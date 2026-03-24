@@ -166,4 +166,3 @@ beauty-wellness-system/
 1. Certifique-se de ter o Docker e o Docker Compose instalados.
 2. Na raiz do projeto, execute: `docker compose -f infra/docker-compose.yml up -d` para subir todos os bancos de dados e mensageria.
 3. Inicie os microsserviços via IDE ou linha de comando através dos respectivos profiles de ambiente (`application-local.yml`).
-```

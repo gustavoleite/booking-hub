@@ -1,185 +1,181 @@
+***
 
+```markdown
+# 💇‍♀️ Beauty & Wellness - Sistema de Agendamento distribuído
 
+Bem-vindo ao repositório central do **Beauty & Wellness**, um sistema robusto, escalável e de alta disponibilidade para agendamento e gerenciamento de serviços de beleza e bem-estar.
 
-Aqui está a **Code RFC (Request for Comments)** detalhada para a construção do **Auth Service**.
-
-Este documento foca fortemente na **Clean Architecture** (exigência 1 do PDF) e na segurança criptográfica, garantindo que o serviço de identidade seja robusto, isolado e testável.
-
----
-
-# RFC-002: Arquitetura e Implementação do Auth Service (IAM)
-
-**Autor:** [Seu Nome/Sua Equipe]
-**Data:** 23 de Março de 2026
-**Status:** 🟡 Em Revisão (Aberto para Comentários)
-**Componente:** Auth Service (Identity & Access Management)
-**Stack:** Java 21+, Spring Boot 3.x, Spring Security, PostgreSQL, Nimbus JOSE/JWT (para geração de tokens)
+Este projeto foi desenvolvido como requisito do Tech Challenge (Fase 3), aplicando conceitos avançados de Arquitetura de Software, Clean Architecture, Microsserviços e Cloud Native.
 
 ---
 
-## 1. Sumário Executivo
-Esta RFC propõe a criação do **Auth Service**, o provedor de identidade (IdP) central do nosso ecossistema de microsserviços. Ele será o único componente responsável por armazenar credenciais (e-mail e hash de senhas), autenticar usuários e emitir os JSON Web Tokens (JWT) utilizando criptografia assimétrica (RSA).
+## 🏗️ Visão Geral da Arquitetura
 
-## 2. Contexto e Motivação
-Na arquitetura definida na RFC-001 (API Gateway), estabelecemos que o Gateway fará a *validação* do token, mas não a sua emissão. Precisamos de um serviço dedicado para gerenciar o registro de novos usuários (Clientes, Profissionais e Donos de Estabelecimentos) e validar suas credenciais durante o login. Misturar essas responsabilidades em outros serviços (como o *Catalog* ou *Booking*) violaria o princípio de Responsabilidade Única (SOLID) e comprometeria a segurança.
+O sistema foi desenhado sob uma arquitetura de **Microsserviços Event-Driven**, garantindo escalabilidade independente, tolerância a falhas e separação clara de domínios (Bounded Contexts). 
 
-## 3. Objetivos e Não-Objetivos
+Optamos por uma abordagem de **Persistência Poliglota**, utilizando o banco de dados mais adequado para o padrão de acesso de cada microsserviço (Relacional, Documentos, Motor de Busca e Chave-Valor). Toda a comunicação com clientes externos é centralizada por um **API Gateway**, que atua como *Edge Service* e validador de segurança (Stateless JWT).
 
-### Objetivos (O que o Auth Service fará):
-* **Gestão de Identidade:** Registrar novos usuários e atribuir perfis de acesso (`ROLE_CLIENT`, `ROLE_PROFESSIONAL`, `ROLE_OWNER`).
-* **Autenticação Segura:** Validar e-mail e senha utilizando proteção contra *Timing Attacks* (via BCrypt).
-* **Emissão de Tokens:** Gerar JWTs assinados com uma **Chave Privada (RS256)** contendo o ID do usuário e suas *roles* no payload (Claims).
-* **Isolamento de Dados:** Manter um banco de dados próprio (PostgreSQL) inacessível para outros microsserviços.
-
-### Não-Objetivos (O que o Auth Service NÃO fará):
-* **Armazenar Dados de Perfil:** Nome, telefone, foto de perfil, endereço do salão ou biografia do profissional **não** ficarão aqui. Esses dados pertencem ao `Catalog Service`. O Auth Service lida apenas com `ID, Email, Senha e Role`.
-* **Gerenciamento de Sessão (Stateful):** Não haverá sessão salva em memória (Tomcat/Redis). A autenticação é 100% *stateless* baseada no JWT.
-* **Social Login (OAuth2 Externo):** Login com Google/Apple não será implementado na V1 para mantermos o escopo exequível no prazo do Tech Challenge.
+### Padrões de Comunicação
+- **Externa (Cliente ↔ Gateway):** RESTful (JSON) sobre HTTPS.
+- **Interna Síncrona (Serviço ↔ Serviço):** `gRPC` para chamadas de baixa latência e alta performance (ex: validação de disponibilidade no momento do agendamento).
+- **Interna Assíncrona (Event-Driven):** Mensageria com `RabbitMQ` para desacoplamento, Coreografia de Sagas e atualização de bases de leitura (Padrão CQRS).
 
 ---
 
-## 4. Arquitetura da Solução (Clean Architecture)
+## 🗺️ Diagrama de Arquitetura
 
-Para atender estritamente aos critérios de avaliação do projeto, o Auth Service será estruturado utilizando **Clean Architecture**. O domínio não terá nenhuma dependência do ecossistema Spring Boot.
+Abaixo está o fluxo macro de comunicação, segurança e dados do ecossistema:
 
-### 4.1. Estrutura de Camadas
+```mermaid
+flowchart TB
+    %% Estilos visuais
+    classDef user fill:#08427b,stroke:#052e56,color:#fff,stroke-width:2px
+    classDef gateway fill:#1168bd,stroke:#0b4884,color:#fff,stroke-width:2px
+    classDef service fill:#23a2d9,stroke:#18739b,color:#fff,stroke-width:2px,rx:10,ry:10
+    classDef db fill:#438dd5,stroke:#2f6395,color:#fff,stroke-width:2px
+    classDef broker fill:#f2a900,stroke:#b37d00,color:#fff,stroke-width:2px
+    classDef external fill:#7f8c8d,stroke:#2c3e50,color:#fff,stroke-width:2px
+
+    %% Atores
+    Client["Postman / API Client\n(REST / JSON)"]:::user
+
+    %% Camada de Borda
+    subgraph Edge["Camada de Borda / Entrada"]
+        direction TB
+        GW["API Gateway\n(Spring Cloud Gateway)"]:::gateway
+    end
+
+    %% Barramento de Eventos
+    subgraph EventBus["Mensageria / Event-Driven"]
+        RabbitMQ{{"RabbitMQ\n(Event Bus)"}}:::broker
+    end
+
+    %% Microsserviços
+    subgraph Services ["Microsserviços (Spring Boot + Clean Architecture)"]
+        direction TB
+        Auth["Auth Service\n(IAM / Segurança)"]:::service
+        Catalog["Catalog Service\n(Estabelecimentos/Serviços)"]:::service
+        Booking["Booking Service\n(Agendamentos - Core)"]:::service
+        Review["Review Service\n(Avaliações)"]:::service
+        Search["Search Service\n(Busca / CQRS)"]:::service
+        Notify["Notification Service\n(Alertas / Sincronização)"]:::service
+    end
+
+    %% Bancos de Dados
+    subgraph Data["Databases (Persistência Poliglota)"]
+        direction TB
+        DB_Auth[("PostgreSQL\n(Users/Roles)")]:::db
+        DB_Catalog[("PostgreSQL\n(Salões/Profs)")]:::db
+        DB_Booking[("PostgreSQL\n(Appointments)")]:::db
+        DB_Review[("MongoDB\n(Comments/Ratings)")]:::db
+        DB_Search[("Elasticsearch\n(Índices/Geo)")]:::db
+        DB_Notify[("Redis\n(Cache/Retries)")]:::db
+    end
+
+    %% Integrações Externas
+    ExtCal["Google Calendar / Outlook\n(APIs Externas)"]:::external
+
+    %% --- CONEXÕES ---
+    Client ===|"HTTPS / REST"| GW
+    GW -->|"Roteamento REST\n(Valida JWT RS256)"| Auth
+    GW -->|"REST"| Catalog
+    GW -->|"REST"| Booking
+    GW -->|"REST"| Review
+    GW -->|"REST"| Search
+
+    Booking -.->|"gRPC\n(Valida Profissional/Serviço)"| Catalog
+
+    Catalog -.->|"Publica Evento\n(CatalogUpdated)"| RabbitMQ
+    Booking -.->|"Publica Evento\n(BookingCreated/Cancelled)"| RabbitMQ
+    Review -.->|"Publica Evento\n(ReviewCreated)"| RabbitMQ
+
+    RabbitMQ ==>|"Consome\n(Atualiza Índice/CQRS)"| Search
+    RabbitMQ ==>|"Consome\n(Dispara Notificações)"| Notify
+
+    Auth --- DB_Auth
+    Catalog --- DB_Catalog
+    Booking --- DB_Booking
+    Review --- DB_Review
+    Search --- DB_Search
+    Notify --- DB_Notify
+    Notify -->|"OAuth2 Sync"| ExtCal
+```
+
+---
+
+## 🧩 Ecossistema de Componentes
+
+### 1. API Gateway (`api-gateway`)
+Ponto único de entrada (Spring Cloud Gateway). Responsável pelo roteamento dinâmico e pela **validação de segurança** (verificação da assinatura matemática da chave pública RS256 do JWT), repassando a identidade do usuário para os serviços de *backend* via *Headers* sem sobrecarregá-los com regras de IAM.
+
+### 2. Auth Service (`auth-service`)
+Provedor de Identidade (IdP). Responsável por registrar usuários, validar credenciais (e-mail/senha com BCrypt) e emitir os *JSON Web Tokens* (JWT) usando uma chave privada RSA. Protege rigorosamente os dados de acesso no seu próprio PostgreSQL.
+
+### 3. Catalog Service (`catalog-service`)
+Gerencia o domínio de negócios estruturais: cadastro de Estabelecimentos, Profissionais associados, Horários de Funcionamento e Serviços (com preço e duração).
+
+### 4. Booking Service (`booking-service`)
+O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking* (agendamentos duplicados no mesmo horário). Comunica-se via `gRPC` com o catálogo para consultas ultrarrápidas de disponibilidade.
+
+### 5. Review Service (`review-service`)
+Coleta notas e comentários após a finalização de um serviço. Utiliza MongoDB pela flexibilidade de esquema na persistência de avaliações em texto livre.
+
+### 6. Search Service (`search-service`)
+Motor de busca e descoberta altamente otimizado. Implementa o padrão **CQRS** (Command Query Responsibility Segregation) escutando eventos do RabbitMQ para construir um índice consolidado no **Elasticsearch**, permitindo buscas ultrarrápidas por geolocalização, serviços oferecidos e melhor avaliação.
+
+### 7. Notification Service (`notification-service`)
+Microsserviço puramente reativo/orientado a eventos. Escuta o barramento do RabbitMQ para disparar e-mails/SMS de confirmação e realizar a integração (sincronização) com APIs externas, como o Google Calendar.
+
+---
+
+## 🛠️ Stack Tecnológica Base
+
+* **Linguagem:** Java 21
+* **Framework Principal:** Spring Boot 3.x / Spring Cloud
+* **Arquitetura de Código:** Clean Architecture (Domain, Application, Infrastructure)
+* **Comunicação:** RESTful (Spring Web), gRPC, RabbitMQ (Spring AMQP)
+* **Bancos de Dados:** PostgreSQL (Relacional), MongoDB (NoSQL Documento), Elasticsearch (Busca), Redis (Cache)
+* **Segurança:** Spring Security, OAuth2 / JWT (RS256 Criptografia Assimétrica), BCrypt
+* **Qualidade e Testes:** JUnit 5, Mockito, Testcontainers, Cucumber (BDD), k6 (Performance)
+* **Infraestrutura/DevOps:** Docker, Docker Compose, GitHub Actions (CI/CD), AWS ECS (Deploy)
+
+---
+
+## 📁 Estrutura do Monorepo
+
+O projeto segue a estrutura de monorepo multi-módulo (via Maven ou Gradle), centralizando a infraestrutura, mas mantendo o isolamento de código de cada serviço:
 
 ```text
-auth-service/
- ├── core/ (Regras de Negócio Puras - Java Puro)
- │    ├── domain/
- │    │    ├── User (Entidade)
- │    │    ├── Role (Enum/Value Object)
- │    │    └── Credential (Value Object contendo lógica de validação de senha forte)
- │    ├── usecases/
- │    │    ├── RegisterUserUseCase (Interface e Impl)
- │    │    └── AuthenticateUserUseCase (Interface e Impl)
- │    └── ports/ (Interfaces de saída)
- │         ├── UserRepository (Contrato para salvar no BD)
- │         ├── PasswordEncoder (Contrato para hash de senhas)
- │         └── TokenGenerator (Contrato para criar o JWT)
+beauty-wellness-system/
+ ├── .github/workflows/       # Pipelines de CI/CD
+ ├── infra/                   # Arquivos globais de infra
+ │    ├── docker-compose.yml  # Sobe BDs, RabbitMQ e Gateway locais
+ │    └── grafana/            # Dashboards de observabilidade
  │
- ├── application/
- │    └── dto/ (LoginRequestDTO, TokenResponseDTO)
- │
- └── infrastructure/ (Frameworks e Tecnologias)
-      ├── adapters/
-      │    ├── in/rest/ (Spring RestControllers: AuthController)
-      │    └── out/
-      │         ├── database/ (Spring Data JPA Repositories e Entidades JPA)
-      │         ├── security/ (Implementação do PasswordEncoder usando BCrypt)
-      │         └── jwt/ (Implementação do TokenGenerator usando Chave Privada RSA)
-      └── configuration/ (Beans de injeção de dependência do Spring)
-```
-
-**Vantagem dessa abordagem:** O `AuthenticateUserUseCase` pode ser testado exaustivamente via **TDD** em milissegundos usando JUnit e Mockito, sem precisar subir o contexto do Spring ou conectar no banco de dados.
-
----
-
-## 5. Modelagem de Dados (PostgreSQL)
-
-O banco de dados será provisionado via Docker e gerenciado pelo **Flyway** (ou Liquibase) para versionamento de *migrations*.
-
-* **Tabela `tb_users`**:
-    * `id` (UUID, PK)
-    * `email` (VARCHAR 255, UNIQUE, NOT NULL)
-    * `password_hash` (VARCHAR 255, NOT NULL)
-    * `created_at` (TIMESTAMP)
-    * `active` (BOOLEAN DEFAULT TRUE)
-
-* **Tabela `tb_roles`**:
-    * `id` (INTEGER, PK)
-    * `name` (VARCHAR 50, UNIQUE) - Ex: 'ROLE_CLIENT'
-
-* **Tabela `tb_user_roles`**:
-    * `user_id` (UUID, FK)
-    * `role_id` (INTEGER, FK)
-
----
-
-## 6. Segurança e Criptografia
-
-### 6.1. Hashing de Senhas
-Utilizaremos o **BCrypt** com `cost=10` (fator de trabalho). O BCrypt gera um *salt* aleatório automaticamente para cada senha, protegendo o banco de dados contra ataques de *Rainbow Tables* e *Brute Force* offline.
-
-### 6.2. Criptografia do Token (Assimetria RSA)
-Em vez de usar uma chave simétrica simples (onde o Gateway teria que conhecer a senha que gerou o token), usaremos **RS256**:
-1. O **Auth Service** possui um arquivo `private_key.pem`. Ele usa essa chave para *assinar* o JWT. Ninguém mais tem acesso a esse arquivo.
-2. O **API Gateway** possui um arquivo `public_key.pem`. Ele usa essa chave matemática apenas para *verificar* se o token foi realmente emitido pelo Auth Service e não foi adulterado.
-
-### 6.3. Payload do JWT (Exemplo do que será gerado)
-```json
-{
-  "sub": "123e4567-e89b-12d3-a456-426614174000", // User UUID
-  "email": "joao.barbeiro@email.com",
-  "roles": ["ROLE_PROFESSIONAL"],
-  "iat": 1711242000, // Issued at
-  "exp": 1711245600  // Expiration (1 hora de validade)
-}
+ ├── api-gateway/             # Roteamento e Filtro JWT
+ ├── auth-service/            # Emissão de Tokens e IAM
+ ├── catalog-service/         # Clean Architecture (Core, Application, Infra)
+ ├── booking-service/         # Clean Architecture (Core, Application, Infra)
+ ├── review-service/          # Clean Architecture (Core, Application, Infra)
+ ├── search-service/          # Microsserviço de indexação
+ └── notification-service/    # Worker assíncrono
 ```
 
 ---
 
-## 7. Contratos da API (Endpoints)
+## 🚀 Como Executar Localmente
 
-### 7.1. Registro de Usuário
-`POST /api/auth/register`
-* **Request:**
-  ```json
-  {
-    "email": "cliente@email.com",
-    "password": "SenhaForte123!",
-    "role": "ROLE_CLIENT"
-  }
-  ```
-* **Response (201 Created):**
-  ```json
-  {
-    "id": "uuid-gerado",
-    "email": "cliente@email.com"
-  }
-  ```
-  *(Nota: Na criação, publicaremos opcionalmente um evento no RabbitMQ para que o `Catalog Service` crie um perfil vazio atrelado a este UUID).*
+*(Instruções a serem adicionadas após o setup do Docker Compose)*
+1. Certifique-se de ter o Docker e o Docker Compose instalados.
+2. Na raiz do projeto, execute: `docker compose -f infra/docker-compose.yml up -d` para subir todos os bancos de dados e mensageria.
+3. Inicie os microsserviços via IDE ou linha de comando através dos respectivos profiles de ambiente (`application-local.yml`).
+```
 
-### 7.2. Login
-`POST /api/auth/login`
-* **Request:**
-  ```json
-  {
-    "email": "cliente@email.com",
-    "password": "SenhaForte123!"
-  }
-  ```
-* **Response (200 OK):**
-  ```json
-  {
-    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "expiresIn": 3600,
-    "tokenType": "Bearer"
-  }
-  ```
+***
 
----
+### O que achou?
+Esse documento "vende" muito bem a maturidade da solução. 
 
-## 8. Alternativas Consideradas
-
-* **Uso de Keycloak / AWS Cognito:** Ferramentas incríveis para ambiente de produção real. **Rejeitado para este escopo** porque o Tech Challenge tem como objetivo principal avaliar a capacidade do aluno em desenvolver regras de negócio, aplicar Clean Architecture, padrões de projeto e testes (TDD/BDD). Delegar o Auth para um provedor SaaS pularia grande parte da avaliação de código Backend.
-* **Tokens Opacos (Opaque Tokens) guardados em Banco:** **Rejeitado**. Faria o Gateway ter que fazer uma chamada de rede para o Auth Service a cada requisição do usuário para validar o token. Isso criaria um gargalo de performance e um ponto único de falha (*Single Point of Failure*). O JWT assinado atende aos requisitos de alta disponibilidade.
-
----
-
-## 9. Questões em Aberto (Open Questions para a Equipe)
-
-1. **Estratégia de Refresh Token:** O Access Token vai durar 1 hora. Quando expirar, obrigaremos o usuário a logar de novo ou vamos implementar a lógica de `Refresh Token` (com duração de 7 dias, guardado no banco do Auth Service para permitir revogação)?
-    * *Recomendação do Autor:* Para a V1 (MVP), não focar no Refresh Token. O escopo do projeto já é denso. Usar tokens de 4 horas de duração para fins de teste e focar nos domínios de agendamento primeiro. Podemos voltar a isso na V2.
-2. **Sincronia de ID (Auth -> Catalog):** O `Catalog Service` precisa saber o UUID do usuário para atrelar a um Profissional ou Salão. Devemos fazer o Frontend/Postman passar esse UUID no momento de criar o salão, ou o Auth Service deve disparar um evento RabbitMQ (`UserRegistered`) para que o Catalog se prepare automaticamente?
-
----
-
-### 👉 Próximos Passos (Para você decidir)
-
-Agora que temos as plantas arquiteturais exatas da "Porta de Entrada" (Gateway) e da "Identidade" (Auth Service), como você quer prosseguir?
-
-1. **Mão na massa na Infra:** Definir o `docker-compose.yml` base contendo o PostgreSQL (do Auth), a geração das chaves RSA e as configurações iniciais do Spring Boot para que você possa gerar os projetos no Spring Initializr.
-2. **Definir o Domínio Core:** Criar a RFC do **Catalog Service** ou do **Booking Service** (o coração do sistema, lidando com os profissionais e a regra para evitar *double-booking*).
-3. **Responder as Questões em Aberto:** Discutir a questão do *Refresh Token* e Sincronia de IDs para fechar 100% o escopo do Auth.
+Se estiver satisfeito com ele, qual é o nosso próximo passo de "descer o nível" da implementação?
+1. Desenhar a **Clean Architecture** e o esquema de dados do **Catalog Service**?
+2. Ou criar a infraestrutura inicial do **`docker-compose.yml`** para você começar a criar os projetos de fato na sua máquina?

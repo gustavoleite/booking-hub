@@ -1,11 +1,11 @@
 server:
-  port: 8081
+  port: ${AUTH_SERVICE_PORT:8081}
 
 spring:
   application:
     name: auth-service
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/auth_db}
+    url: ${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:auth_db}}
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

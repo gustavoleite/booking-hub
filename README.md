@@ -1,6 +1,3 @@
-***
-
-```markdown
 # 💇‍♀️ Beauty & Wellness - Sistema de Agendamento distribuído
 
 Bem-vindo ao repositório central do **Beauty & Wellness**, um sistema robusto, escalável e de alta disponibilidade para agendamento e gerenciamento de serviços de beleza e bem-estar.

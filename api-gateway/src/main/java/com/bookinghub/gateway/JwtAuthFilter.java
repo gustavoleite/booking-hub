@@ -40,16 +40,16 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             try {
                 Claims claims = jwtValidationService.validateTokenAndGetClaims(token);
 
-                exchange.getRequest().mutate()
+                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                         .header("X-User-Id", claims.getSubject())
                         .header("X-User-Role", claims.get("role", String.class))
                         .build();
 
+                return chain.filter(exchange.mutate().request(modifiedRequest).build());
+
             } catch (Exception e) {
                 return onError(exchange, "Invalid JWT Token", HttpStatus.UNAUTHORIZED);
             }
-
-            return chain.filter(exchange);
         };
     }
 

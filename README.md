@@ -1,4 +1,4 @@
-# 💇‍♀️ Beauty & Wellness - Sistema de Agendamento distribuído
+# 💇‍♀️ Booking HUB - Sistema de Agendamento distribuído
 
 Bem-vindo ao repositório central do **Beauty & Wellness**, um sistema robusto, escalável e de alta disponibilidade para agendamento e gerenciamento de serviços de beleza e bem-estar.
 
@@ -167,12 +167,3 @@ beauty-wellness-system/
 2. Na raiz do projeto, execute: `docker compose -f infra/docker-compose.yml up -d` para subir todos os bancos de dados e mensageria.
 3. Inicie os microsserviços via IDE ou linha de comando através dos respectivos profiles de ambiente (`application-local.yml`).
 ```
-
-***
-
-### O que achou?
-Esse documento "vende" muito bem a maturidade da solução. 
-
-Se estiver satisfeito com ele, qual é o nosso próximo passo de "descer o nível" da implementação?
-1. Desenhar a **Clean Architecture** e o esquema de dados do **Catalog Service**?
-2. Ou criar a infraestrutura inicial do **`docker-compose.yml`** para você começar a criar os projetos de fato na sua máquina?

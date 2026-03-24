@@ -1,0 +1,36 @@
+# OS/Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Java/Maven
+*.class
+*.jar
+*.war
+*.ear
+*.log
+logs/
+.idea/
+.project
+.classpath
+.settings/
+
+# Maven Wrapper cache
+.mvn/wrapper/maven-wrapper.jar
+
+# Build outputs
+**/target/
+
+# AWS SAM
+.aws-sam/
+
+# Quarkus
+.quarkus/
+**/build/
+
+# Other
+.env
+.env.*

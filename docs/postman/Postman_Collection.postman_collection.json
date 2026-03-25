@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "Beauty & Wellness API",
+    "description": "Coleção de testes para os microsserviços do sistema de agendamento.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item":[
+    {
+      "name": "1. Auth Service",
+      "item":[
+        {
+          "name": "Registrar Usuário",
+          "request": {
+            "method": "POST",
+            "header":[
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path":["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login (Gera JWT)",
+          "event":[
+            {
+              "listen": "test",
+              "script": {
+                "exec":[
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.accessToken) {",
+                  "    pm.environment.set(\"access_token\", jsonData.accessToken);",
+                  "    console.log(\"Token salvo na variável de ambiente!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header":[
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path":["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer":[
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  }
+}

@@ -9,7 +9,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {"AUTH_SERVICE_URI=http://localhost:${wiremock.server.port}"})
+        properties = {
+                "AUTH_SERVICE_URI=http://localhost:${wiremock.server.port}",
+                "spring.profiles.active=local"
+        })
 @AutoConfigureWireMock(port = 0)
 class GatewayRoutingTest {
 
@@ -17,8 +20,8 @@ class GatewayRoutingTest {
     private WebTestClient webClient;
 
     @Test
-    void shouldRouteToAuthService() {
-        stubFor(get(urlEqualTo("/api/auth/health"))
+    void shouldRouteToAuthServiceWithRewrite() {
+        stubFor(get(urlEqualTo("/health"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")

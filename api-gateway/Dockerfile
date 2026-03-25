@@ -3,6 +3,7 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 COPY pom.xml .
 COPY api-gateway/pom.xml api-gateway/
+COPY auth-service/pom.xml auth-service/
 RUN mvn dependency:go-offline -pl api-gateway -am
 
 COPY api-gateway/src api-gateway/src

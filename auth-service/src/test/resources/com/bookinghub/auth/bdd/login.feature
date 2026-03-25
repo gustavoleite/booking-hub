@@ -6,6 +6,6 @@ Funcionalidade: Autenticacao de Usuario
 
   Cenario: Login bem-sucedido com credenciais validas
     Dado que existe um usuario com email "cliente@teste.com" e senha "senha123"
-    Quando eu envio uma requisicao POST para "/api/auth/login" com estas credenciais
+    Quando eu envio uma requisicao POST para "/login" com estas credenciais
     Entao o status da resposta deve ser 200 OK
     E o corpo da resposta deve conter um "accessToken" valido

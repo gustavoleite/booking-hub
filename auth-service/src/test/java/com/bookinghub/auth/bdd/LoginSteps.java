@@ -37,7 +37,7 @@ public class LoginSteps {
             .contentType(ContentType.JSON)
             .body(registerRequest)
         .when()
-            .post("/api/auth/register")
+            .post("/register")
         .then()
             .statusCode(201);
     }

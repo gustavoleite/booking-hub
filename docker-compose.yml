@@ -20,9 +20,7 @@ services:
       dockerfile: auth-service/Dockerfile
     container_name: auth-service
     environment:
-      DB_HOST: auth-db
-      DB_PORT: 5432
-      DB_NAME: auth_db
+      SPRING_PROFILES_ACTIVE: docker
       DB_USER: admin
       DB_PASS: admin123
       RSA_PRIVATE_KEY_VALUE: ${RSA_PRIVATE_KEY_VALUE}
@@ -38,7 +36,7 @@ services:
       dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     environment:
-      AUTH_SERVICE_URI: http://auth-service:8081
+      SPRING_PROFILES_ACTIVE: docker
       RSA_PUBLIC_KEY: ${RSA_PUBLIC_KEY}
     depends_on:
       - auth-service

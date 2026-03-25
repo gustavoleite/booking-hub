@@ -58,6 +58,35 @@
               "path":["api", "auth", "login"]
             }
           }
+        },
+        {
+          "name": "Falhas de Validação (Testes HTTP)",
+          "item": [
+            {
+              "name": "[ERRO 409] Registrar E-mail Duplicado",
+              "request": {
+                "method": "POST",
+                "header":[{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path":["api", "auth", "register"] }
+              }
+            },
+            {
+              "name": "[ERRO 400] Registrar com Senha Fraca",
+              "request": {
+                "method": "POST",
+                "header":[{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
+              }
+            }
+          ]
         }
       ]
     }

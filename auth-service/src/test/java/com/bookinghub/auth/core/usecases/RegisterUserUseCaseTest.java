@@ -2,6 +2,9 @@ package com.bookinghub.auth.core.usecases;
 
 import com.bookinghub.auth.core.domain.Role;
 import com.bookinghub.auth.core.domain.User;
+import com.bookinghub.auth.core.exceptions.EmailAlreadyExistsException;
+import com.bookinghub.auth.core.exceptions.InvalidRoleException;
+import com.bookinghub.auth.core.exceptions.WeakPasswordException;
 import com.bookinghub.auth.core.ports.PasswordEncoder;
 import com.bookinghub.auth.core.ports.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +31,7 @@ class RegisterUserUseCaseTest {
     @Test
     void shouldRegisterUserSuccessfully() {
         String email = "test@example.com";
-        String password = "password123";
+        String password = "Password123";
         Role role = Role.ROLE_CLIENT;
 
         when(userRepository.existsByEmail(email)).thenReturn(false);
@@ -45,12 +48,40 @@ class RegisterUserUseCaseTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenEmailAlreadyExists() {
+    void shouldThrowEmailAlreadyExistsException_whenEmailIsTaken() {
         String email = "existing@example.com";
         when(userRepository.existsByEmail(email)).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> 
-            registerUserUseCase.execute(email, "password", Role.ROLE_CLIENT)
+        assertThrows(EmailAlreadyExistsException.class, () -> 
+            registerUserUseCase.execute(email, "Password123", Role.ROLE_CLIENT)
+        );
+    }
+
+    @Test
+    void shouldThrowWeakPasswordException_whenPasswordIsTooShort() {
+        assertThrows(WeakPasswordException.class, () -> 
+            registerUserUseCase.execute("test@example.com", "Pass1", Role.ROLE_CLIENT)
+        );
+    }
+
+    @Test
+    void shouldThrowWeakPasswordException_whenPasswordHasNoUppercase() {
+        assertThrows(WeakPasswordException.class, () -> 
+            registerUserUseCase.execute("test@example.com", "password123", Role.ROLE_CLIENT)
+        );
+    }
+
+    @Test
+    void shouldThrowWeakPasswordException_whenPasswordHasNoNumber() {
+        assertThrows(WeakPasswordException.class, () -> 
+            registerUserUseCase.execute("test@example.com", "Password", Role.ROLE_CLIENT)
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidRoleException_whenRoleIsNull() {
+        assertThrows(InvalidRoleException.class, () -> 
+            registerUserUseCase.execute("test@example.com", "Password123", null)
         );
     }
 }

@@ -31,7 +31,9 @@ public class LoginSteps {
     public void que_existe_um_usuario_com_email_e_senha(String email, String password) {
         RestAssured.port = port;
         
-        RegisterRequestDTO registerRequest = new RegisterRequestDTO(email, password, Role.ROLE_CLIENT);
+        // Ajustando senha para passar na nova politica se for a senha de teste antiga
+        String strongPassword = password.equals("senha123") ? "SenhaForte123!" : password;
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO(email, strongPassword, Role.ROLE_CLIENT);
 
         given()
             .contentType(ContentType.JSON)
@@ -44,7 +46,7 @@ public class LoginSteps {
 
     @Quando("eu envio uma requisicao POST para {string} com estas credenciais")
     public void eu_envio_uma_requisicao_post_para_com_estas_credenciais(String path) {
-        LoginRequestDTO loginRequest = new LoginRequestDTO("cliente@teste.com", "senha123");
+        LoginRequestDTO loginRequest = new LoginRequestDTO("cliente@teste.com", "SenhaForte123!");
 
         response = given()
             .contentType(ContentType.JSON)

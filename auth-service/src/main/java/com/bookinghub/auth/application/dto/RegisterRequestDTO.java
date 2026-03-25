@@ -12,7 +12,7 @@ public record RegisterRequestDTO(
     @NotBlank @Email String email,
 
     @Schema(description = "User password", example = "SenhaForte123!", minLength = 8)
-    @NotBlank @Size(min = 8) String password,
+    @NotBlank @Size(min = 8, message = "A senha deve conter no mínimo 8 caracteres") String password,
 
     @Schema(description = "User role", example = "ROLE_CLIENT")
     @NotNull Role role

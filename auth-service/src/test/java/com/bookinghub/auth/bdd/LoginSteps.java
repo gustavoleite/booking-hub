@@ -31,9 +31,7 @@ public class LoginSteps {
     public void que_existe_um_usuario_com_email_e_senha(String email, String password) {
         RestAssured.port = port;
         
-        // Ajustando senha para passar na nova politica se for a senha de teste antiga
-        String strongPassword = password.equals("senha123") ? "SenhaForte123!" : password;
-        RegisterRequestDTO registerRequest = new RegisterRequestDTO(email, strongPassword, Role.ROLE_CLIENT);
+        RegisterRequestDTO registerRequest = new RegisterRequestDTO(email, password, Role.ROLE_CLIENT);
 
         given()
             .contentType(ContentType.JSON)
@@ -44,9 +42,9 @@ public class LoginSteps {
             .statusCode(201);
     }
 
-    @Quando("eu envio uma requisicao POST para {string} com estas credenciais")
-    public void eu_envio_uma_requisicao_post_para_com_estas_credenciais(String path) {
-        LoginRequestDTO loginRequest = new LoginRequestDTO("cliente@teste.com", "SenhaForte123!");
+    @Quando("eu envio uma requisicao POST para {string} com email {string} e senha {string}")
+    public void eu_envio_uma_requisicao_post_para_com_email_e_senha(String path, String email, String password) {
+        LoginRequestDTO loginRequest = new LoginRequestDTO(email, password);
 
         response = given()
             .contentType(ContentType.JSON)
@@ -58,6 +56,16 @@ public class LoginSteps {
     @Entao("o status da resposta deve ser {int} OK")
     public void o_status_da_resposta_deve_ser_ok(Integer statusCode) {
         response.then().statusCode(statusCode);
+    }
+
+    @Entao("o status da resposta deve ser {int} UNAUTHORIZED")
+    public void o_status_da_resposta_deve_ser_unauthorized(Integer statusCode) {
+        response.then().statusCode(statusCode);
+    }
+
+    @Entao("o corpo da resposta deve conter o titulo {string}")
+    public void o_corpo_da_resposta_deve_conter_o_titulo(String title) {
+        response.then().body("title", org.hamcrest.Matchers.equalTo(title));
     }
 
     @Entao("o corpo da resposta deve conter um {string} valido")

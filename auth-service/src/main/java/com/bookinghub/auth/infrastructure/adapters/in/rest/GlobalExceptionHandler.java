@@ -1,6 +1,8 @@
 package com.bookinghub.auth.infrastructure.adapters.in.rest;
 
 import com.bookinghub.auth.core.exceptions.EmailAlreadyExistsException;
+import com.bookinghub.auth.core.exceptions.InactiveUserException;
+import com.bookinghub.auth.core.exceptions.InvalidCredentialsException;
 import com.bookinghub.auth.core.exceptions.InvalidRoleException;
 import com.bookinghub.auth.core.exceptions.WeakPasswordException;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,20 @@ public class GlobalExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("Dados de Entrada Inválidos");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidCredentials(InvalidCredentialsException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problem.setTitle("Falha na Autenticação");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(InactiveUserException.class)
+    public ResponseEntity<ProblemDetail> handleInactiveUser(InactiveUserException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        problem.setTitle("Usuário Inativo");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

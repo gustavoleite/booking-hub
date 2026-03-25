@@ -47,10 +47,13 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    @Operation(summary = "Authenticate user", description = "Authenticates user and returns a JWT access token")
+    @Operation(summary = "Autenticar usuário", description = "Autentica o usuário e retorna um token de acesso JWT")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully authenticated"),
-        @ApiResponse(responseCode = "401", description = "Invalid credentials")
+        @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
+                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "403", description = "Usuário inativo",
+                     content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
         String token = authenticateUserUseCase.execute(request.email(), request.password());

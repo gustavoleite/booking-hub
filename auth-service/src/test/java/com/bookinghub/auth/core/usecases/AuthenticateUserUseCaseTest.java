@@ -2,6 +2,8 @@ package com.bookinghub.auth.core.usecases;
 
 import com.bookinghub.auth.core.domain.Role;
 import com.bookinghub.auth.core.domain.User;
+import com.bookinghub.auth.core.exceptions.InactiveUserException;
+import com.bookinghub.auth.core.exceptions.InvalidCredentialsException;
 import com.bookinghub.auth.core.ports.PasswordEncoder;
 import com.bookinghub.auth.core.ports.TokenGenerator;
 import com.bookinghub.auth.core.ports.UserRepository;
@@ -49,24 +51,39 @@ class AuthenticateUserUseCaseTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUserNotFound() {
+    void shouldThrowInvalidCredentialsExceptionWhenUserNotFound() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> 
+        assertThrows(InvalidCredentialsException.class, () -> 
             authenticateUserUseCase.execute("wrong@example.com", "password")
         );
     }
 
     @Test
-    void shouldThrowExceptionWhenPasswordDoesNotMatch() {
+    void shouldThrowInvalidCredentialsExceptionWhenPasswordDoesNotMatch() {
         String email = "test@example.com";
         User user = new User(UUID.randomUUID(), email, "hashed", Set.of(Role.ROLE_CLIENT), true);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        assertThrows(RuntimeException.class, () -> 
+        assertThrows(InvalidCredentialsException.class, () -> 
             authenticateUserUseCase.execute(email, "wrongpassword")
+        );
+    }
+
+    @Test
+    void shouldThrowInactiveUserExceptionWhenUserIsNotActive() {
+        String email = "inactive@example.com";
+        String password = "password123";
+        String hashedPassword = "hashedPassword";
+        User user = new User(UUID.randomUUID(), email, hashedPassword, Set.of(Role.ROLE_CLIENT), false);
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(password, hashedPassword)).thenReturn(true);
+
+        assertThrows(InactiveUserException.class, () -> 
+            authenticateUserUseCase.execute(email, password)
         );
     }
 }

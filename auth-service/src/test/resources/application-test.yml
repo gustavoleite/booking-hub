@@ -1,0 +1,42 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: false
+rsa:
+  private:
+    key: |
+      MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCpE2uU7Yp6Zq7W
+      y2lE7j9XF9Y9Z9u9W9v9X9v9Y9v9Z9v9a9v9b9v9c9v9d9v9e9v9f9v9g9v9h9v9
+      i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s9v9t9v9u9v9v9v9w9v9x9v9
+      y9v9z9v9A9v9B9v9C9v9D9v9E9v9F9v9G9v9H9v9I9v9J9v9K9v9L9v9M9v9N9v9
+      O9v9P9v9Q9v9R9v9S9v9T9v9U9v9V9v9W9v9X9v9Y9v9Z9v9a9v9b9v9c9v9d9v9
+      e9v9f9v9g9v9h9v9i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s9v9t9v9
+      u9v9v9v9w9v9x9v9y9v9z9v9AgMBAAECggEAIK5W9v9X9v9Y9v9Z9v9a9v9b9v9c
+      9v9d9v9e9v9f9v9g9v9h9v9i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s
+      9v9t9v9u9v9v9v9w9v9x9v9y9v9z9v9A9v9B9v9C9v9D9v9E9v9F9v9G9v9H9v9I
+      9v9J9v9K9v9L9v9M9v9N9v9O9v9P9v9Q9v9R9v9S9v9T9v9U9v9V9v9W9v9X9v9Y
+      9v9Z9v9a9v9b9v9c9v9d9v9e9v9f9v9g9v9h9v9i9v9j9v9k9v9l9v9m9v9n9v9o
+      9v9p9v9q9v9r9v9s9v9t9v9u9v9v9v9w9v9x9v9y9v9z9v9AgEAAwEAAv9A9v9B
+      9v9C9v9D9v9E9v9F9v9G9v9H9v9I9v9J9v9K9v9L9v9M9v9N9v9O9v9P9v9Q9v9R
+      9v9S9v9T9v9U9v9V9v9W9v9X9v9Y9v9Z9v9a9v9b9v9c9v9d9v9e9v9f9v9g9v9h
+      9v9i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s9v9t9v9u9v9v9v9w9v9x
+      9v9y9v9z9v9AgEAAwEAAv9A9v9B9v9C9v9D9v9E9v9F9v9G9v9H9v9I9v9J9v9K
+      9v9L9v9M9v9N9v9O9v9P9v9Q9v9R9v9S9v9T9v9U9v9V9v9W9v9X9v9Y9v9Z9v9a
+      9v9b9v9c9v9d9v9e9v9f9v9g9v9h9v9i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q
+      9v9r9v9s9v9t9v9u9v9v9v9w9v9x9v9y9v9z9v9AgEAAwEAAv9A9v9B9v9C9v9D
+      9v9E9v9F9v9G9v9H9v9I9v9J9v9K9v9L9v9M9v9N9v9O9v9P9v9Q9v9R9v9S9v9T
+      9v9U9v9V9v9W9v9X9v9Y9v9Z9v9a9v9b9v9c9v9d9v9e9v9f9v9g9v9h9v9i9v9j
+      9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s9v9t9v9u9v9v9v9w9v9x9v9y9v9z
+      9v9AgEAAwEAAv9A9v9B9v9C9v9D9v9E9v9F9v9G9v9H9v9I9v9J9v9K9v9L9v9M
+      9v9N9v9O9v9P9v9Q9v9R9v9S9v9T9v9U9v9V9v9W9v9X9v9Y9v9Z9v9a9v9b9v9c
+      9v9d9v9e9v9f9v9g9v9h9v9i9v9j9v9k9v9l9v9m9v9n9v9o9v9p9v9q9v9r9v9s
+      9v9t9v9u9v9v9v9w9v9x9v9y9v9z9v9AgEAAwEAAv9A9v9B9v9C

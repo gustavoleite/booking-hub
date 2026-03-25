@@ -4,8 +4,9 @@ import com.bookinghub.auth.application.dto.LoginRequestDTO;
 import com.bookinghub.auth.application.dto.RegisterRequestDTO;
 import com.bookinghub.auth.core.domain.Role;
 import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.Então;
+import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
+import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -16,17 +17,18 @@ import org.springframework.test.context.ActiveProfiles;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
+@CucumberContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class LoginSteps {
-
+    
     @LocalServerPort
     private int port;
 
     private Response response;
 
-    @Dado("que existe um usuário com email {string} e senha {string}")
-    public void que_existe_um_usuário_com_email_e_senha(String email, String password) {
+    @Dado("que existe um usuario com email {string} e senha {string}")
+    public void que_existe_um_usuario_com_email_e_senha(String email, String password) {
         RestAssured.port = port;
         
         RegisterRequestDTO registerRequest = new RegisterRequestDTO(email, password, Role.ROLE_CLIENT);
@@ -40,10 +42,8 @@ public class LoginSteps {
             .statusCode(201);
     }
 
-    @Quando("eu envio uma requisição POST para {string} com estas credenciais")
-    public void eu_envio_uma_requisição_post_para_com_estas_credenciais(String path, String password) {
-        // O password aqui vem do cenário mas já sabemos o email do step anterior
-        // Simplificando para o exemplo
+    @Quando("eu envio uma requisicao POST para {string} com estas credenciais")
+    public void eu_envio_uma_requisicao_post_para_com_estas_credenciais(String path) {
         LoginRequestDTO loginRequest = new LoginRequestDTO("cliente@teste.com", "senha123");
 
         response = given()
@@ -53,13 +53,13 @@ public class LoginSteps {
             .post(path);
     }
 
-    @Então("o status da resposta deve ser {int} OK")
+    @Entao("o status da resposta deve ser {int} OK")
     public void o_status_da_resposta_deve_ser_ok(Integer statusCode) {
         response.then().statusCode(statusCode);
     }
 
-    @Então("o corpo da resposta deve conter um {string} válido")
-    public void o_corpo_da_resposta_deve_conter_um_válido(String field) {
+    @Entao("o corpo da resposta deve conter um {string} valido")
+    public void o_corpo_da_resposta_deve_conter_um_valido(String field) {
         response.then().body(field, notNullValue());
     }
 }

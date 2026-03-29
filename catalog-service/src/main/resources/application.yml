@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: catalog-service
+
+grpc:
+  server:
+    port: 9091
+
+server:
+  port: 8083
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

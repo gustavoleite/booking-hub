@@ -1,6 +1,6 @@
 # 🔐 Auth Service (Identity & Access Management)
 
-Este microsserviço é o provedor central de identidade do do sistema distribuído Booking Hub. Desenvolvido sob os princípios da **Clean Architecture**, ele é responsável por gerenciar credenciais, validar senhas via hash (BCrypt) e emitir *JSON Web Tokens* (JWT) utilizando criptografia assimétrica (RSA).
+Este microsserviço é o provedor central de identidade do sistema distribuído Booking Hub. Desenvolvido sob os princípios da **Clean Architecture**, ele é responsável por gerenciar credenciais, validar senhas via hash (BCrypt) e emitir *JSON Web Tokens* (JWT) utilizando criptografia assimétrica (RSA).
 
 ## 🚀 Tecnologias Utilizadas
 * **Java 21** / **Spring Boot 3.x**

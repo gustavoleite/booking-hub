@@ -1,0 +1,33 @@
+# ESTÁGIO 1: Build (Compilação)
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
+WORKDIR /build
+
+# Copia os poms para baixar dependências
+COPY pom.xml ./
+COPY auth-service/pom.xml auth-service/
+COPY api-gateway/pom.xml api-gateway/
+COPY catalog-service/pom.xml catalog-service/
+
+# Baixa as dependências do auth-service
+RUN mvn dependency:go-offline -pl auth-service -am
+
+# Copia o código fonte e compila
+COPY auth-service/src/ auth-service/src/
+RUN mvn clean package -DskipTests -pl auth-service
+
+# ESTÁGIO 2: Run (Execução)
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Cria um usuário não-root para segurança
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+# Copia apenas o .jar gerado no estágio 1
+COPY --from=builder /build/auth-service/target/*.jar app.jar
+
+# Expõe a porta (A porta real será sobrescrita no docker-compose)
+EXPOSE 8081
+
+# Ponto de entrada otimizado para containers
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

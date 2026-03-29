@@ -1,0 +1,29 @@
+# ESTÁGIO 1: Build (Compilação)
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
+WORKDIR /build
+
+# Copia tudo para garantir que o build funcione (monorepo)
+COPY . .
+
+# Compila o catalog-service
+# Tratamento especial para gRPC em Alpine
+RUN mvn clean compile -pl catalog-service -am || true
+RUN chmod +x catalog-service/target/protoc-plugins/*.exe || true
+RUN mvn package -DskipTests -pl catalog-service -am
+
+# ESTÁGIO 2: Run (Execução)
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Cria um usuário não-root para segurança
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+# Copia apenas o .jar gerado no estágio 1
+COPY --from=builder /build/catalog-service/target/*.jar app.jar
+
+# Expõe as portas
+EXPOSE 8083 9091
+
+# Ponto de entrada otimizado para containers
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

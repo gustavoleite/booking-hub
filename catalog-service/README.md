@@ -48,6 +48,22 @@ O código segue uma divisão rigorosa para manter a lógica de negócio independ
     - `adapters/out/messaging/`: Publicação de eventos via RabbitMQ.
     - `configuration/`: Definição de Beans e configurações do Spring.
 
+## 🔐 Controle de Acesso e Roles
+O acesso aos endpoints é controlado via **API Gateway**, que valida o JWT e encaminha os cabeçalhos `X-User-Id` e `X-User-Role` para o serviço.
+
+| Recurso | Método | Endpoint | Permissão (Role) | Descrição |
+| :--- | :---: | :--- | :--- | :--- |
+| **Estabelecimentos** | `POST` | `/api/catalog/establishments` | `ROLE_OWNER` | Criar um novo salão |
+| | `GET` | `/api/catalog/establishments/my-salons` | `ROLE_OWNER` | Listar salões do proprietário |
+| | `GET` | `/api/catalog/establishments/{id}` | `Público` | Ver detalhes de um salão |
+| | `PUT` | `/api/catalog/establishments/{id}` | `ROLE_OWNER` | Atualizar dados do salão |
+| | `DELETE` | `/api/catalog/establishments/{id}` | `ROLE_OWNER` | Inativar um salão |
+| | `POST` | `/api/catalog/establishments/{id}/services` | `ROLE_OWNER` | Adicionar serviço ao catálogo |
+| **Profissionais** | `PUT` | `/api/catalog/professionals/me` | `ROLE_PROFESSIONAL` | Criar/Atualizar perfil do profissional |
+| | `GET` | `/api/catalog/professionals/me` | `ROLE_PROFESSIONAL` | Ver meu perfil profissional |
+| | `GET` | `/api/catalog/professionals/{id}` | `Público` | Ver perfil de um profissional |
+| **Afiliações** | `POST` | `/api/catalog/establishments/{id}/affiliations` | `ROLE_OWNER` | Vincular profissional ao salão |
+
 ## 📚 Documentação da API (Swagger)
 A documentação dos endpoints REST pode ser acessada em:
 👉 `http://localhost:8083/swagger-ui.html`

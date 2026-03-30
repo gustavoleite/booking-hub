@@ -22,6 +22,7 @@ spring:
           predicates:
             - Path=/api/bookings/**
           filters:
+            - RewritePath=/api/bookings/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
 
         - id: catalog-service-route
@@ -29,6 +30,7 @@ spring:
           predicates:
             - Path=/api/catalog/**
           filters:
+            - RewritePath=/api/catalog/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
 
         - id: review-service-route
@@ -36,9 +38,12 @@ spring:
           predicates:
             - Path=/api/reviews/**
           filters:
+            - RewritePath=/api/reviews/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
 
         - id: search-service-route
           uri: ${SEARCH_SERVICE_URI:http://localhost:8085}
           predicates:
             - Path=/api/search/**
+          filters:
+            - RewritePath=/api/search/(?<remaining>.*), /${remaining}

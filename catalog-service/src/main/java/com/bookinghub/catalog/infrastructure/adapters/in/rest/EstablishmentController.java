@@ -6,6 +6,10 @@ import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.domain.ProvidedService;
 import com.bookinghub.catalog.core.usecases.*;
 import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.EstablishmentRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/catalog/establishments")
 @RequiredArgsConstructor
+@Tag(name = "1. Estabelecimentos", description = "Gestão de Salões (Requer ROLE_OWNER)")
 public class EstablishmentController {
     private final CreateEstablishmentUseCase createEstablishmentUseCase;
     private final UpdateEstablishmentUseCase updateEstablishmentUseCase;
@@ -27,8 +32,10 @@ public class EstablishmentController {
     private final AddProvidedServiceUseCase addProvidedServiceUseCase;
 
     @PostMapping
+    @Operation(summary = "Criar um novo estabelecimento")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Establishment> create(
-            @RequestHeader("X-User-Id") String ownerId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId,
             @RequestBody EstablishmentRequest request) {
         Establishment domain = toDomain(request, ownerId);
         Establishment saved = createEstablishmentUseCase.execute(domain);
@@ -36,7 +43,9 @@ public class EstablishmentController {
     }
 
     @GetMapping("/my-salons")
-    public ResponseEntity<List<Establishment>> listMySalons(@RequestHeader("X-User-Id") String ownerId) {
+    @Operation(summary = "Listar meus estabelecimentos")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<List<Establishment>> listMySalons(@Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId) {
         return ResponseEntity.ok(listMyEstablishmentsUseCase.execute(ownerId));
     }
 
@@ -46,26 +55,32 @@ public class EstablishmentController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar um estabelecimento")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Establishment> update(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") String ownerId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId,
             @RequestBody EstablishmentRequest request) {
         Establishment domain = toDomain(request, ownerId);
         return ResponseEntity.ok(updateEstablishmentUseCase.execute(id, ownerId, domain));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Inativar um estabelecimento")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") String ownerId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId) {
         inactivateEstablishmentUseCase.execute(id, ownerId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/services")
+    @Operation(summary = "Adicionar serviço prestado")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ProvidedService> addService(
             @PathVariable UUID id,
-            @RequestHeader("X-User-Id") String ownerId,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId,
             @RequestBody EstablishmentRequest.ProvidedServiceDto request) {
         ProvidedService service = ProvidedService.builder()
                 .title(request.getTitle())

@@ -28,7 +28,20 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             String path = request.getURI().getPath();
 
             // Skip authentication for Swagger and API Docs
-            if (path.contains("/v3/api-docs") || path.contains("/swagger-ui")) {
+            if (path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/api-docs")) {
+                return chain.filter(exchange);
+            }
+
+            // DONT filter if it's already rewritten (doesn't start with /api/)
+            if (!path.startsWith("/api/")) {
+                return chain.filter(exchange);
+            }
+
+            // Public endpoints that dont need JWT
+            if (path.matches("^/api/catalog/establishments/[^/]+$") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
+            if (path.matches("^/api/catalog/professionals/[^/]+$") && request.getMethod().name().equals("GET")) {
                 return chain.filter(exchange);
             }
 
@@ -46,20 +59,23 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             try {
                 Claims claims = jwtValidationService.validateTokenAndGetClaims(token);
 
-                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                        .header("X-User-Id", claims.getSubject())
-                        .header("X-User-Role", claims.get("role", String.class))
+                ServerWebExchange modifiedExchange = exchange.mutate()
+                        .request(r -> r
+                                .header("X-User-Id", claims.getSubject())
+                                .header("X-User-Role", claims.get("role", String.class))
+                        )
                         .build();
 
-                return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                return chain.filter(modifiedExchange);
 
             } catch (Exception e) {
-                return onError(exchange, "Invalid JWT Token", HttpStatus.UNAUTHORIZED);
+                return onError(exchange, "Invalid JWT Token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
             }
         };
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
+        System.err.println("Auth Filter Error: " + err);
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
         return response.setComplete();

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/catalog/establishments/{establishmentId}/affiliations")
+@RequestMapping("/establishments/{establishmentId}/affiliations")
 @RequiredArgsConstructor
 @Tag(name = "3. Afiliações", description = "Vincular Profissionais a Estabelecimentos")
 public class AffiliationController {
@@ -22,8 +22,8 @@ public class AffiliationController {
     @Operation(summary = "Adicionar profissional ao estabelecimento")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Affiliation> addProfessional(
-            @PathVariable UUID establishmentId,
-            @RequestParam UUID professionalId,
+            @PathVariable("establishmentId") UUID establishmentId,
+            @RequestParam("professionalId") UUID professionalId,
             @RequestBody Affiliation affiliation) {
         Affiliation saved = addProfessionalToEstablishmentUseCase.execute(establishmentId, professionalId, affiliation);
         return ResponseEntity.ok(saved);

@@ -22,28 +22,29 @@ spring:
           predicates:
             - Path=/api/bookings/**
           filters:
-            - RewritePath=/api/bookings/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
+            - RewritePath=/api/bookings/(?<remaining>.*), /${remaining}
 
         - id: catalog-service-route
           uri: ${CATALOG_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/catalog/**
           filters:
-            - RewritePath=/api/catalog/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
+            - RewritePath=/api/catalog/(?<remaining>.*), /${remaining}
 
         - id: review-service-route
           uri: ${REVIEW_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/reviews/**
           filters:
-            - RewritePath=/api/reviews/(?<remaining>.*), /${remaining}
             - JwtAuthFilter
+            - RewritePath=/api/reviews/(?<remaining>.*), /${remaining}
 
         - id: search-service-route
           uri: ${SEARCH_SERVICE_URI:http://localhost:8085}
           predicates:
             - Path=/api/search/**
           filters:
+            - JwtAuthFilter
             - RewritePath=/api/search/(?<remaining>.*), /${remaining}

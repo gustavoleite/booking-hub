@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/catalog/establishments")
+@RequestMapping("/establishments")
 @RequiredArgsConstructor
 @Tag(name = "1. Estabelecimentos", description = "Gestão de Salões (Requer ROLE_OWNER)")
 public class EstablishmentController {
@@ -50,7 +50,7 @@ public class EstablishmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Establishment> getDetails(@PathVariable UUID id) {
+    public ResponseEntity<Establishment> getDetails(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(getEstablishmentDetailsUseCase.execute(id));
     }
 
@@ -58,7 +58,7 @@ public class EstablishmentController {
     @Operation(summary = "Atualizar um estabelecimento")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Establishment> update(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId,
             @RequestBody EstablishmentRequest request) {
         Establishment domain = toDomain(request, ownerId);
@@ -69,7 +69,7 @@ public class EstablishmentController {
     @Operation(summary = "Inativar um estabelecimento")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Void> delete(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId) {
         inactivateEstablishmentUseCase.execute(id, ownerId);
         return ResponseEntity.noContent().build();
@@ -79,7 +79,7 @@ public class EstablishmentController {
     @Operation(summary = "Adicionar serviço prestado")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ProvidedService> addService(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") String ownerId,
             @RequestBody EstablishmentRequest.ProvidedServiceDto request) {
         ProvidedService service = ProvidedService.builder()
@@ -95,13 +95,11 @@ public class EstablishmentController {
                 .name(request.getName())
                 .cnpj(request.getCnpj())
                 .description(request.getDescription())
-                .address(Address.builder()
+                .address(request.getAddress() != null ? Address.builder()
                         .street(request.getAddress().getStreet())
                         .number(request.getAddress().getNumber())
                         .zipCode(request.getAddress().getZipCode())
-                        // City and State are not in our domain yet but are in DTO/DB. 
-                        // I'll keep it simple for now as per domain model.
-                        .build())
+                        .build() : null)
                 .defaultBusinessHours(request.getBusinessHours() != null ? request.getBusinessHours().stream()
                         .map(bh -> BusinessHour.builder()
                                 .dayOfWeek(bh.getDayOfWeek())

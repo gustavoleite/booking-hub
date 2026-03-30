@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/catalog/professionals")
+@RequestMapping("/professionals")
 @RequiredArgsConstructor
 @Tag(name = "2. Profissionais", description = "Gestão de Perfis de Profissionais")
 public class ProfessionalController {
@@ -58,7 +58,7 @@ public class ProfessionalController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Professional> getProfile(@PathVariable String id) {
+    public ResponseEntity<Professional> getProfile(@PathVariable("id") String id) {
         try {
             return professionalRepository.findById(UUID.fromString(id))
                     .map(ResponseEntity::ok)

@@ -135,7 +135,7 @@ public class StepDefinitions {
                 .header("X-User-Id", currentUserId)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .post("/api/catalog/establishments");
+                .post("/establishments");
     }
 
     @Quando("eu envio uma requisição POST para {string} com o mesmo CNPJ {string}")
@@ -250,7 +250,7 @@ public class StepDefinitions {
     @Dado("que existe um salão com ID {string} que pertence ao usuário {string}")
     public void otherEstablishment(String id, String owner) {
         setupRestAssured();
-        this.currentUserId = "owner-123";
+        this.currentUserId = "123e4567-e89b-12d3-a456-426614174000";
         
         EstablishmentRequest request = new EstablishmentRequest();
         request.setName("Other Salon");
@@ -266,7 +266,7 @@ public class StepDefinitions {
                 .header("X-User-Id", owner)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .post("/api/catalog/establishments");
+                .post("/establishments");
         
         String actualId = res.jsonPath().getString("id");
         this.response = null; // Reset for next step
@@ -291,7 +291,7 @@ public class StepDefinitions {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put("/api/catalog/establishments/" + salaoId);
+                .put("/establishments/" + salaoId);
     }
 
     @Então("o status da resposta deve ser {int} FORBIDDEN")
@@ -339,7 +339,7 @@ public class StepDefinitions {
     @Dado("que o profissional {string} possui o nome {string} salvo no banco")
     public void professionalInDb(String id, String name) {
         setupRestAssured();
-        this.currentUserId = "00000000-0000-0000-0000-000000000777";
+        this.currentUserId = id;
         ProfessionalProfileRequest request = new ProfessionalProfileRequest();
         request.setName(name);
         request.setBio("Bio");
@@ -348,7 +348,7 @@ public class StepDefinitions {
                 .header("X-User-Id", currentUserId)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .put("/api/catalog/professionals/me");
+                .put("/professionals/me");
     }
 
     @Quando("qualquer usuário envia uma requisição GET para {string} sem enviar header de autenticação")
@@ -356,7 +356,7 @@ public class StepDefinitions {
         setupRestAssured();
         response = RestAssured.given()
                 .when()
-                .get(endpoint.replace("prof-777", "00000000-0000-0000-0000-000000000777"));
+                .get(endpoint);
     }
 
     @Então("o corpo da resposta deve conter o nome {string}")

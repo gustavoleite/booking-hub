@@ -6,21 +6,22 @@ import io.cucumber.java.pt.Quando;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 public class RegisterSteps {
 
     @LocalServerPort
     private int port;
 
-    private Response response;
+    @Autowired
+    private TestContext testContext;
 
     @Dado("que o e-mail {string} já está cadastrado no banco de dados")
     public void que_o_email_ja_esta_cadastrado_no_banco_de_dados(String email) {
@@ -45,11 +46,13 @@ public class RegisterSteps {
         body.put("password", "SenhaForte123!");
         body.put("role", "ROLE_CLIENT");
 
-        response = given()
+        Response response = given()
             .contentType(ContentType.JSON)
             .body(body)
         .when()
             .post(path);
+        
+        testContext.setResponse(response);
     }
 
     @Quando("eu envio uma requisição POST para {string} com a senha {string}")
@@ -60,11 +63,13 @@ public class RegisterSteps {
         body.put("password", password);
         body.put("role", "ROLE_CLIENT");
 
-        response = given()
+        Response response = given()
             .contentType(ContentType.JSON)
             .body(body)
         .when()
             .post(path);
+        
+        testContext.setResponse(response);
     }
 
     @Quando("eu envio uma requisição POST para {string} com a role {string}")
@@ -75,38 +80,46 @@ public class RegisterSteps {
         body.put("password", "SenhaForte123!");
         body.put("role", role);
 
-        response = given()
+        Response response = given()
             .contentType(ContentType.JSON)
             .body(body)
         .when()
             .post(path);
+        
+        testContext.setResponse(response);
     }
 
-    @Entao("o status da resposta deve ser {int} CONFLICT")
-    public void o_status_da_resposta_deve_ser_conflict(Integer statusCode) {
-        response.then().statusCode(statusCode);
+    @Quando("eu envio uma requisição POST para {string} com email {string}, senha {string} e role {string}")
+    public void eu_envio_uma_requisicao_post_para_com_email_senha_e_role(String path, String email, String password, String role) {
+        RestAssured.port = port;
+        Map<String, Object> body = new HashMap<>();
+        body.put("email", email);
+        body.put("password", password);
+        body.put("role", role);
+
+        Response response = given()
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post(path);
+        
+        testContext.setResponse(response);
     }
 
-    @Entao("o status da resposta deve ser {int} BAD REQUEST")
-    public void o_status_da_resposta_deve_ser_bad_request(Integer statusCode) {
-        response.then().statusCode(statusCode);
+    @Entao("o corpo da resposta deve conter o id do usuário e o email {string}")
+    public void o_corpo_da_resposta_deve_conter_o_id_e_o_email(String email) {
+        testContext.getResponse().then()
+            .body("id", notNullValue())
+            .body("email", equalTo(email));
     }
 
-    @Entao("o corpo da resposta deve conter o título {string}")
-    public void o_corpo_da_resposta_deve_conter_o_titulo(String title) {
-        response.then().body("title", equalTo(title));
-    }
-
-    @Entao("o corpo da resposta deve informar que a senha deve conter no mínimo 8 caracteres")
-    public void o_corpo_da_resposta_deve_informar_senha_curta() {
-        response.then().body("detail", containsString("mínimo 8 caracteres"));
+    @Entao("o corpo da resposta deve informar que a senha é fraca")
+    public void o_corpo_da_resposta_deve_informar_senha_fraca() {
+        testContext.getResponse().then().body("detail", containsString("mínimo 8 caracteres, uma letra maiúscula e um número"));
     }
 
     @Entao("o corpo da resposta deve informar os valores permitidos")
     public void o_corpo_da_resposta_deve_informar_roles_permitidas() {
-        // Se cair na nossa exceção do UseCase, a mensagem é customizada.
-        // Se cair no Jackson (ROLE_HACKER não é Role), pode ser outra mensagem.
-        // Mas a RFC pede "O corpo da resposta deve informar os valores permitidos".
-        response.then().body("detail", containsString("Valores permitidos"));
+        testContext.getResponse().then().body("detail", containsString("Valores permitidos"));
     }
 }

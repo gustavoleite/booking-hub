@@ -20,3 +20,14 @@ Funcionalidade: Autenticacao de Usuario
     Quando eu envio uma requisicao POST para "/login" com email "inexistente@teste.com" e senha "SenhaQualquer123"
     Entao o status da resposta deve ser 401 UNAUTHORIZED
     E o corpo da resposta deve conter o titulo "Falha na Autenticação"
+
+  Cenario: Tentativa de login com usuario inativo
+    Dado que existe um usuario inativo com email "inativo@teste.com" e senha "SenhaForte123!"
+    Quando eu envio uma requisicao POST para "/login" com email "inativo@teste.com" e senha "SenhaForte123!"
+    Entao o status da resposta deve ser 403 FORBIDDEN
+    E o corpo da resposta deve conter o titulo "Usuário Inativo"
+
+  Cenario: Tentativa de login com e-mail em formato invalido
+    Quando eu envio uma requisicao POST para "/login" com email "email_invalido" e senha "SenhaForte123!"
+    Entao o status da resposta deve ser 400 BAD REQUEST
+    E o corpo da resposta deve conter o titulo "Erro de Validação"

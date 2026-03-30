@@ -1,6 +1,9 @@
-package com.bookinghub.gateway;
+package com.bookinghub.gateway.core.application.services;
 
+import com.bookinghub.gateway.core.domain.exceptions.InvalidTokenException;
+import com.bookinghub.gateway.core.domain.exceptions.JwtConfigurationException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -23,11 +26,15 @@ public class JwtValidationService {
     private Resource publicKeyResource;
 
     public Claims validateTokenAndGetClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getPublicKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getPublicKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new InvalidTokenException("Invalid JWT token", e);
+        }
     }
 
     private PublicKey getPublicKey() {
@@ -38,7 +45,11 @@ public class JwtValidationService {
             } else {
                 key = publicKeyContent;
             }
-            
+
+            if (key == null || key.isBlank()) {
+                throw new JwtConfigurationException("JWT public key content or resource is missing");
+            }
+
             key = key.replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
                     .replace("-----BEGIN RSA PUBLIC KEY-----", "")
@@ -48,8 +59,10 @@ public class JwtValidationService {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(keySpec);
+        } catch (JwtConfigurationException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Could not initialize public key for JWT validation", e);
+            throw new JwtConfigurationException("Could not initialize public key for JWT validation", e);
         }
     }
 }

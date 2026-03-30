@@ -1,5 +1,10 @@
-package com.bookinghub.gateway;
+package com.bookinghub.gateway.infrastructure.web.filters;
 
+import com.bookinghub.gateway.core.application.services.JwtValidationService;
+import com.bookinghub.gateway.core.domain.exceptions.InvalidAuthorizationHeaderException;
+import com.bookinghub.gateway.core.domain.exceptions.JwtConfigurationException;
+import com.bookinghub.gateway.core.domain.exceptions.MissingTokenException;
+import com.bookinghub.gateway.core.domain.exceptions.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -45,18 +50,17 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 return chain.filter(exchange);
             }
 
-            if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
-            }
-
-            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return onError(exchange, "Invalid Authorization Header", HttpStatus.UNAUTHORIZED);
-            }
-
-            String token = authHeader.substring(7);
-
             try {
+                if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+                    throw new MissingTokenException("Missing Authorization Header");
+                }
+
+                String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                    throw new InvalidAuthorizationHeaderException("Invalid Authorization Header");
+                }
+
+                String token = authHeader.substring(7);
                 Claims claims = jwtValidationService.validateTokenAndGetClaims(token);
 
                 ServerWebExchange modifiedExchange = exchange.mutate()
@@ -68,8 +72,12 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
 
                 return chain.filter(modifiedExchange);
 
+            } catch (UnauthorizedException e) {
+                return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
+            } catch (JwtConfigurationException e) {
+                return onError(exchange, "Gateway configuration error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (Exception e) {
-                return onError(exchange, "Invalid JWT Token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+                return onError(exchange, "Authentication failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
             }
         };
     }

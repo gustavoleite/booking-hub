@@ -28,7 +28,7 @@ public class AddProvidedServiceUseCase {
                 .active(true)
                 .build();
 
-        establishment.getProvidedServices().add(toAdd);
+        establishment.addProvidedService(toAdd);
         establishmentRepository.save(establishment);
         
         return toAdd;

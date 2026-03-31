@@ -20,7 +20,8 @@ public class Establishment {
     private List<String> photos;
     private Address address;
     private List<BusinessHour> defaultBusinessHours;
-    private List<ProvidedService> providedServices;
+    @Builder.Default
+    private List<ProvidedService> providedServices = new java.util.ArrayList<>();
 
     public void updateDetails(String name, String description, List<String> photos) {
         this.name = name;
@@ -30,5 +31,11 @@ public class Establishment {
 
     public void inactivate() {
         this.active = false;
+    }
+    public void addProvidedService(ProvidedService service) {
+        if (this.providedServices == null) {
+            this.providedServices = new java.util.ArrayList<>();
+        }
+        this.providedServices.add(service);
     }
 }

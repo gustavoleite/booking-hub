@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -26,6 +27,9 @@ class GlobalFilterConfigTest {
     private ServerHttpRequest request;
 
     @Mock
+    private ServerHttpResponse response;
+
+    @Mock
     private ServerWebExchange.Builder exchangeBuilder;
 
     @Mock
@@ -39,6 +43,8 @@ class GlobalFilterConfigTest {
         globalFilterConfig = new GlobalFilterConfig();
         
         when(exchange.getRequest()).thenReturn(request);
+        when(exchange.getResponse()).thenReturn(response);
+        when(response.getHeaders()).thenReturn(new HttpHeaders());
         when(exchange.mutate()).thenReturn(exchangeBuilder);
         when(request.mutate()).thenReturn(requestBuilder);
         when(requestBuilder.header(anyString(), anyString())).thenReturn(requestBuilder);

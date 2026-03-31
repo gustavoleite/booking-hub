@@ -19,9 +19,13 @@ public class GlobalFilterConfig {
                 correlationId = UUID.randomUUID().toString();
             }
 
+            String finalCorrelationId = correlationId;
+
             ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                    .header("X-Correlation-ID", correlationId)
+                    .header("X-Correlation-ID", finalCorrelationId)
                     .build();
+
+            exchange.getResponse().getHeaders().add("X-Correlation-ID", finalCorrelationId);
 
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
         };

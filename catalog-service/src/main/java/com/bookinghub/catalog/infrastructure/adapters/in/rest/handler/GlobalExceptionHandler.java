@@ -6,6 +6,7 @@ import com.bookinghub.catalog.core.exceptions.ForbiddenException;
 import com.bookinghub.catalog.core.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -40,6 +41,13 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleForbiddenException(ForbiddenException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
         problemDetail.setTitle("Access Denied");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "JSON parse error: " + ex.getMessage());
+        problemDetail.setTitle("Malformed JSON Request");
         return problemDetail;
     }
 

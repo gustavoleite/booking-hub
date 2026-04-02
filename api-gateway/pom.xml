@@ -122,6 +122,7 @@
                     <profiles>
                         <profile>${spring.profiles.active}</profile>
                     </profiles>
+                    <jvmArguments>-Dspring.profiles.active=${spring.profiles.active}</jvmArguments>
                 </configuration>
             </plugin>
             <plugin>

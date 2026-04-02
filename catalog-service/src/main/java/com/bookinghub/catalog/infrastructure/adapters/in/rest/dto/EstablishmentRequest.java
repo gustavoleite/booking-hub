@@ -1,5 +1,6 @@
 package com.bookinghub.catalog.infrastructure.adapters.in.rest.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.time.LocalTime;
 import java.util.List;
@@ -25,7 +26,9 @@ public class EstablishmentRequest {
     @Data
     public static class BusinessHourDto {
         private int dayOfWeek;
+        @JsonFormat(pattern = "HH:mm:ss")
         private LocalTime openTime;
+        @JsonFormat(pattern = "HH:mm:ss")
         private LocalTime closeTime;
     }
 

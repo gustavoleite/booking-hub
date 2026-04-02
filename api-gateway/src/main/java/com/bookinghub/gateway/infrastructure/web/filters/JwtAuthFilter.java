@@ -33,12 +33,17 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             String path = request.getURI().getPath();
 
             // Skip authentication for Swagger and API Docs
-            if (path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/api-docs")) {
+            if (path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/api-docs") || path.contains("/webjars")) {
                 return chain.filter(exchange);
             }
 
             // DONT filter if it's already rewritten (doesn't start with /api/)
             if (!path.startsWith("/api/")) {
+                return chain.filter(exchange);
+            }
+
+            // Auth service endpoints are public (registration and login)
+            if (path.startsWith("/api/auth/")) {
                 return chain.filter(exchange);
             }
 

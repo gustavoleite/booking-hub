@@ -31,6 +31,7 @@ spring:
             - Path=/api/catalog/**
           filters:
             - JwtAuthFilter
+            - RewritePath=/api/catalog/(?<remaining>.*), /${remaining}
 
         - id: review-service-route
           uri: ${REVIEW_SERVICE_URI:http://review-service:8084}

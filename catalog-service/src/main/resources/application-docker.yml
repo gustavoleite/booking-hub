@@ -19,3 +19,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+
+app:
+  openapi:
+    server-url: ${OPENAPI_SERVER_URL:http://localhost:8080/api/catalog}

@@ -18,3 +18,7 @@ spring:
 rsa:
   private:
     key-path: ${RSA_PRIVATE_KEY_PATH:file:/app/certs/private_key.pem}
+
+app:
+  openapi:
+    server-url: ${OPENAPI_SERVER_URL:http://localhost:8080/api/auth}

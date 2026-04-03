@@ -58,6 +58,9 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
             if (path.matches("^/api/catalog/establishments/" + uuidPattern + "/affiliations/professional/" + uuidPattern + "/schedule$") && request.getMethod().name().equals("GET")) {
                 return chain.filter(exchange);
             }
+            if (path.equals("/api/bookings/availability") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
 
             try {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {

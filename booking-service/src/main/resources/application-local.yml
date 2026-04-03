@@ -1,0 +1,2 @@
+# Local profile — all defaults are already set in application.yml
+# This file exists so '-Dspring.profiles.active=local' works without error.

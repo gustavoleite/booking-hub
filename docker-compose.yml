@@ -42,8 +42,35 @@ services:
   # ==========================================
   # 2. MICROSSERVIÇOS (Aplicações)
   # ==========================================
+  booking-service:
+    build:
+      context: .
+      dockerfile: booking-service/Dockerfile
+    container_name: bw-booking-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=booking_db
+      - DB_USER=admin
+      - DB_PASS=admin123
+      - RABBIT_HOST=rabbitmq
+      - CATALOG_SERVICE_URI=http://catalog-service:8083
+      - OPENAPI_SERVER_URL=http://localhost:8080/api/bookings
+    networks:
+      - bw-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+
   api-gateway:
-    build: 
+    build:
       context: .
       dockerfile: api-gateway/Dockerfile
     container_name: bw-api-gateway
@@ -53,6 +80,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH_SERVICE_URI=http://auth-service:8081
       - CATALOG_SERVICE_URI=http://catalog-service:8083
+      - BOOKING_SERVICE_URI=http://booking-service:8082
       - RSA_PUBLIC_KEY_PATH=file:/app/certs/public_key.pem
     volumes:
       - ./infra/certs:/app/certs:ro # Read-only para as chaves
@@ -61,6 +89,7 @@ services:
     depends_on:
       - auth-service
       - catalog-service
+      - booking-service
 
   auth-service:
     build: 

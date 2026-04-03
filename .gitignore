@@ -37,6 +37,6 @@ logs/
 
 .idea
 
-CLAUDE.md
 .claude
-.gitignore
+
+CLAUDE.md

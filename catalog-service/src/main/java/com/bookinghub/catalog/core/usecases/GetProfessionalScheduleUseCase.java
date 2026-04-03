@@ -1,6 +1,7 @@
 package com.bookinghub.catalog.core.usecases;
 
 import com.bookinghub.catalog.core.domain.Affiliation;
+import com.bookinghub.catalog.core.exceptions.NotFoundException;
 import com.bookinghub.catalog.core.ports.AffiliationRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +13,6 @@ public class GetProfessionalScheduleUseCase {
 
     public Affiliation execute(UUID establishmentId, UUID professionalId) {
         return affiliationRepository.findByEstablishmentIdAndProfessionalId(establishmentId, professionalId)
-                .orElseThrow(() -> new RuntimeException("Affiliation not found"));
+                .orElseThrow(() -> new NotFoundException("Afiliação não encontrada para o profissional e estabelecimento informados"));
     }
 }

@@ -47,11 +47,15 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 return chain.filter(exchange);
             }
 
-            // Public endpoints that dont need JWT
-            if (path.matches("^/api/catalog/establishments/[^/]+$") && request.getMethod().name().equals("GET")) {
+            // Public endpoints that dont need JWT (UUID-identified resources only)
+            String uuidPattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "$") && request.getMethod().name().equals("GET")) {
                 return chain.filter(exchange);
             }
-            if (path.matches("^/api/catalog/professionals/[^/]+$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/catalog/professionals/" + uuidPattern + "$") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
+            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "/affiliations/professional/" + uuidPattern + "/schedule$") && request.getMethod().name().equals("GET")) {
                 return chain.filter(exchange);
             }
 

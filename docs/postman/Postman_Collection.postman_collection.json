@@ -1,42 +1,66 @@
 {
   "info": {
-    "name": "Beauty & Wellness API",
-    "description": "Coleção de testes para os microsserviços do sistema de agendamento.",
+    "name": "Booking Hub API",
+    "description": "Coleção de testes para os microsserviços do sistema de agendamento Booking Hub.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "item":[
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
     {
       "name": "1. Auth Service",
-      "item":[
+      "item": [
         {
-          "name": "Registrar Usuário",
+          "name": "Registrar Owner",
           "request": {
             "method": "POST",
-            "header":[
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+              "raw": "{\n  \"name\": \"Dono do Salão\",\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_OWNER\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
               "host": ["{{base_url}}"],
-              "path":["api", "auth", "register"]
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Registrar Profissional",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Barbeiro\",\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_PROFESSIONAL\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
             }
           }
         },
         {
           "name": "Login (Gera JWT)",
-          "event":[
+          "event": [
             {
               "listen": "test",
               "script": {
-                "exec":[
+                "exec": [
                   "var jsonData = pm.response.json();",
-                  "if(jsonData.accessToken) {",
-                  "    pm.environment.set(\"access_token\", jsonData.accessToken);",
-                  "    console.log(\"Token salvo na variável de ambiente!\");",
+                  "if (jsonData.accessToken) {",
+                  "    pm.environment.set('access_token', jsonData.accessToken);",
+                  "    console.log('Token salvo: ' + jsonData.accessToken.substring(0, 20) + '...');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -45,43 +69,41 @@
           ],
           "request": {
             "method": "POST",
-            "header":[
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+              "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
               "host": ["{{base_url}}"],
-              "path":["api", "auth", "login"]
+              "path": ["api", "auth", "login"]
             }
           }
         },
         {
-          "name": "Falhas de Validação (Testes HTTP)",
+          "name": "Falhas de Validação",
           "item": [
             {
-              "name": "[ERRO 409] Registrar E-mail Duplicado",
+              "name": "[ERRO 409] E-mail Duplicado",
               "request": {
                 "method": "POST",
-                "header":[{ "key": "Content-Type", "value": "application/json" }],
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                  "raw": "{\n  \"name\": \"Duplicado\",\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
-                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path":["api", "auth", "register"] }
+                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
               }
             },
             {
-              "name": "[ERRO 400] Registrar com Senha Fraca",
+              "name": "[ERRO 400] Senha Fraca",
               "request": {
                 "method": "POST",
-                "header":[{ "key": "Content-Type", "value": "application/json" }],
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                  "raw": "{\n  \"name\": \"Fraco\",\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
                 "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
               }
@@ -91,244 +113,286 @@
       ]
     },
     {
-      "name": "2. Catalog Service",
+      "name": "2. Catalog Service - Profissionais",
       "item": [
         {
-          "name": "Profissionais",
+          "name": "Criar Meu Perfil Profissional",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('professional_id', jsonData.id);",
+                  "    console.log('professional_id salvo: ' + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Barbeiro\",\n  \"bio\": \"Especialista em cortes clássicos e barba.\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/catalog/professionals/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "professionals", "me"]
+            }
+          }
+        },
+        {
+          "name": "Obter Meu Perfil Profissional",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/professionals/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "professionals", "me"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Meu Perfil Profissional",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Barbeiro Atualizado\",\n  \"bio\": \"Nova bio com mais detalhes.\",\n  \"avatarUrl\": \"https://example.com/avatar-novo.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\", \"Corte com Navalha\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/catalog/professionals/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "professionals", "me"]
+            }
+          }
+        },
+        {
+          "name": "Obter Perfil por ID (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/professionals/{{professional_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "professionals", "{{professional_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Catalog Service - Estabelecimentos",
+      "item": [
+        {
+          "name": "Criar Novo Estabelecimento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('establishment_id', jsonData.id);",
+                  "    console.log('establishment_id salvo: ' + jsonData.id);",
+                  "}",
+                  "if (jsonData.providedServices && jsonData.providedServices.length > 0) {",
+                  "    pm.environment.set('service_id', jsonData.providedServices[0].id);",
+                  "    console.log('service_id salvo: ' + jsonData.providedServices[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments"]
+            }
+          }
+        },
+        {
+          "name": "Listar Meus Estabelecimentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/my-salons",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "my-salons"]
+            }
+          }
+        },
+        {
+          "name": "Obter Detalhes do Estabelecimento (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Atualizar Estabelecimento",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo.\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Adicionar Serviço ao Estabelecimento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('service_id', jsonData.id);",
+                  "    console.log('service_id atualizado: ' + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Barba Completa\",\n  \"description\": \"Barba com toalha quente e navalha.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/services",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "services"]
+            }
+          }
+        },
+        {
+          "name": "Inativar Estabelecimento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Falhas de Validação",
           "item": [
             {
-              "name": "Meu Perfil Profissional",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/professionals/me",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "professionals", "me"]
-                }
-              }
-            },
-            {
-              "name": "Criar Meu Perfil",
+              "name": "[ERRO 400] CNPJ Inválido",
               "request": {
                 "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"João Barbeiro\",\n  \"bio\": \"Especialista em cortes clássicos e barba.\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\"]\n}"
+                  "raw": "{\n  \"name\": \"Salão Inválido\",\n  \"cnpj\": \"12345678000100\",\n  \"description\": \"CNPJ com dígitos verificadores errados.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"zipCode\": \"01234-567\" },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }],\n  \"services\": [{ \"title\": \"Svc\", \"description\": \"Desc\" }]\n}"
                 },
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/professionals/me",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "professionals", "me"]
-                }
+                "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
               }
             },
             {
-              "name": "Atualizar Meu Perfil",
+              "name": "[ERRO 400] Sem Serviços",
               "request": {
-                "method": "PUT",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"João Barbeiro Atualizado\",\n  \"bio\": \"Nova bio com mais detalhes.\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\", \"Corte com Navalha\"]\n}"
+                  "raw": "{\n  \"name\": \"Salão Sem Serviços\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Sem serviços.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"zipCode\": \"01234-567\" },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }]\n}"
                 },
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/professionals/me",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "professionals", "me"]
-                }
-              }
-            },
-            {
-              "name": "Obter Perfil por ID",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/professionals/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "professionals", ":id"],
-                  "variable": [
-                    { "key": "id", "value": "{{professional_id}}" }
-                  ]
-                }
+                "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "4. Catalog Service - Afiliações",
+      "item": [
         {
-          "name": "Estabelecimentos",
-          "item": [
-            {
-              "name": "Criar Novo Estabelecimento",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12.345.678/0001-95\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    {\n      \"dayOfWeek\": 1,\n      \"openTime\": \"08:00:00\",\n      \"closeTime\": \"18:00:00\"\n    }\n  ],\n  \"services\": [\n    {\n      \"title\": \"Corte Simples\",\n      \"description\": \"Corte de cabelo com máquina ou tesoura.\"\n    }\n  ]\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments"]
-                }
-              }
+          "name": "Vincular Profissional (Upsert)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"09:00:00\", \"endTime\": \"17:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"{{service_id}}\",\n      \"price\": 75.0,\n      \"durationMinutes\": 45\n    }\n  ]\n}"
             },
-            {
-              "name": "Listar Meus Estabelecimentos",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/my-salons",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", "my-salons"]
-                }
-              }
-            },
-            {
-              "name": "Obter Detalhes do Estabelecimento",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":id"],
-                  "variable": [
-                    { "key": "id", "value": "{{establishment_id}}" }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Atualizar Estabelecimento",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12.345.678/0001-95\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":id"],
-                  "variable": [
-                    { "key": "id", "value": "{{establishment_id}}" }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Inativar Estabelecimento",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":id"],
-                  "variable": [
-                    { "key": "id", "value": "{{establishment_id}}" }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Adicionar Serviço ao Estabelecimento",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Barba Completa\",\n  \"description\": \"Barba com toalha quente e navalha.\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:id/services",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":id", "services"],
-                  "variable": [
-                    { "key": "id", "value": "{{establishment_id}}" }
-                  ]
-                }
-              }
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations?professionalId={{professional_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations"],
+              "query": [{ "key": "professionalId", "value": "{{professional_id}}" }]
             }
-          ]
+          }
         },
         {
-          "name": "Afiliações",
+          "name": "Consultar Agenda do Profissional (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations/professional/{{professional_id}}/schedule?serviceId={{service_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations", "professional", "{{professional_id}}", "schedule"],
+              "query": [{ "key": "serviceId", "value": "{{service_id}}" }]
+            }
+          }
+        },
+        {
+          "name": "Falhas de Validação",
           "item": [
             {
-              "name": "Vincular Profissional a Estabelecimento",
+              "name": "[ERRO 400] Horário Fora do Expediente",
               "request": {
                 "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"UUID_DO_SERVICO\",\n      \"price\": 50.0,\n      \"durationMinutes\": 30\n    }\n  ],\n  \"workSchedules\": [\n    {\n      \"dayOfWeek\": 1,\n      \"startTime\": \"09:00:00\",\n      \"endTime\": \"17:00:00\"\n    }\n  ]\n}"
+                  "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"06:00:00\", \"endTime\": \"20:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    { \"providedServiceId\": \"{{service_id}}\", \"price\": 50.0, \"durationMinutes\": 30 }\n  ]\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:establishmentId/affiliations?professionalId={{professional_id}}",
+                  "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations?professionalId={{professional_id}}",
                   "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":establishmentId", "affiliations"],
-                  "query": [
-                    { "key": "professionalId", "value": "{{professional_id}}" }
-                  ],
-                  "variable": [
-                    { "key": "establishmentId", "value": "{{establishment_id}}" }
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Consultar Agenda do Profissional no Estabelecimento",
-              "request": {
-                "method": "GET",
-                "header": [
-                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:establishmentId/affiliations/professional/:professionalId/schedule?serviceId={{service_id}}",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", ":establishmentId", "affiliations", "professional", ":professionalId", "schedule"],
-                  "query": [
-                    { "key": "serviceId", "value": "{{service_id}}" }
-                  ],
-                  "variable": [
-                    { "key": "establishmentId", "value": "{{establishment_id}}" },
-                    { "key": "professionalId", "value": "{{professional_id}}" }
-                  ]
+                  "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations"],
+                  "query": [{ "key": "professionalId", "value": "{{professional_id}}" }]
                 }
               }
             }
@@ -336,15 +400,5 @@
         }
       ]
     }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer":[
-      {
-        "key": "token",
-        "value": "{{access_token}}",
-        "type": "string"
-      }
-    ]
-  }
+  ]
 }

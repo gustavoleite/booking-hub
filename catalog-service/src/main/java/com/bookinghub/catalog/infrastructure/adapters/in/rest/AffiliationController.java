@@ -3,8 +3,10 @@ package com.bookinghub.catalog.infrastructure.adapters.in.rest;
 import com.bookinghub.catalog.core.domain.Affiliation;
 import com.bookinghub.catalog.core.domain.ServiceOffering;
 import com.bookinghub.catalog.core.domain.WorkSchedule;
+import com.bookinghub.catalog.core.exceptions.NotFoundException;
 import com.bookinghub.catalog.core.usecases.AddProfessionalToEstablishmentUseCase;
 import com.bookinghub.catalog.core.usecases.GetProfessionalScheduleUseCase;
+import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.AffiliationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,7 +38,30 @@ public class AffiliationController {
     public ResponseEntity<Affiliation> addProfessional(
             @PathVariable("establishmentId") UUID establishmentId,
             @RequestParam("professionalId") UUID professionalId,
-            @RequestBody Affiliation affiliation) {
+            @RequestBody AffiliationRequest request) {
+        Affiliation affiliation = Affiliation.builder()
+                .establishmentId(establishmentId)
+                .professionalId(professionalId)
+                .active(request.isActive())
+                .workSchedules(request.getWorkSchedules() != null
+                        ? request.getWorkSchedules().stream()
+                                .map(ws -> WorkSchedule.builder()
+                                        .dayOfWeek(ws.getDayOfWeek())
+                                        .startTime(ws.getStartTime())
+                                        .endTime(ws.getEndTime())
+                                        .build())
+                                .collect(Collectors.toList())
+                        : Collections.emptyList())
+                .serviceOfferings(request.getServiceOfferings() != null
+                        ? request.getServiceOfferings().stream()
+                                .map(so -> ServiceOffering.builder()
+                                        .providedServiceId(so.getProvidedServiceId())
+                                        .price(so.getPrice())
+                                        .durationMinutes(so.getDurationMinutes())
+                                        .build())
+                                .collect(Collectors.toList())
+                        : Collections.emptyList())
+                .build();
         Affiliation saved = addProfessionalToEstablishmentUseCase.execute(establishmentId, professionalId, affiliation);
         return ResponseEntity.ok(saved);
     }
@@ -52,7 +78,7 @@ public class AffiliationController {
         ServiceOffering offering = affiliation.getServiceOfferings().stream()
                 .filter(so -> so.getProvidedServiceId().equals(serviceId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Service offering not found for this professional"));
+                .orElseThrow(() -> new NotFoundException("Serviço não oferecido por este profissional neste estabelecimento"));
 
         ScheduleResponse response = ScheduleResponse.builder()
                 .isActive(affiliation.isActive())

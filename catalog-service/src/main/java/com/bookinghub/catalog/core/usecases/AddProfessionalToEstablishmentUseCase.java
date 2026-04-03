@@ -1,12 +1,17 @@
 package com.bookinghub.catalog.core.usecases;
 
 import com.bookinghub.catalog.core.domain.*;
+import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
+import com.bookinghub.catalog.core.exceptions.NotFoundException;
 import com.bookinghub.catalog.core.ports.AffiliationRepository;
 import com.bookinghub.catalog.core.ports.CatalogEventPublisher;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import com.bookinghub.catalog.core.ports.ProfessionalRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -18,27 +23,44 @@ public class AddProfessionalToEstablishmentUseCase {
 
     public Affiliation execute(UUID establishmentId, UUID professionalId, Affiliation affiliation) {
         Establishment establishment = establishmentRepository.findById(establishmentId)
-                .orElseThrow(() -> new RuntimeException("Establishment not found"));
+                .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado: " + establishmentId));
 
         professionalRepository.findById(professionalId)
-                .orElseThrow(() -> new RuntimeException("Professional not found"));
+                .orElseThrow(() -> new NotFoundException("Profissional não encontrado: " + professionalId));
 
-        // Business Rule 1: Professional schedule must be within establishment business hours
-        for (WorkSchedule schedule : affiliation.getWorkSchedules()) {
-            BusinessHour salonHour = establishment.getDefaultBusinessHours().stream()
+        List<WorkSchedule> schedules = affiliation.getWorkSchedules() != null
+                ? affiliation.getWorkSchedules()
+                : Collections.emptyList();
+
+        List<BusinessHour> businessHours = establishment.getDefaultBusinessHours() != null
+                ? establishment.getDefaultBusinessHours()
+                : Collections.emptyList();
+
+        for (WorkSchedule schedule : schedules) {
+            BusinessHour salonHour = businessHours.stream()
                     .filter(bh -> bh.getDayOfWeek() == schedule.getDayOfWeek())
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Salon is closed on day " + schedule.getDayOfWeek()));
+                    .orElseThrow(() -> new BusinessRuleException("O salão não funciona no dia " + schedule.getDayOfWeek()));
 
             if (!salonHour.isWithin(schedule.getStartTime(), schedule.getEndTime())) {
-                throw new RuntimeException("Horário do profissional fora do expediente do salão");
+                throw new BusinessRuleException("Horário do profissional fora do expediente do salão");
             }
         }
 
-        // Domain invariant: Overlapping check is inside affiliation.updateSchedules, but we can do it here too if we are setting them
-        affiliation.updateSchedules(affiliation.getWorkSchedules());
+        affiliation.updateSchedules(schedules);
 
-        Affiliation savedAffiliation = affiliationRepository.save(affiliation);
+        // Reuse existing affiliation ID if one already exists for this pair
+        Optional<Affiliation> existing = affiliationRepository.findByEstablishmentIdAndProfessionalId(establishmentId, professionalId);
+        Affiliation toSave = existing.map(ex -> Affiliation.builder()
+                .id(ex.getId())
+                .establishmentId(affiliation.getEstablishmentId())
+                .professionalId(affiliation.getProfessionalId())
+                .active(affiliation.isActive())
+                .workSchedules(affiliation.getWorkSchedules())
+                .serviceOfferings(affiliation.getServiceOfferings())
+                .build()).orElse(affiliation);
+
+        Affiliation savedAffiliation = affiliationRepository.save(toSave);
         eventPublisher.publishAffiliationCreated(savedAffiliation);
         return savedAffiliation;
     }

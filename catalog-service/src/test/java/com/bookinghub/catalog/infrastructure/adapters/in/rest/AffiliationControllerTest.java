@@ -2,6 +2,7 @@ package com.bookinghub.catalog.infrastructure.adapters.in.rest;
 
 import com.bookinghub.catalog.core.domain.Affiliation;
 import com.bookinghub.catalog.core.usecases.AddProfessionalToEstablishmentUseCase;
+import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.AffiliationRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -29,12 +31,12 @@ class AffiliationControllerTest {
     void shouldAddProfessional() {
         UUID estId = UUID.randomUUID();
         UUID profId = UUID.randomUUID();
-        Affiliation affiliation = Affiliation.builder().build();
+        AffiliationRequest request = new AffiliationRequest();
         Affiliation saved = Affiliation.builder().id(UUID.randomUUID()).build();
-        
-        when(addProfessionalToEstablishmentUseCase.execute(eq(estId), eq(profId), eq(affiliation))).thenReturn(saved);
 
-        ResponseEntity<Affiliation> response = controller.addProfessional(estId, profId, affiliation);
+        when(addProfessionalToEstablishmentUseCase.execute(eq(estId), eq(profId), any(Affiliation.class))).thenReturn(saved);
+
+        ResponseEntity<Affiliation> response = controller.addProfessional(estId, profId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(saved, response.getBody());

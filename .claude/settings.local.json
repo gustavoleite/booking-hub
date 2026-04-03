@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean:*)",
+      "Bash(curl -s http://localhost:8083/actuator/health)",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"pro@test.com\",\"password\":\"Pass123!\",\"name\":\"Test Pro\",\"role\":\"ROLE_PROFESSIONAL\"}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register -H \"Content-Type: application/json\" -d '{\"email\":\"pro@test.com\",\"password\":\"Pass123!\",\"name\":\"Test Pro\",\"role\":\"ROLE_PROFESSIONAL\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"pro@test.com\",\"password\":\"Pass123!\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/catalog/professionals/me -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJjYTA4NzhmZC0zNDk3LTQxNWUtOTMwNi1kMzcyMTAzZWQ1N2EiLCJyb2xlIjoiUk9MRV9QUk9GRVNTSU9OQUwiLCJleHAiOjE3NzUxODU3ODEsImlhdCI6MTc3NTE4MjE4MSwiZW1haWwiOiJwcm9AdGVzdC5jb20ifQ.AloXETuxGgo0H6r5V7NCT4-tc7BvxSt80A5tztdhjtDW3iScqLx9nFRFurA1Bsp6edirsWLabKQ1ql6j0-0nQK5rlyBp6O6_vrU-rGQLN0WjWSYnm8rhKEIC2R_E2kP78ZkZeOHwyToX_BIA08HWQlYSCixK0PNrD8ZywvqbqddzI-HwgS2CYNQL6M4UP4a9v-0Ms0oezdtJ9TsG5VLV_EiQe7c9l6Bxi5-kQmSR8TRO921lmcxHmcq3QmL7NGgSH_H09lkdyQFARXop3KmJd7JKWvG6syuWjWHPNMGCCyj8l0RxCyaIC0V5aeaSf5d9URSDfYkOyzxKo-betKHjJw' -H 'Content-Type: application/json' -d '{\"name\":\"Test Pro\",\"bio\":\"My bio\"}')",
+      "Bash(curl -s http://localhost:8080/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"pro@test.com\",\"password\":\"Pass123!\"}')",
+      "Bash(curl -s -X POST http://localhost:8083/professionals/me -H 'X-User-Id: ca0878fd-3497-415e-9306-d372103ed57a' -H 'Content-Type: application/json' -d '{\"name\":\"Test Pro\",\"bio\":\"My bio\"}')",
+      "Bash(curl -s http://localhost:8083/professionals/me -H 'X-User-Id: ca0878fd-3497-415e-9306-d372103ed57a')",
+      "Bash(curl -s http://localhost:8083/professionals/00000000-0000-0000-0000-000000000000)",
+      "Bash(grep:*)",
+      "Bash(kill 21572)",
+      "Bash(docker compose:*)",
+      "Bash(taskkill /F /PID 21572)",
+      "Bash(netstat -ano)",
+      "Bash(cmd /c \"taskkill /F /PID 21572\")",
+      "Bash(powershell -Command \"Stop-Process -Id 21572 -Force\")",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"owner@test.com\",\"password\":\"Pass123!\",\"name\":\"Test Owner\",\"role\":\"ROLE_OWNER\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"pro2@test.com\",\"password\":\"Pass123!\",\"name\":\"Test Professional\",\"role\":\"ROLE_PROFESSIONAL\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/catalog/professionals/me -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIwNjRhNDVhNC03Mjg5LTRkZmEtODliNC04ZmY1MWE0YjU0MDEiLCJyb2xlIjoiUk9MRV9QUk9GRVNTSU9OQUwiLCJleHAiOjE3NzUxODY0OTEsImlhdCI6MTc3NTE4Mjg5MSwiZW1haWwiOiJwcm8yQHRlc3QuY29tIn0.SlOa-Pys_oLCCSMrli_F1oxE8fLrqZULQAUgN1wEZEDOZNv8UOhbl78_6gPeLgA6J1ioEf5AsgeOUV2UabpXU9a_fUX8rGy4r8b9PraDxX8tH6h8BaSHfxNf9xFWGqQOlC6NCZ5es19kYagMgBo6gbZHJuaskppxUozumyJWx1sMYPQsWdfXvI2HTe8REKURyt7FAfLtq0JShgMLagkNg3qwpbpJaLYl8Z-L95cVGHluxCmQVZVHUZxAsaGd2Dkl7CVJ70H8Q1yvx0IpT5g7xruJGi5mcDbD1jxV7KgQBlAFzmEAjpyvSCo5waOIZqYGGcNGexthUn_dGPzQ7oF3Yg' -H 'Content-Type: application/json' -d '{\"name\":\"Maria Nail Art\",\"bio\":\"Specialist in nails\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"owner@test.com\",\"password\":\"Password1!\"}')",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/register -H 'Content-Type: application/json' -d '{\"name\":\"Test Owner\",\"email\":\"owner2@test.com\",\"password\":\"Password1!\",\"role\":\"ROLE_OWNER\"}')",
+      "Bash(python3:*)",
+      "Bash(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"owner2@test.com\",\"password\":\"Password1!\"}')",
+      "Bash(curl:*)",
+      "Bash(docker exec bw-postgres:*)"
+    ]
+  }
+}

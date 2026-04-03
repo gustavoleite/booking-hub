@@ -4,9 +4,11 @@ import com.bookinghub.catalog.core.domain.*;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,12 +18,20 @@ public class PostgresEstablishmentRepositoryAdapter implements EstablishmentRepo
     private final JpaEstablishmentRepository jpaRepository;
 
     @Override
+    @Transactional
     public Establishment save(Establishment establishment) {
-        EstablishmentEntity entity = jpaRepository.findById(establishment.getId())
-                .orElse(toEntity(establishment));
-        updateEntity(entity, establishment);
-        EstablishmentEntity saved = jpaRepository.save(entity);
-        return toDomain(saved);
+        Optional<EstablishmentEntity> found = jpaRepository.findById(establishment.getId());
+        if (found.isPresent()) {
+            EstablishmentEntity entity = found.get();
+            // Only clear business hours (unique constraint on establishment_id+day_of_week)
+            entity.getDefaultBusinessHours().clear();
+            jpaRepository.flush();
+            updateEntity(entity, establishment);
+            return toDomain(jpaRepository.save(entity));
+        } else {
+            EstablishmentEntity entity = toEntity(establishment);
+            return toDomain(jpaRepository.save(entity));
+        }
     }
 
     @Override
@@ -57,7 +67,6 @@ public class PostgresEstablishmentRepositoryAdapter implements EstablishmentRepo
                 .build());
 
         if (domain.getDefaultBusinessHours() != null) {
-            entity.getDefaultBusinessHours().clear();
             entity.getDefaultBusinessHours().addAll(domain.getDefaultBusinessHours().stream()
                     .map(bh -> BusinessHourEntity.builder()
                             .id(UUID.randomUUID()) // Simple for now
@@ -70,8 +79,11 @@ public class PostgresEstablishmentRepositoryAdapter implements EstablishmentRepo
         }
 
         if (domain.getProvidedServices() != null) {
-            entity.getProvidedServices().clear();
+            Set<UUID> existingIds = entity.getProvidedServices().stream()
+                    .map(ProvidedServiceEntity::getId)
+                    .collect(Collectors.toSet());
             entity.getProvidedServices().addAll(domain.getProvidedServices().stream()
+                    .filter(ps -> ps.getId() == null || !existingIds.contains(ps.getId()))
                     .map(ps -> ProvidedServiceEntity.builder()
                             .id(ps.getId() != null ? ps.getId() : UUID.randomUUID())
                             .establishment(entity)

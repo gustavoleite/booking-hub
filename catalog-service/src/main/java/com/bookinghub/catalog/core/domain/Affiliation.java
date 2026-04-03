@@ -1,5 +1,6 @@
 package com.bookinghub.catalog.core.domain;
 
+import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Affiliation {
         for (int i = 0; i < newSchedules.size(); i++) {
             for (int j = i + 1; j < newSchedules.size(); j++) {
                 if (newSchedules.get(i).overlaps(newSchedules.get(j))) {
-                    throw new RuntimeException("Overlapping schedules for the same professional");
+                    throw new BusinessRuleException("Horários sobrepostos para o mesmo profissional no dia " + newSchedules.get(i).getDayOfWeek());
                 }
             }
         }

@@ -5,6 +5,8 @@ import com.bookinghub.catalog.core.ports.ProfessionalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +34,7 @@ public class PostgresProfessionalRepositoryAdapter implements ProfessionalReposi
         entity.setBio(domain.getBio());
         entity.setAvatarUrl(domain.getAvatarUrl());
         entity.setActive(domain.isActive());
-        entity.setSpecialties(domain.getSpecialties());
+        entity.setSpecialties(toSafeList(domain.getSpecialties()));
     }
 
     private ProfessionalEntity toEntity(Professional domain) {
@@ -42,8 +44,12 @@ public class PostgresProfessionalRepositoryAdapter implements ProfessionalReposi
                 .bio(domain.getBio())
                 .avatarUrl(domain.getAvatarUrl())
                 .active(domain.isActive())
-                .specialties(domain.getSpecialties())
+                .specialties(toSafeList(domain.getSpecialties()))
                 .build();
+    }
+
+    private List<String> toSafeList(List<String> list) {
+        return list != null ? list : Collections.emptyList();
     }
 
     private Professional toDomain(ProfessionalEntity entity) {

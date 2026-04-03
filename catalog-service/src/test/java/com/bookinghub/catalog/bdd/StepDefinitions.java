@@ -108,7 +108,7 @@ public class StepDefinitions {
     }
 
     @Então("o status da resposta deve ser {int} CREATED")
-    public void checkStatusCreated(int status) {
+    public void checkStatusCreatedProfessional(int status) {
         response.then().statusCode(status);
     }
 
@@ -303,8 +303,23 @@ public class StepDefinitions {
 
     // Professional steps
 
+    @Quando("eu envio uma requisição POST para {string} informando o nome {string} e especialidade {string}")
+    public void createProfessionalSuccess(String endpoint, String name, String specialty) {
+        setupRestAssured();
+        ProfessionalProfileRequest request = new ProfessionalProfileRequest();
+        request.setName(name);
+        request.setSpecialties(List.of(specialty));
+
+        response = RestAssured.given()
+                .header("X-User-Id", currentUserId)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post(endpoint);
+    }
+
     @Quando("eu envio uma requisição PUT para {string} informando o nome {string} e especialidade {string}")
-    public void upsertProfessionalSuccess(String endpoint, String name, String specialty) {
+    public void updateProfessionalSuccess(String endpoint, String name, String specialty) {
         setupRestAssured();
         ProfessionalProfileRequest request = new ProfessionalProfileRequest();
         request.setName(name);
@@ -318,8 +333,8 @@ public class StepDefinitions {
                 .put(endpoint);
     }
 
-    @Quando("eu envio uma requisição PUT para {string} informando a bio mas com o nome vazio")
-    public void upsertProfessionalNoName(String endpoint) {
+    @Quando("eu envio uma requisição POST para {string} informando a bio mas com o nome vazio")
+    public void createProfessionalNoName(String endpoint) {
         setupRestAssured();
         ProfessionalProfileRequest request = new ProfessionalProfileRequest();
         request.setBio("Some bio");
@@ -330,7 +345,7 @@ public class StepDefinitions {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when()
-                .put(endpoint);
+                .post(endpoint);
     }
 
     @Então("o corpo da resposta deve pedir a obrigatoriedade do nome")
@@ -342,15 +357,20 @@ public class StepDefinitions {
     public void professionalInDb(String id, String name) {
         setupRestAssured();
         this.currentUserId = id;
-        ProfessionalProfileRequest request = new ProfessionalProfileRequest();
-        request.setName(name);
-        request.setBio("Bio");
-
-        RestAssured.given()
-                .header("X-User-Id", currentUserId)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .put("/professionals/me");
+        
+        Professional domain = Professional.builder()
+                .id(UUID.fromString(id))
+                .name(name)
+                .bio("Bio")
+                .active(true)
+                .build();
+        
+        jpaProfessionalRepository.save(ProfessionalEntity.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .bio(domain.getBio())
+                .active(true)
+                .build());
     }
 
     @Quando("qualquer usuário envia uma requisição GET para {string} sem enviar header de autenticação")

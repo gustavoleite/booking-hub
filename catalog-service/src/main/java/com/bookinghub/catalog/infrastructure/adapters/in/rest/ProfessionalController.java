@@ -2,8 +2,10 @@ package com.bookinghub.catalog.infrastructure.adapters.in.rest;
 
 import com.bookinghub.catalog.core.domain.Professional;
 import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
+import com.bookinghub.catalog.core.exceptions.ProfessionalNotFoundException;
 import com.bookinghub.catalog.core.ports.ProfessionalRepository;
-import com.bookinghub.catalog.core.usecases.UpsertProfessionalProfileUseCase;
+import com.bookinghub.catalog.core.usecases.CreateProfessionalProfileUseCase;
+import com.bookinghub.catalog.core.usecases.UpdateProfessionalProfileUseCase;
 import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.ProfessionalProfileRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,13 +22,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "2. Profissionais", description = "Gestão de Perfis de Profissionais")
 public class ProfessionalController {
-    private final UpsertProfessionalProfileUseCase upsertProfessionalProfileUseCase;
+    private final CreateProfessionalProfileUseCase createProfessionalProfileUseCase;
+    private final UpdateProfessionalProfileUseCase updateProfessionalProfileUseCase;
     private final ProfessionalRepository professionalRepository;
 
-    @PutMapping("/me")
-    @Operation(summary = "Criar/Atualizar meu perfil profissional")
+    @PostMapping("/me")
+    @Operation(summary = "Criar meu perfil profissional")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Professional> upsertMyProfile(
+    public ResponseEntity<Professional> createMyProfile(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") String userId,
             @RequestBody ProfessionalProfileRequest request) {
         UUID userUuid = parseId(userId);
@@ -36,7 +39,23 @@ public class ProfessionalController {
                 .avatarUrl(request.getAvatarUrl())
                 .specialties(request.getSpecialties())
                 .build();
-        return ResponseEntity.ok(upsertProfessionalProfileUseCase.execute(userUuid, domain));
+        return ResponseEntity.status(201).body(createProfessionalProfileUseCase.execute(userUuid, domain));
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "Atualizar meu perfil profissional")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Professional> updateMyProfile(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") String userId,
+            @RequestBody ProfessionalProfileRequest request) {
+        UUID userUuid = parseId(userId);
+        Professional domain = Professional.builder()
+                .name(request.getName())
+                .bio(request.getBio())
+                .avatarUrl(request.getAvatarUrl())
+                .specialties(request.getSpecialties())
+                .build();
+        return ResponseEntity.ok(updateProfessionalProfileUseCase.execute(userUuid, domain));
     }
 
     @GetMapping("/me")
@@ -46,7 +65,7 @@ public class ProfessionalController {
         UUID userUuid = parseId(userId);
         return professionalRepository.findById(userUuid)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ProfessionalNotFoundException("Perfil profissional não encontrado para o usuário logado."));
     }
 
     private UUID parseId(String id) {
@@ -62,9 +81,9 @@ public class ProfessionalController {
         try {
             return professionalRepository.findById(UUID.fromString(id))
                     .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+                    .orElseThrow(() -> new ProfessionalNotFoundException("Perfil profissional não encontrado para o ID: " + id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            throw new ProfessionalNotFoundException("ID fornecido não é um UUID válido: " + id);
         }
     }
 }

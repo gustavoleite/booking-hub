@@ -2,8 +2,10 @@ package com.bookinghub.catalog.infrastructure.adapters.in.rest;
 
 import com.bookinghub.catalog.core.domain.Professional;
 import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
+import com.bookinghub.catalog.core.exceptions.ProfessionalNotFoundException;
 import com.bookinghub.catalog.core.ports.ProfessionalRepository;
-import com.bookinghub.catalog.core.usecases.UpsertProfessionalProfileUseCase;
+import com.bookinghub.catalog.core.usecases.CreateProfessionalProfileUseCase;
+import com.bookinghub.catalog.core.usecases.UpdateProfessionalProfileUseCase;
 import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.ProfessionalProfileRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,24 +26,39 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProfessionalControllerTest {
 
-    @Mock private UpsertProfessionalProfileUseCase upsertProfessionalProfileUseCase;
+    @Mock private CreateProfessionalProfileUseCase createProfessionalProfileUseCase;
+    @Mock private UpdateProfessionalProfileUseCase updateProfessionalProfileUseCase;
     @Mock private ProfessionalRepository professionalRepository;
 
     @InjectMocks
     private ProfessionalController controller;
 
     @Test
-    void shouldUpsertProfile() {
+    void shouldCreateProfile() {
         UUID userId = UUID.randomUUID();
         ProfessionalProfileRequest request = new ProfessionalProfileRequest();
         request.setName("Pro");
         Professional saved = Professional.builder().id(userId).name("Pro").build();
-        when(upsertProfessionalProfileUseCase.execute(eq(userId), any())).thenReturn(saved);
+        when(createProfessionalProfileUseCase.execute(eq(userId), any())).thenReturn(saved);
 
-        ResponseEntity<Professional> response = controller.upsertMyProfile(userId.toString(), request);
+        ResponseEntity<Professional> response = controller.createMyProfile(userId.toString(), request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(saved, response.getBody());
+    }
+
+    @Test
+    void shouldUpdateProfile() {
+        UUID userId = UUID.randomUUID();
+        ProfessionalProfileRequest request = new ProfessionalProfileRequest();
+        request.setName("Pro Updated");
+        Professional updated = Professional.builder().id(userId).name("Pro Updated").build();
+        when(updateProfessionalProfileUseCase.execute(eq(userId), any())).thenReturn(updated);
+
+        ResponseEntity<Professional> response = controller.updateMyProfile(userId.toString(), request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(saved, response.getBody());
+        assertEquals(updated, response.getBody());
     }
 
     @Test
@@ -57,13 +74,11 @@ class ProfessionalControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenMyProfileDoesNotExist() {
+    void shouldThrowExceptionWhenMyProfileDoesNotExist() {
         UUID userId = UUID.randomUUID();
         when(professionalRepository.findById(userId)).thenReturn(Optional.empty());
 
-        ResponseEntity<Professional> response = controller.getMyProfile(userId.toString());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(ProfessionalNotFoundException.class, () -> controller.getMyProfile(userId.toString()));
     }
 
     @Test
@@ -84,18 +99,15 @@ class ProfessionalControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenProfileByIdDoesNotExist() {
+    void shouldThrowExceptionWhenProfileByIdDoesNotExist() {
         UUID id = UUID.randomUUID();
         when(professionalRepository.findById(id)).thenReturn(Optional.empty());
 
-        ResponseEntity<Professional> response = controller.getProfile(id.toString());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(ProfessionalNotFoundException.class, () -> controller.getProfile(id.toString()));
     }
 
     @Test
-    void shouldReturnNotFoundWhenInvalidProfileId() {
-        ResponseEntity<Professional> response = controller.getProfile("invalid-uuid");
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    void shouldThrowExceptionWhenInvalidProfileId() {
+        assertThrows(ProfessionalNotFoundException.class, () -> controller.getProfile("invalid-uuid"));
     }
 }

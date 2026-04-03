@@ -29,8 +29,13 @@ public class BeanConfig {
     }
 
     @Bean
-    public UpsertProfessionalProfileUseCase upsertProfessionalProfileUseCase(ProfessionalRepository repository) {
-        return new UpsertProfessionalProfileUseCase(repository);
+    public CreateProfessionalProfileUseCase createProfessionalProfileUseCase(ProfessionalRepository repository) {
+        return new CreateProfessionalProfileUseCase(repository);
+    }
+
+    @Bean
+    public UpdateProfessionalProfileUseCase updateProfessionalProfileUseCase(ProfessionalRepository repository) {
+        return new UpdateProfessionalProfileUseCase(repository);
     }
 
     @Bean

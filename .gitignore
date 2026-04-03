@@ -34,3 +34,9 @@ logs/
 # Other
 .env
 .env.*
+
+.idea
+
+CLAUDE.md
+.claude
+.gitignore

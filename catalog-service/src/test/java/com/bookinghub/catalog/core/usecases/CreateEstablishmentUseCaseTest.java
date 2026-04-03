@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +39,7 @@ class CreateEstablishmentUseCaseTest {
         validEstablishment = Establishment.builder()
                 .ownerId("owner-1")
                 .name("Test Salon")
-                .cnpj("12345678000199")
+                .cnpj("12345678000195")
                 .address(Address.builder().street("Main St").build())
                 .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
                 .defaultBusinessHours(List.of(
@@ -62,6 +63,24 @@ class CreateEstablishmentUseCaseTest {
     }
 
     @Test
+    void shouldCreateEstablishmentWhenCnpjIsFormatted() {
+        validEstablishment = Establishment.builder()
+                .ownerId("owner-1")
+                .name("Test Salon")
+                .cnpj("12.345.678/0001-95")
+                .address(Address.builder().street("Main St").build())
+                .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
+                .build();
+
+        when(establishmentRepository.existsByCnpj(any())).thenReturn(false);
+        when(establishmentRepository.save(any())).thenReturn(validEstablishment);
+
+        createEstablishmentUseCase.execute(validEstablishment);
+
+        verify(establishmentRepository).save(argThat(e -> e.getCnpj().equals("12345678000195")));
+    }
+
+    @Test
     void shouldThrowExceptionWhenCnpjAlreadyExists() {
         when(establishmentRepository.existsByCnpj(any())).thenReturn(true);
 
@@ -81,7 +100,7 @@ class CreateEstablishmentUseCaseTest {
     @Test
     void shouldThrowExceptionWhenAddressIsMissing() {
         validEstablishment = Establishment.builder()
-                .cnpj("12345678000199")
+                .cnpj("12345678000195")
                 .build();
 
         assertThrows(BusinessRuleException.class, () -> createEstablishmentUseCase.execute(validEstablishment));
@@ -90,7 +109,7 @@ class CreateEstablishmentUseCaseTest {
     @Test
     void shouldThrowExceptionWhenNoServicesProvided() {
         validEstablishment = Establishment.builder()
-                .cnpj("12345678000199")
+                .cnpj("12345678000195")
                 .address(Address.builder().street("Main St").build())
                 .providedServices(Collections.emptyList())
                 .build();
@@ -101,7 +120,7 @@ class CreateEstablishmentUseCaseTest {
     @Test
     void shouldThrowExceptionWhenBusinessHoursAreInvalid() {
         validEstablishment = Establishment.builder()
-                .cnpj("12345678000199")
+                .cnpj("12345678000195")
                 .address(Address.builder().street("Main St").build())
                 .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
                 .defaultBusinessHours(List.of(

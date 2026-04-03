@@ -14,7 +14,7 @@ Optamos por uma abordagem de **Persistência Poliglota**, utilizando o banco de 
 
 ### Padrões de Comunicação
 - **Externa (Cliente ↔ Gateway):** RESTful (JSON) sobre HTTPS.
-- **Interna Síncrona (Serviço ↔ Serviço):** `gRPC` para chamadas de baixa latência e alta performance (ex: validação de disponibilidade no momento do agendamento).
+- **Interna Síncrona (Serviço ↔ Serviço):** RESTful (JSON) para chamadas entre serviços (ex: validação de disponibilidade no momento do agendamento).
 - **Interna Assíncrona (Event-Driven):** Mensageria com `RabbitMQ` para desacoplamento, Coreografia de Sagas e atualização de bases de leitura (Padrão CQRS).
 
 ---
@@ -80,7 +80,7 @@ flowchart TB
     GW -->|"REST"| Review
     GW -->|"REST"| Search
 
-    Booking -.->|"gRPC\n(Valida Profissional/Serviço)"| Catalog
+    Booking -.->|"REST\n(Valida Profissional/Serviço)"| Catalog
 
     Catalog -.->|"Publica Evento\n(CatalogUpdated)"| RabbitMQ
     Booking -.->|"Publica Evento\n(BookingCreated/Cancelled)"| RabbitMQ
@@ -112,7 +112,7 @@ Provedor de Identidade (IdP). Responsável por registrar usuários, validar cred
 Gerencia o domínio de negócios estruturais: cadastro de Estabelecimentos, Profissionais associados, Horários de Funcionamento e Serviços (com preço e duração).
 
 ### 4. Booking Service (`booking-service`)
-O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking* (agendamentos duplicados no mesmo horário). Comunica-se via `gRPC` com o catálogo para consultas ultrarrápidas de disponibilidade.
+O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking* (agendamentos duplicados no mesmo horário). Comunica-se via REST com o catálogo para consultas de disponibilidade.
 
 ### 5. Review Service (`review-service`)
 Coleta notas e comentários após a finalização de um serviço. Utiliza MongoDB pela flexibilidade de esquema na persistência de avaliações em texto livre.
@@ -130,7 +130,7 @@ Microsserviço puramente reativo/orientado a eventos. Escuta o barramento do Rab
 * **Linguagem:** Java 21
 * **Framework Principal:** Spring Boot 3.x / Spring Cloud
 * **Arquitetura de Código:** Clean Architecture (Domain, Application, Infrastructure)
-* **Comunicação:** RESTful (Spring Web), gRPC, RabbitMQ (Spring AMQP)
+* **Comunicação:** RESTful (Spring Web), RabbitMQ (Spring AMQP)
 * **Bancos de Dados:** PostgreSQL (Relacional), MongoDB (NoSQL Documento), Elasticsearch (Busca), Redis (Cache)
 * **Segurança:** Spring Security, OAuth2 / JWT (RS256 Criptografia Assimétrica), BCrypt
 * **Qualidade e Testes:** JUnit 5, Mockito, Testcontainers, Cucumber (BDD), k6 (Performance)

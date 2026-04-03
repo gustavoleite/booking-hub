@@ -161,7 +161,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12.345.678/0001-90\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    {\n      \"dayOfWeek\": 1,\n      \"openTime\": { \"hour\": 8, \"minute\": 0 },\n      \"closeTime\": { \"hour\": 18, \"minute\": 0 }\n    }\n  ],\n  \"services\": [\n    {\n      \"title\": \"Corte Simples\",\n      \"description\": \"Corte de cabelo com máquina ou tesoura.\"\n    }\n  ]\n}"
+                  "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12.345.678/0001-95\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    {\n      \"dayOfWeek\": 1,\n      \"openTime\": \"08:00:00\",\n      \"closeTime\": \"18:00:00\"\n    }\n  ],\n  \"services\": [\n    {\n      \"title\": \"Corte Simples\",\n      \"description\": \"Corte de cabelo com máquina ou tesoura.\"\n    }\n  ]\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/catalog/establishments",
@@ -211,7 +211,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12.345.678/0001-90\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
+                  "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12.345.678/0001-95\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01234-567\"\n  }\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/catalog/establishments/:id",
@@ -277,14 +277,38 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalId\": \"{{professional_id}}\",\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"UUID_DO_SERVICO\",\n      \"price\": 50.0,\n      \"durationMinutes\": 30\n    }\n  ],\n  \"workSchedules\": [\n    {\n      \"dayOfWeek\": 1,\n      \"startTime\": { \"hour\": 9, \"minute\": 0 },\n      \"endTime\": { \"hour\": 17, \"minute\": 0 }\n    }\n  ]\n}"
+                  "raw": "{\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"UUID_DO_SERVICO\",\n      \"price\": 50.0,\n      \"durationMinutes\": 30\n    }\n  ],\n  \"workSchedules\": [\n    {\n      \"dayOfWeek\": 1,\n      \"startTime\": \"09:00:00\",\n      \"endTime\": \"17:00:00\"\n    }\n  ]\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/:establishmentId/affiliations",
+                  "raw": "{{base_url}}/api/catalog/establishments/:establishmentId/affiliations?professionalId={{professional_id}}",
                   "host": ["{{base_url}}"],
                   "path": ["api", "catalog", "establishments", ":establishmentId", "affiliations"],
+                  "query": [
+                    { "key": "professionalId", "value": "{{professional_id}}" }
+                  ],
                   "variable": [
                     { "key": "establishmentId", "value": "{{establishment_id}}" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Consultar Agenda do Profissional no Estabelecimento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-User-Id", "value": "{{x_user_id}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/catalog/establishments/:establishmentId/affiliations/professional/:professionalId/schedule?serviceId={{service_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "catalog", "establishments", ":establishmentId", "affiliations", "professional", ":professionalId", "schedule"],
+                  "query": [
+                    { "key": "serviceId", "value": "{{service_id}}" }
+                  ],
+                  "variable": [
+                    { "key": "establishmentId", "value": "{{establishment_id}}" },
+                    { "key": "professionalId", "value": "{{professional_id}}" }
                   ]
                 }
               }

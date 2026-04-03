@@ -4,10 +4,6 @@ spring:
   profiles:
     active: ${spring.profiles.active:local}
 
-grpc:
-  server:
-    port: 9091
-
 server:
   port: 8083
 

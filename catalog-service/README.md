@@ -1,13 +1,12 @@
 # 🏥 Catalog Service (Management of Establishments & Professionals)
 
-Este microsserviço é responsável pelo gerenciamento de estabelecimentos, profissionais e serviços dentro do sistema Booking Hub. Desenvolvido sob os princípios da **Clean Architecture**, ele permite o cadastro de locais de atendimento, perfis profissionais e a oferta de serviços, além de disponibilizar integrações via gRPC e mensageria.
+Este microsserviço é responsável pelo gerenciamento de estabelecimentos, profissionais e serviços dentro do sistema Booking Hub. Desenvolvido sob os princípios da **Clean Architecture**, ele permite o cadastro de locais de atendimento, perfis profissionais e a oferta de serviços, além de disponibilizar integrações via mensageria.
 
 ## 🚀 Tecnologias Utilizadas
 * **Java 21** / **Spring Boot 3.x**
 * **Spring Data JPA** (Persistência relacional)
 * **PostgreSQL** (Banco de dados principal)
 * **Flyway** (Migrations de Banco de Dados)
-* **gRPC** (Comunicação inter-serviços de alta performance)
 * **RabbitMQ** (Mensageria assíncrona para eventos)
 * **Springdoc OpenAPI** (Documentação Swagger)
 * **Cucumber / RestAssured** (Testes de aceitação e BDD)
@@ -43,7 +42,6 @@ O código segue uma divisão rigorosa para manter a lógica de negócio independ
     - `ports/`: Interfaces de entrada e saída.
 - `infrastructure/`: 
     - `adapters/in/rest/`: Controladores REST (Exposição da API).
-    - `adapters/in/grpc/`: Servidores gRPC para integração interna.
     - `adapters/out/database/`: Persistência via Spring Data JPA.
     - `adapters/out/messaging/`: Publicação de eventos via RabbitMQ.
     - `configuration/`: Definição de Beans e configurações do Spring.
@@ -67,6 +65,3 @@ O acesso aos endpoints é controlado via **API Gateway**, que valida o JWT e enc
 ## 📚 Documentação da API (Swagger)
 A documentação dos endpoints REST pode ser acessada em:
 👉 `http://localhost:8083/swagger-ui.html`
-
-A definição das mensagens gRPC pode ser encontrada em:
-📁 `src/main/proto/`

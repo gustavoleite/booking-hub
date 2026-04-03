@@ -6,9 +6,6 @@ WORKDIR /build
 COPY . .
 
 # Compila o catalog-service
-# Tratamento especial para gRPC em Alpine
-RUN mvn clean compile -pl catalog-service -am || true
-RUN chmod +x catalog-service/target/protoc-plugins/*.exe || true
 RUN mvn package -DskipTests -pl catalog-service -am
 
 # ESTÁGIO 2: Run (Execução)
@@ -23,7 +20,7 @@ USER spring:spring
 COPY --from=builder /build/catalog-service/target/*.jar app.jar
 
 # Expõe as portas
-EXPOSE 8083 9091
+EXPOSE 8083
 
 # Ponto de entrada otimizado para containers
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

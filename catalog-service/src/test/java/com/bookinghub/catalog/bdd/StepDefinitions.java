@@ -174,7 +174,7 @@ public class StepDefinitions {
     public void createEstablishmentInvalidHours(String endpoint, String open, String close) {
         EstablishmentRequest request = new EstablishmentRequest();
         request.setName("Salon Test");
-        request.setCnpj("12345678901234");
+        request.setCnpj("12345678000195");
         
         EstablishmentRequest.AddressDto address = new EstablishmentRequest.AddressDto();
         address.setStreet("Main St");
@@ -254,23 +254,24 @@ public class StepDefinitions {
         
         EstablishmentRequest request = new EstablishmentRequest();
         request.setName("Other Salon");
-        request.setCnpj("11122233344455");
+        request.setCnpj("12.345.678/0001-95");
         EstablishmentRequest.AddressDto address = new EstablishmentRequest.AddressDto();
         address.setStreet("Street");
         address.setNumber("1");
         address.setZipCode("12345678");
         request.setAddress(address);
-        request.setServices(List.of(new EstablishmentRequest.ProvidedServiceDto() {{ setTitle("Service"); }}));
+        
+        EstablishmentRequest.ProvidedServiceDto ps = new EstablishmentRequest.ProvidedServiceDto();
+        ps.setTitle("Service");
+        request.setServices(List.of(ps));
 
-        Response res = RestAssured.given()
+        RestAssured.given()
                 .header("X-User-Id", owner)
                 .contentType(ContentType.JSON)
                 .body(request)
                 .post("/establishments");
         
-        String actualId = res.jsonPath().getString("id");
         this.response = null; // Reset for next step
-        // We will replace "salao-456" with actualId in the Quando step if it matches
     }
 
     @Quando("eu envio uma requisição PUT para {string}")
@@ -283,8 +284,9 @@ public class StepDefinitions {
         // Use a known existing ID from our DB since we can't easily capture it from previous step without a variable
         UUID salaoId = jpaEstablishmentRepository.findAll().stream()
                 .filter(e -> !e.getOwnerId().equals(currentUserId))
+                .findAny()
                 .map(e -> e.getId())
-                .findFirst().orElse(UUID.randomUUID());
+                .orElse(UUID.randomUUID());
 
         response = RestAssured.given()
                 .header("X-User-Id", currentUserId)

@@ -43,7 +43,6 @@ Cucumber reports are written to `target/cucumber-reports.html`.
 **Communication patterns:**
 - Client → API Gateway: REST/JSON, JWT Bearer token required (except `/api/auth/**`)
 - Gateway → Services: REST/JSON, forwards `X-User-Id`, `X-User-Role`, `X-Correlation-ID` headers extracted from JWT
-- Catalog → Booking (future): gRPC on port 9091 (`catalog-service/src/main/proto/catalog_service.proto`)
 - Services → Events: RabbitMQ AMQP (catalog publishes `CatalogUpdated`; booking will publish `BookingCreated/Cancelled`)
 
 **Security:** RS256 asymmetric JWT. Auth Service signs tokens with private key (`infra/certs/private_key.pem`). API Gateway validates with public key (`infra/certs/public_key.pem`). Downstream services trust the forwarded headers — they do NOT re-validate JWT.
@@ -66,7 +65,6 @@ application/
 
 infrastructure/
   adapters/in/rest/       # Spring MVC controllers + global exception handler
-  adapters/in/grpc/       # gRPC service impls (catalog-service only)
   adapters/out/database/  # JPA persistence adapters implementing core ports
   adapters/out/messaging/ # RabbitMQ publishers
   adapters/out/jwt/       # Token generation (Nimbus JOSE+JWT in auth-service)
@@ -95,7 +93,7 @@ Three layers of tests:
 2. **Component/integration tests** — Spring Boot Test with H2 (`application-test.yml`) or Testcontainers (PostgreSQL) for adapter-level tests.
 3. **BDD / acceptance tests** — Cucumber + REST Assured. Feature files in `src/test/resources/features/`. Run as part of `mvn test`. Scenarios cover routing, JWT validation, CORS, registration, login, establishment and professional management.
 
-JaCoCo minimum coverage: **80% LINE**. Excluded from coverage: JPA entities, DTOs, gRPC generated classes.
+JaCoCo minimum coverage: **80% LINE**. Excluded from coverage: JPA entities, DTOs.
 
 ## Database
 
@@ -112,6 +110,6 @@ Local init SQL (creates both databases): `infra/init-scripts/init.sql`.
 |---------|------|-------|
 | API Gateway | http://localhost:8080 (Swagger: `/swagger-ui.html`) | — |
 | Auth Service | http://localhost:8081 (Swagger: `/swagger-ui.html`) | — |
-| Catalog Service | http://localhost:8083 (Swagger: `/swagger-ui.html`) | gRPC: 9091 |
+| Catalog Service | http://localhost:8083 (Swagger: `/swagger-ui.html`) | — |
 | RabbitMQ UI | http://localhost:15672 (guest/guest) | AMQP: 5672 |
 | PostgreSQL | localhost:5432 | — |

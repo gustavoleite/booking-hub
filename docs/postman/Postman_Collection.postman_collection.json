@@ -25,7 +25,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Dono do Salão\",\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_OWNER\"\n}"
+              "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_OWNER\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
@@ -41,7 +41,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"João Barbeiro\",\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_PROFESSIONAL\"\n}"
+              "raw": "{\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_PROFESSIONAL\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
@@ -51,7 +51,23 @@
           }
         },
         {
-          "name": "Login (Gera JWT)",
+          "name": "Registrar Cliente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login Owner (salva token)",
           "event": [
             {
               "listen": "test",
@@ -60,7 +76,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.accessToken) {",
                   "    pm.environment.set('access_token', jsonData.accessToken);",
-                  "    console.log('Token salvo: ' + jsonData.accessToken.substring(0, 20) + '...');",
+                  "    console.log('Token (Owner) salvo.');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -82,6 +98,68 @@
           }
         },
         {
+          "name": "Login Profissional (salva token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.environment.set('access_token', jsonData.accessToken);",
+                  "    console.log('Token (Profissional) salvo.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Cliente (salva token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.environment.set('access_token', jsonData.accessToken);",
+                  "    console.log('Token (Cliente) salvo.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
           "name": "Falhas de Validação",
           "item": [
             {
@@ -91,7 +169,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Duplicado\",\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                  "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
                 "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
               }
@@ -103,7 +181,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Fraco\",\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
+                  "raw": "{\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
                 "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
               }
@@ -218,7 +296,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" }\n  ]\n}"
+              "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments",
@@ -259,7 +337,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo.\" }\n  ]\n}"
+              "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
@@ -290,7 +368,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Barba Completa\",\n  \"description\": \"Barba com toalha quente e navalha.\"\n}"
+              "raw": "{\n  \"title\": \"Hidratação Capilar\",\n  \"description\": \"Hidratação profunda com máscara.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/services",
@@ -346,13 +424,13 @@
       "name": "4. Catalog Service - Afiliações",
       "item": [
         {
-          "name": "Vincular Profissional (Upsert)",
+          "name": "Vincular Profissional ao Estabelecimento (Upsert)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"09:00:00\", \"endTime\": \"17:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"{{service_id}}\",\n      \"price\": 75.0,\n      \"durationMinutes\": 45\n    }\n  ]\n}"
+              "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"{{service_id}}\",\n      \"price\": 120.00,\n      \"durationMinutes\": 60\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations?professionalId={{professional_id}}",
@@ -375,24 +453,199 @@
               "query": [{ "key": "serviceId", "value": "{{service_id}}" }]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "5. Booking Service - Disponibilidade",
+      "item": [
+        {
+          "name": "Consultar Slots Disponíveis (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/availability?establishmentId={{establishment_id}}&professionalId={{professional_id}}&serviceId={{service_id}}&date={{availability_date}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "availability"],
+              "query": [
+                { "key": "establishmentId", "value": "{{establishment_id}}" },
+                { "key": "professionalId", "value": "{{professional_id}}" },
+                { "key": "serviceId", "value": "{{service_id}}" },
+                { "key": "date", "value": "{{availability_date}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Booking Service - Agendamentos",
+      "item": [
+        {
+          "name": "Criar Agendamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('booking_id', jsonData.id);",
+                  "    console.log('booking_id salvo: ' + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"professionalId\": \"{{professional_id}}\",\n  \"establishmentId\": \"{{establishment_id}}\",\n  \"providedServiceId\": \"{{service_id}}\",\n  \"startDatetime\": \"{{booking_datetime}}\",\n  \"notes\": \"Prefiro corte mais curto nas laterais\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings"]
+            }
+          }
         },
         {
-          "name": "Falhas de Validação",
+          "name": "Meus Agendamentos (Cliente)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "me"]
+            }
+          }
+        },
+        {
+          "name": "Detalhes do Agendamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Minha Agenda (Profissional)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/professional",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "professional"]
+            }
+          }
+        },
+        {
+          "name": "Agendamentos do Estabelecimento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/establishment/{{establishment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "establishment", "{{establishment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar Agendamento (Cliente ou Owner)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Compromisso surgiu de última hora\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{booking_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Finalizar Atendimento (Profissional ou Owner)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{booking_id}}/complete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "Marcar No-Show (Profissional ou Owner)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/{{booking_id}}/no-show",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "{{booking_id}}", "no-show"]
+            }
+          }
+        },
+        {
+          "name": "Erros - Slot Já Ocupado",
           "item": [
             {
-              "name": "[ERRO 400] Horário Fora do Expediente",
+              "name": "[ERRO 409] Double Booking",
               "request": {
                 "method": "POST",
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"06:00:00\", \"endTime\": \"20:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    { \"providedServiceId\": \"{{service_id}}\", \"price\": 50.0, \"durationMinutes\": 30 }\n  ]\n}"
+                  "raw": "{\n  \"professionalId\": \"{{professional_id}}\",\n  \"establishmentId\": \"{{establishment_id}}\",\n  \"providedServiceId\": \"{{service_id}}\",\n  \"startDatetime\": \"{{booking_datetime}}\",\n  \"notes\": \"Tentativa duplicada\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations?professionalId={{professional_id}}",
+                  "raw": "{{base_url}}/api/bookings",
                   "host": ["{{base_url}}"],
-                  "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations"],
-                  "query": [{ "key": "professionalId", "value": "{{professional_id}}" }]
+                  "path": ["api", "bookings"]
+                }
+              }
+            },
+            {
+              "name": "[ERRO 422] Cancelar Agendamento Já Finalizado",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Tentativa após conclusão\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bookings/{{booking_id}}/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bookings", "{{booking_id}}", "cancel"]
+                }
+              }
+            },
+            {
+              "name": "[ERRO 403] Cliente Tenta Ver Booking de Outro Cliente",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/bookings/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bookings", "00000000-0000-0000-0000-000000000000"]
                 }
               }
             }

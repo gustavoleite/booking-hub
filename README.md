@@ -160,9 +160,264 @@ beauty-wellness-system/
 
 ---
 
-## 🚀 Como Executar Localmente
+## 🚀 Como Executar
 
-*(Instruções a serem adicionadas após o setup do Docker Compose)*
-1. Certifique-se de ter o Docker e o Docker Compose instalados.
-2. Na raiz do projeto, execute: `docker compose -f infra/docker-compose.yml up -d` para subir todos os bancos de dados e mensageria.
-3. Inicie os microsserviços via IDE ou linha de comando através dos respectivos profiles de ambiente (`application-local.yml`).
+### Opção 1 — Docker Compose (recomendado)
+
+Sobe toda a stack (infra + serviços) com um único comando. As imagens são construídas via **multi-stage build** — não é necessário ter Maven instalado localmente.
+
+```bash
+docker compose up -d --build
+```
+
+Aguarde todos os containers estarem saudáveis (≈ 60 s na primeira execução):
+
+```bash
+docker compose ps          # verifique o estado dos containers
+docker compose logs -f     # acompanhe os logs em tempo real
+```
+
+| Serviço          | URL local                                      |
+|------------------|------------------------------------------------|
+| API Gateway      | http://localhost:8080 · Swagger: `/swagger-ui.html` |
+| Auth Service     | http://localhost:8081 · Swagger: `/swagger-ui.html` |
+| Catalog Service  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
+| Booking Service  | http://localhost:8082 · Swagger: `/swagger-ui.html` |
+| RabbitMQ UI      | http://localhost:15672 (guest / guest)         |
+
+### Opção 2 — Execução local (IntelliJ / linha de comando)
+
+Requer PostgreSQL e RabbitMQ rodando localmente. Crie os bancos manualmente antes de iniciar:
+
+```sql
+CREATE DATABASE auth_db;
+CREATE DATABASE catalog_db;
+CREATE DATABASE booking_db;
+```
+
+Execute cada serviço (perfil `default` usa localhost para todos os recursos):
+
+```bash
+cd auth-service    && mvn spring-boot:run
+cd catalog-service && mvn spring-boot:run
+cd booking-service && mvn spring-boot:run
+cd api-gateway     && mvn spring-boot:run
+```
+
+---
+
+## 🧪 Testes
+
+```bash
+mvn test                        # todos os módulos
+mvn test -pl booking-service    # módulo específico
+mvn verify                      # testes + relatório JaCoCo (target/site/jacoco/)
+```
+
+Cobertura mínima exigida: **80% de linhas** (excluindo entidades JPA e DTOs).
+
+---
+
+## 🔄 Happy Path — Fluxo Completo de Agendamento
+
+O fluxo completo envolve três atores: **Owner** (dono do salão), **Professional** (profissional) e **Client** (cliente). Todos os exemplos abaixo usam a API Gateway em `http://localhost:8080`.
+
+> Substitua os valores de `id` retornados por cada request nas variáveis indicadas.
+
+---
+
+### Passo 1 — Registrar os usuários
+
+```bash
+# Owner
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"owner@salon.com","password":"Senha123!","role":"ROLE_OWNER"}'
+
+# Professional
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"prof@salon.com","password":"Senha123!","role":"ROLE_PROFESSIONAL"}'
+
+# Client
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"cliente@email.com","password":"Senha123!","role":"ROLE_CLIENT"}'
+```
+
+---
+
+### Passo 2 — Obter tokens JWT
+
+```bash
+# Owner → salve o token em OWNER_TOKEN
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"owner@salon.com","password":"Senha123!"}'
+# → { "token": "<OWNER_TOKEN>" }
+
+# Professional → PROF_TOKEN
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"prof@salon.com","password":"Senha123!"}'
+
+# Client → CLIENT_TOKEN
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"cliente@email.com","password":"Senha123!"}'
+```
+
+---
+
+### Passo 3 — Criar estabelecimento (Owner)
+
+```bash
+curl -s -X POST http://localhost:8080/api/catalog/establishments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <OWNER_TOKEN>" \
+  -d '{
+    "name": "Salão da Maria",
+    "cnpj": "12.345.678/0001-99",
+    "description": "Salão completo de beleza",
+    "address": {
+      "street": "Rua das Flores", "number": "100",
+      "city": "São Paulo", "state": "SP", "zipCode": "01310-100"
+    },
+    "businessHours": [
+      {"dayOfWeek": 1, "openTime": "09:00:00", "closeTime": "18:00:00"},
+      {"dayOfWeek": 2, "openTime": "09:00:00", "closeTime": "18:00:00"},
+      {"dayOfWeek": 3, "openTime": "09:00:00", "closeTime": "18:00:00"},
+      {"dayOfWeek": 4, "openTime": "09:00:00", "closeTime": "18:00:00"},
+      {"dayOfWeek": 5, "openTime": "09:00:00", "closeTime": "18:00:00"}
+    ],
+    "services": [
+      {"title": "Corte Feminino", "description": "Corte e escova"},
+      {"title": "Coloração", "description": "Coloração completa"}
+    ]
+  }'
+# → { "id": "<EST_ID>", "providedServices": [{ "id": "<SVC_ID>", ... }], ... }
+```
+
+Anote o `id` do estabelecimento (`EST_ID`) e o `id` de um dos serviços (`SVC_ID`).
+
+---
+
+### Passo 4 — Criar perfil do profissional (Professional)
+
+```bash
+curl -s -X POST http://localhost:8080/api/catalog/professionals/me \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <PROF_TOKEN>" \
+  -d '{
+    "name": "João Cabeleireiro",
+    "bio": "10 anos de experiência em cortes femininos",
+    "specialties": ["Corte", "Coloração"]
+  }'
+# → { "id": "<PROF_ID>", ... }
+```
+
+Anote o `id` do profissional (`PROF_ID`).
+
+---
+
+### Passo 5 — Afiliar profissional ao estabelecimento com agenda (Owner)
+
+Use `dayOfWeek` de 1 (segunda) a 7 (domingo). Ligue `providedServiceId` ao `SVC_ID` obtido no Passo 3.
+
+```bash
+curl -s -X POST "http://localhost:8080/api/catalog/establishments/<EST_ID>/affiliations?professionalId=<PROF_ID>" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <OWNER_TOKEN>" \
+  -d '{
+    "active": true,
+    "workSchedules": [
+      {"dayOfWeek": 1, "startTime": "09:00:00", "endTime": "18:00:00"},
+      {"dayOfWeek": 2, "startTime": "09:00:00", "endTime": "18:00:00"},
+      {"dayOfWeek": 3, "startTime": "09:00:00", "endTime": "18:00:00"},
+      {"dayOfWeek": 4, "startTime": "09:00:00", "endTime": "18:00:00"},
+      {"dayOfWeek": 5, "startTime": "09:00:00", "endTime": "18:00:00"}
+    ],
+    "serviceOfferings": [
+      {"providedServiceId": "<SVC_ID>", "price": 120.00, "durationMinutes": 60}
+    ]
+  }'
+```
+
+---
+
+### Passo 6 — Consultar disponibilidade (público, sem token)
+
+Escolha uma data futura que caia em dia de semana (ex: próxima segunda-feira).
+
+```bash
+curl -s "http://localhost:8080/api/bookings/availability?\
+establishmentId=<EST_ID>&professionalId=<PROF_ID>&serviceId=<SVC_ID>&date=2026-04-07"
+# → {
+#     "durationMinutes": 60,
+#     "price": 120.00,
+#     "availableSlots": ["2026-04-07T09:00:00", "2026-04-07T10:00:00", ...]
+#   }
+```
+
+---
+
+### Passo 7 — Criar agendamento (Client)
+
+Escolha um dos horários retornados no passo anterior como `startDatetime`.
+
+```bash
+curl -s -X POST http://localhost:8080/api/bookings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <CLIENT_TOKEN>" \
+  -d '{
+    "professionalId": "<PROF_ID>",
+    "establishmentId": "<EST_ID>",
+    "providedServiceId": "<SVC_ID>",
+    "startDatetime": "2026-04-07T10:00:00",
+    "notes": "Prefiro corte mais curto nas laterais"
+  }'
+# → { "id": "<BOOKING_ID>", "status": "CONFIRMED", "price": 120.00, ... }
+```
+
+---
+
+### Passo 8 — Consultar agendamento (Client)
+
+```bash
+curl -s http://localhost:8080/api/bookings/<BOOKING_ID> \
+  -H "Authorization: Bearer <CLIENT_TOKEN>"
+# → { "id": "<BOOKING_ID>", "status": "CONFIRMED", ... }
+```
+
+---
+
+### Passo 9 — Finalizar atendimento (Professional)
+
+```bash
+curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/complete \
+  -H "Authorization: Bearer <PROF_TOKEN>"
+# → { "status": "COMPLETED", ... }
+```
+
+**Variante — Cancelar (Client ou Owner):**
+
+```bash
+curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/cancel \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <CLIENT_TOKEN>" \
+  -d '{"reason": "Compromisso surgiu"}'
+# → { "status": "CANCELLED", "cancelReason": "Compromisso surgiu", ... }
+```
+
+---
+
+### Resumo do Fluxo
+
+```
+Owner registra → Owner cria estabelecimento + serviços
+Professional registra → Professional cria perfil
+Owner afilia Professional com agenda + preços
+Client consulta disponibilidade (sem token)
+Client cria booking → status: CONFIRMED → evento BookingCreated publicado no RabbitMQ
+Professional finaliza → status: COMPLETED → evento BookingCompleted publicado
+```

@@ -23,7 +23,7 @@ spring:
             - Path=/api/bookings/**
           filters:
             - JwtAuthFilter
-            - RewritePath=/api/bookings/(?<remaining>.*), /${remaining}
+            - RewritePath=/api/(?<remaining>.*), /${remaining}
 
         - id: catalog-service-route
           uri: ${CATALOG_SERVICE_URI:http://catalog-service:8083}

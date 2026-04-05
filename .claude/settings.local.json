@@ -35,7 +35,8 @@
       "Bash(python -c \"import json; json.load\\(open\\('docs/postman/Postman_Collection.postman_collection.json'\\)\\); print\\('Collection JSON valid'\\)\")",
       "Bash(python -c \"import json; json.load\\(open\\('docs/postman/Postman_Environment.postman_environment.json'\\)\\); print\\('Environment JSON valid'\\)\")",
       "Bash(mvn verify:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(mvn dependency:get -Dartifact=de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0 -q)"
     ]
   }
 }

@@ -22,6 +22,21 @@ services:
       timeout: 5s
       retries: 5
 
+  mongodb:
+    image: mongo:7-jammy
+    container_name: bw-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - bw-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: bw-rabbitmq
@@ -78,17 +93,14 @@ services:
       - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=review_db
-      - DB_USER=admin
-      - DB_PASS=admin123
+      - MONGO_HOST=mongodb
+      - MONGO_DB=review_db
       - RABBIT_HOST=rabbitmq
       - OPENAPI_SERVER_URL=http://localhost:8080/api/reviews
     networks:
       - bw-network
     depends_on:
-      postgres:
+      mongodb:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -174,3 +186,4 @@ networks:
 
 volumes:
   pgdata:
+  mongodata:

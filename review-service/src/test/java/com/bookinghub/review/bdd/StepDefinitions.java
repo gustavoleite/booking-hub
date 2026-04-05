@@ -1,9 +1,9 @@
 package com.bookinghub.review.bdd;
 
 import com.bookinghub.review.core.ports.ReviewEventPublisher;
-import com.bookinghub.review.infrastructure.adapters.out.database.EligibleBookingEntity;
-import com.bookinghub.review.infrastructure.adapters.out.database.JpaEligibleBookingRepository;
-import com.bookinghub.review.infrastructure.adapters.out.database.JpaReviewRepository;
+import com.bookinghub.review.infrastructure.adapters.out.database.EligibleBookingDocument;
+import com.bookinghub.review.infrastructure.adapters.out.database.MongoEligibleBookingRepository;
+import com.bookinghub.review.infrastructure.adapters.out.database.MongoReviewRepository;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -37,10 +37,10 @@ public class StepDefinitions {
     private ReviewEventPublisher reviewEventPublisher;
 
     @Autowired
-    private JpaReviewRepository jpaReviewRepository;
+    private MongoReviewRepository mongoReviewRepository;
 
     @Autowired
-    private JpaEligibleBookingRepository jpaEligibleBookingRepository;
+    private MongoEligibleBookingRepository mongoEligibleBookingRepository;
 
     // Per-scenario state
     private UUID professionalId;
@@ -57,8 +57,8 @@ public class StepDefinitions {
         bookingId = UUID.randomUUID();
         clientId = "bdd-client-" + UUID.randomUUID().toString().substring(0, 8);
         response = null;
-        jpaReviewRepository.deleteAll();
-        jpaEligibleBookingRepository.deleteAll();
+        mongoReviewRepository.deleteAll();
+        mongoEligibleBookingRepository.deleteAll();
         Mockito.reset(reviewEventPublisher);
     }
 
@@ -66,14 +66,14 @@ public class StepDefinitions {
 
     @Given("a completed booking exists for the client")
     public void aCompletedBookingExistsForTheClient() {
-        EligibleBookingEntity entity = EligibleBookingEntity.builder()
-                .bookingId(bookingId)
+        EligibleBookingDocument entity = EligibleBookingDocument.builder()
+                .bookingId(bookingId.toString())
                 .clientId(clientId)
-                .professionalId(professionalId)
-                .establishmentId(establishmentId)
+                .professionalId(professionalId.toString())
+                .establishmentId(establishmentId.toString())
                 .completedAt(LocalDateTime.now().minusHours(1))
                 .build();
-        jpaEligibleBookingRepository.save(entity);
+        mongoEligibleBookingRepository.save(entity);
     }
 
     @Given("the client has already reviewed the booking")

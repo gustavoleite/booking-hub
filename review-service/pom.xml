@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -44,15 +44,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -78,8 +69,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -149,7 +141,7 @@
                 </executions>
                 <configuration>
                     <excludes>
-                        <exclude>com/bookinghub/review/infrastructure/adapters/out/database/*Entity.class</exclude>
+                        <exclude>com/bookinghub/review/infrastructure/adapters/out/database/*Document.class</exclude>
                         <exclude>com/bookinghub/review/application/dto/*.class</exclude>
                         <exclude>com/bookinghub/review/infrastructure/adapters/in/messaging/BookingCompletedEvent.class</exclude>
                         <exclude>com/bookinghub/review/infrastructure/adapters/out/messaging/ReviewEventPayload.class</exclude>

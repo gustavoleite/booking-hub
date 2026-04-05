@@ -20,10 +20,10 @@ Microsserviço responsável por coletar e expor **avaliações e comentários** 
 | Camada       | Tecnologia                              |
 |--------------|-----------------------------------------|
 | Framework    | Spring Boot 3.2 / Java 21               |
-| Persistência | PostgreSQL + Spring Data JPA + Flyway   |
+| Persistência | MongoDB 7 + Spring Data MongoDB         |
 | Mensageria   | RabbitMQ (Spring AMQP)                  |
 | Documentação | SpringDoc OpenAPI 2 (Swagger UI)        |
-| Testes       | JUnit 5, Mockito, Cucumber + REST Assured |
+| Testes       | JUnit 5, Mockito, Cucumber + REST Assured + Flapdoodle Embedded MongoDB |
 
 ---
 
@@ -170,33 +170,42 @@ O listener é **idempotente**: reentregas do mesmo evento não geram duplicatas.
 
 ## Banco de Dados
 
-Banco dedicado: `review_db`
+Banco dedicado: `review_db` (MongoDB)
 
-```sql
--- Bookings elegíveis (alimentados via evento)
-CREATE TABLE tb_eligible_bookings (
-    booking_id        UUID         PRIMARY KEY,
-    client_id         VARCHAR(255) NOT NULL,
-    professional_id   UUID         NOT NULL,
-    establishment_id  UUID         NOT NULL,
-    completed_at      TIMESTAMP    NOT NULL
-);
+MongoDB foi escolhido pela **flexibilidade de esquema** na persistência de avaliações em texto livre — o campo `comment` pode evoluir para estruturas mais ricas (tags, respostas, mídia) sem migrações.
 
--- Avaliações
-CREATE TABLE tb_reviews (
-    id                   UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    booking_id           UUID         NOT NULL UNIQUE,
-    client_id            VARCHAR(255) NOT NULL,
-    professional_id      UUID         NOT NULL,
-    establishment_id     UUID         NOT NULL,
-    professional_rating  INTEGER      CHECK (professional_rating BETWEEN 1 AND 5),
-    establishment_rating INTEGER      CHECK (establishment_rating BETWEEN 1 AND 5),
-    comment              TEXT,
-    created_at           TIMESTAMP    NOT NULL DEFAULT now(),
-    CONSTRAINT chk_at_least_one_rating
-        CHECK (professional_rating IS NOT NULL OR establishment_rating IS NOT NULL)
-);
+### Coleções
+
+**`eligible_bookings`** — alimentada via evento `booking.completed`
+```json
+{
+  "_id": "uuid-do-booking",
+  "clientId": "uuid-do-cliente",
+  "professionalId": "uuid-do-profissional",
+  "establishmentId": "uuid-do-estabelecimento",
+  "completedAt": "2026-04-04T18:00:00"
+}
 ```
+
+**`reviews`** — avaliações submetidas pelos clientes
+```json
+{
+  "_id": "uuid-da-review",
+  "bookingId": "uuid-do-booking",
+  "clientId": "uuid-do-cliente",
+  "professionalId": "uuid-do-profissional",
+  "establishmentId": "uuid-do-estabelecimento",
+  "professionalRating": 5,
+  "establishmentRating": 4,
+  "comment": "Atendimento excelente!",
+  "createdAt": "2026-04-04T18:00:00"
+}
+```
+
+Índices criados automaticamente pelo Spring Data MongoDB:
+- `reviews.bookingId` — unique
+- `reviews.professionalId`
+- `reviews.establishmentId`
 
 ---
 
@@ -240,10 +249,8 @@ Payload `review.created`:
 
 | Variável             | Descrição                  | Default (local)              |
 |----------------------|----------------------------|------------------------------|
-| `DB_HOST`            | Host do PostgreSQL          | `localhost`                  |
-| `DB_NAME`            | Nome do banco               | `review_db`                  |
-| `DB_USER`            | Usuário do banco            | `admin`                      |
-| `DB_PASS`            | Senha do banco              | `admin123`                   |
+| `MONGO_HOST`         | Host do MongoDB             | `localhost`                  |
+| `MONGO_DB`           | Nome do banco               | `review_db`                  |
 | `RABBIT_HOST`        | Host do RabbitMQ            | `localhost`                  |
 | `RABBITMQ_PORT`      | Porta AMQP                  | `5672`                       |
 | `RABBITMQ_USER`      | Usuário RabbitMQ            | `guest`                      |
@@ -252,10 +259,7 @@ Payload `review.created`:
 
 ### Pré-requisito local
 
-Criar o banco antes de iniciar:
-```sql
-CREATE DATABASE review_db;
-```
+MongoDB rodando em `localhost:27017` (sem autenticação por padrão). O banco `review_db` e as coleções são criados automaticamente pelo Spring Data MongoDB na primeira inserção.
 
 ---
 

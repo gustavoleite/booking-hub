@@ -62,6 +62,14 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 return chain.filter(exchange);
             }
 
+            // Public review endpoints (listing and stats — no auth required)
+            if (path.matches("^/api/reviews/professional/" + uuidPattern + "(/stats)?$") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
+            if (path.matches("^/api/reviews/establishment/" + uuidPattern + "(/stats)?$") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
+
             try {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                     throw new MissingTokenException("Missing Authorization Header");

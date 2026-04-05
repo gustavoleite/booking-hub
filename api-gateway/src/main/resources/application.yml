@@ -31,3 +31,5 @@ springdoc:
         url: /api/catalog/v3/api-docs
       - name: Booking Service
         url: /api/bookings/v3/api-docs
+      - name: Review Service
+        url: /api/reviews/v3/api-docs

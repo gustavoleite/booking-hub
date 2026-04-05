@@ -69,6 +69,32 @@ services:
       catalog-service:
         condition: service_started
 
+  review-service:
+    build:
+      context: .
+      dockerfile: review-service/Dockerfile
+    container_name: bw-review-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=review_db
+      - DB_USER=admin
+      - DB_PASS=admin123
+      - RABBIT_HOST=rabbitmq
+      - OPENAPI_SERVER_URL=http://localhost:8080/api/reviews
+    networks:
+      - bw-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+
   api-gateway:
     build:
       context: .
@@ -81,6 +107,7 @@ services:
       - AUTH_SERVICE_URI=http://auth-service:8081
       - CATALOG_SERVICE_URI=http://catalog-service:8083
       - BOOKING_SERVICE_URI=http://booking-service:8082
+      - REVIEW_SERVICE_URI=http://review-service:8084
       - RSA_PUBLIC_KEY_PATH=file:/app/certs/public_key.pem
     volumes:
       - ./infra/certs:/app/certs:ro # Read-only para as chaves
@@ -90,6 +117,7 @@ services:
       - auth-service
       - catalog-service
       - booking-service
+      - review-service
 
   auth-service:
     build: 

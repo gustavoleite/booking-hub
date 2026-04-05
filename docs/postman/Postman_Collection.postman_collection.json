@@ -652,6 +652,171 @@
           ]
         }
       ]
+    },
+    {
+      "name": "7. Review Service - Avaliações",
+      "item": [
+        {
+          "name": "Submeter Avaliação (Cliente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set('review_id', jsonData.id);",
+                  "    console.log('review_id salvo: ' + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"professionalRating\": 5,\n  \"establishmentRating\": 4,\n  \"comment\": \"Atendimento excelente, ambiente muito agradável.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Reviews do Profissional (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/professional/{{professional_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "professional", "{{professional_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Estatísticas do Profissional (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/professional/{{professional_id}}/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "professional", "{{professional_id}}", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Reviews do Estabelecimento (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/establishment/{{establishment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "establishment", "{{establishment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Estatísticas do Estabelecimento (Público)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/establishment/{{establishment_id}}/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "establishment", "{{establishment_id}}", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Review por Booking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/booking/{{booking_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "booking", "{{booking_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Erros de Avaliação",
+          "item": [
+            {
+              "name": "[ERRO 422] Booking Não Concluído",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bookingId\": \"00000000-0000-0000-0000-000000000000\",\n  \"professionalRating\": 5\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/reviews",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "reviews"]
+                }
+              }
+            },
+            {
+              "name": "[ERRO 409] Booking Já Avaliado",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"professionalRating\": 3,\n  \"comment\": \"Segunda tentativa — deve falhar\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/reviews",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "reviews"]
+                }
+              }
+            },
+            {
+              "name": "[ERRO 400] Sem Nenhum Rating",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"comment\": \"Sem rating, apenas comentário\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/reviews",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "reviews"]
+                }
+              }
+            },
+            {
+              "name": "[ERRO 404] Review Não Encontrada",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/reviews/booking/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "reviews", "booking", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

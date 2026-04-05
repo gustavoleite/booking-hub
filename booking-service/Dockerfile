@@ -6,6 +6,7 @@ COPY auth-service/pom.xml auth-service/pom.xml
 COPY catalog-service/pom.xml catalog-service/pom.xml
 COPY booking-service/pom.xml booking-service/pom.xml
 COPY api-gateway/pom.xml api-gateway/pom.xml
+COPY review-service/pom.xml review-service/pom.xml
 RUN mvn -pl booking-service dependency:go-offline -B -q
 
 COPY booking-service/src booking-service/src

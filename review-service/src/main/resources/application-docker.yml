@@ -1,0 +1,1 @@
+# Docker profile — all values come from docker-compose env vars, fallbacks in application.yml

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>GraphiQL — Search Service</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+      body { display: flex; flex-direction: column; }
+      #toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: #1c1f24;
+        border-bottom: 1px solid #383e4a;
+        font-family: system-ui, sans-serif;
+        font-size: 13px;
+        color: #e0e0e0;
+        flex-shrink: 0;
+        height: 36px;
+      }
+      #toolbar label { color: #9da5b4; white-space: nowrap; }
+      #example-select {
+        background: #282c34;
+        color: #e0e0e0;
+        border: 1px solid #454d5e;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 13px;
+        cursor: pointer;
+        flex: 1;
+        max-width: 420px;
+      }
+      #example-select:focus { outline: 2px solid #e10098; outline-offset: 1px; }
+      #graphiql { flex: 1; height: calc(100vh - 36px); }
+    </style>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphiql@3/graphiql.min.css" />
+  </head>
+  <body>
+    <div id="toolbar">
+      <label for="example-select">Exemplos:</label>
+      <select id="example-select">
+        <option value="">— selecione um exemplo —</option>
+        <option value="0">1. Busca por texto livre</option>
+        <option value="1">2. Filtro por cidade e estado</option>
+        <option value="2">3. Busca por geolocalização (raio)</option>
+        <option value="3">4. Filtro por serviços oferecidos</option>
+        <option value="4">5. Filtro por faixa de preço</option>
+        <option value="5">6. Busca combinada (geo + serviço + preço + rating)</option>
+        <option value="6">7. Paginação</option>
+      </select>
+    </div>
+    <div id="graphiql">Loading...</div>
+    <script src="https://cdn.jsdelivr.net/npm/graphiql@3/graphiql.min.js" type="application/javascript"></script>
+    <script>
+      const EXAMPLES = [
+        // 0 — texto livre
+        // Dado do Postman: name="Barbearia Central"
+        `# Busca "Barbearia Central" pelo nome.
+# Dado cadastrado no Postman: name = "Barbearia Central"
+query BuscaTextoLivre {
+  searchEstablishments(
+    filter: { query: "Barbearia Central", sortBy: RELEVANCE }
+    page: { page: 0, size: 5 }
+  ) {
+    totalHits
+    page
+    size
+    results {
+      id
+      name
+      city
+      state
+      averageRating
+      totalReviews
+      minPrice
+      maxPrice
+      score
+      services { title minPrice maxPrice }
+      professionals { name specialties }
+    }
+  }
+}`,
+
+        // 1 — cidade + estado
+        // Dado do Postman: city="São Paulo", state="SP", averageRating=4.0 (após review)
+        `# Estabelecimentos em São Paulo com nota >= 3.5.
+# Dado cadastrado no Postman: city="São Paulo", state="SP", averageRating=4.0
+query MelhoresEmSaoPaulo {
+  searchEstablishments(
+    filter: {
+      city: "São Paulo"
+      state: "SP"
+      minRating: 3.5
+      sortBy: RATING
+    }
+    page: { page: 0, size: 10 }
+  ) {
+    totalHits
+    results {
+      id
+      name
+      city
+      state
+      averageRating
+      totalReviews
+      minPrice
+      maxPrice
+    }
+  }
+}`,
+
+        // 2 — geo
+        // Dado do Postman: lat=-23.5505, lon=-46.6333 (Av. Paulista, São Paulo)
+        `# Estabelecimentos em até 2 km da Av. Paulista.
+# Dado cadastrado no Postman: latitude=-23.5505, longitude=-46.6333
+query BuscaGeo {
+  searchEstablishments(
+    filter: {
+      geo: { lat: -23.5505, lon: -46.6333, radiusKm: 2.0 }
+      sortBy: DISTANCE
+    }
+    page: { page: 0, size: 10 }
+  ) {
+    totalHits
+    results {
+      id
+      name
+      city
+      distanceKm
+      averageRating
+    }
+  }
+}`,
+
+        // 3 — serviços
+        // Dado do Postman: services = ["Corte Simples", "Barba Completa"]
+        `# Estabelecimentos que oferecem "Corte Simples".
+# Dado cadastrado no Postman: services = ["Corte Simples", "Barba Completa"]
+query FiltroPorServicos {
+  searchEstablishments(
+    filter: {
+      services: ["Corte Simples"]
+      sortBy: RATING
+    }
+    page: { page: 0, size: 10 }
+  ) {
+    totalHits
+    results {
+      id
+      name
+      city
+      services { title minPrice maxPrice }
+      averageRating
+    }
+  }
+}`,
+
+        // 4 — preço
+        // Dado do Postman: affiliation price = R$120.00 → minPrice=120, maxPrice=120 no ES
+        `# Estabelecimentos com serviços entre R$100 e R$150.
+# Dado cadastrado no Postman: preço da afiliação = R$120,00
+query FiltroPorPreco {
+  searchEstablishments(
+    filter: {
+      minPrice: 100.0
+      maxPrice: 150.0
+      sortBy: RELEVANCE
+    }
+    page: { page: 0, size: 10 }
+  ) {
+    totalHits
+    results {
+      id
+      name
+      minPrice
+      maxPrice
+      averageRating
+      services { title minPrice maxPrice }
+    }
+  }
+}`,
+
+        // 5 — combinada
+        // Usa todos os dados reais do Postman juntos
+        `# Busca completa usando todos os dados cadastrados no Postman.
+# Barbearia Central: SP, lat/lon Av. Paulista, Corte Simples R$120, rating 4.0
+query BuscaCompleta {
+  searchEstablishments(
+    filter: {
+      query: "Barbearia"
+      city: "São Paulo"
+      state: "SP"
+      geo: { lat: -23.5505, lon: -46.6333, radiusKm: 5.0 }
+      services: ["Corte Simples"]
+      minPrice: 100.0
+      maxPrice: 150.0
+      minRating: 3.5
+      sortBy: DISTANCE
+    }
+    page: { page: 0, size: 10 }
+  ) {
+    totalHits
+    results {
+      id
+      name
+      city
+      state
+      distanceKm
+      averageRating
+      totalReviews
+      minPrice
+      maxPrice
+      score
+      services { title minPrice maxPrice }
+      professionals { name specialties }
+    }
+  }
+}`,
+
+        // 6 — paginação
+        // Dado do Postman: state="SP"
+        `# Paginação: 5 itens por página, primeira página.
+# Dado cadastrado no Postman: state="SP"
+query Paginacao {
+  searchEstablishments(
+    filter: { state: "SP", sortBy: RATING }
+    page: { page: 0, size: 5 }
+  ) {
+    totalHits
+    page
+    size
+    results {
+      id
+      name
+      city
+      averageRating
+    }
+  }
+}`,
+      ];
+
+      const fetcher = GraphiQL.createFetcher({ url: '/graphql' });
+      let renderKey = 0;
+      let root = null;
+
+      function clearGraphiQLStorage() {
+        Object.keys(localStorage)
+          .filter(k => k.startsWith('graphiql:'))
+          .forEach(k => localStorage.removeItem(k));
+      }
+
+      function renderEditor(query) {
+        clearGraphiQLStorage();
+        if (!root) {
+          root = ReactDOM.createRoot(document.getElementById('graphiql'));
+        }
+        renderKey++;
+        root.render(
+          React.createElement(GraphiQL, {
+            key: renderKey,
+            fetcher: fetcher,
+            defaultEditorToolsVisibility: true,
+            defaultQuery: query,
+          })
+        );
+      }
+
+      // Render inicial com a busca combinada como exemplo padrão
+      renderEditor(EXAMPLES[5]);
+      document.getElementById('example-select').value = '5';
+
+      document.getElementById('example-select').addEventListener('change', function () {
+        if (this.value === '') return;
+        renderEditor(EXAMPLES[parseInt(this.value, 10)]);
+      });
+    </script>
+  </body>
+</html>

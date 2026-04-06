@@ -44,31 +44,36 @@ public class RabbitMQConfig {
     @Bean public Queue searchReviewCreatedQueue() { return QueueBuilder.durable(SEARCH_REVIEW_CREATED_QUEUE).build(); }
 
     @Bean
-    public Binding searchEstablishmentCreatedBinding(Queue searchEstablishmentCreatedQueue,
+    public Binding searchEstablishmentCreatedBinding(
+            @Qualifier("searchEstablishmentCreatedQueue") Queue searchEstablishmentCreatedQueue,
             @Qualifier("catalogExchange") TopicExchange catalogExchange) {
         return BindingBuilder.bind(searchEstablishmentCreatedQueue).to(catalogExchange).with("establishment.created");
     }
 
     @Bean
-    public Binding searchEstablishmentUpdatedBinding(Queue searchEstablishmentUpdatedQueue,
+    public Binding searchEstablishmentUpdatedBinding(
+            @Qualifier("searchEstablishmentUpdatedQueue") Queue searchEstablishmentUpdatedQueue,
             @Qualifier("catalogExchange") TopicExchange catalogExchange) {
         return BindingBuilder.bind(searchEstablishmentUpdatedQueue).to(catalogExchange).with("establishment.updated");
     }
 
     @Bean
-    public Binding searchAffiliationCreatedBinding(Queue searchAffiliationCreatedQueue,
+    public Binding searchAffiliationCreatedBinding(
+            @Qualifier("searchAffiliationCreatedQueue") Queue searchAffiliationCreatedQueue,
             @Qualifier("catalogExchange") TopicExchange catalogExchange) {
         return BindingBuilder.bind(searchAffiliationCreatedQueue).to(catalogExchange).with("affiliation.created");
     }
 
     @Bean
-    public Binding searchAffiliationUpdatedBinding(Queue searchAffiliationUpdatedQueue,
+    public Binding searchAffiliationUpdatedBinding(
+            @Qualifier("searchAffiliationUpdatedQueue") Queue searchAffiliationUpdatedQueue,
             @Qualifier("catalogExchange") TopicExchange catalogExchange) {
         return BindingBuilder.bind(searchAffiliationUpdatedQueue).to(catalogExchange).with("affiliation.updated");
     }
 
     @Bean
-    public Binding searchReviewCreatedBinding(Queue searchReviewCreatedQueue,
+    public Binding searchReviewCreatedBinding(
+            @Qualifier("searchReviewCreatedQueue") Queue searchReviewCreatedQueue,
             @Qualifier("reviewExchange") TopicExchange reviewExchange) {
         return BindingBuilder.bind(searchReviewCreatedQueue).to(reviewExchange).with("review.created");
     }

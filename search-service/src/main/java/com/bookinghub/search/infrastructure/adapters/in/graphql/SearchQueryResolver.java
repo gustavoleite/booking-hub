@@ -1,6 +1,8 @@
 package com.bookinghub.search.infrastructure.adapters.in.graphql;
 
+import com.bookinghub.search.application.dto.EstablishmentFilterInput;
 import com.bookinghub.search.application.dto.EstablishmentResultResponse;
+import com.bookinghub.search.application.dto.PageInput;
 import com.bookinghub.search.application.dto.SearchResultResponse;
 import com.bookinghub.search.core.domain.SearchFilter;
 import com.bookinghub.search.core.domain.SearchPage;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Controller;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,12 +23,12 @@ public class SearchQueryResolver {
 
     @QueryMapping
     public SearchResultResponse searchEstablishments(
-            @Argument Map<String, Object> filter,
-            @Argument Map<String, Object> page
+            @Argument("filter") EstablishmentFilterInput filter,
+            @Argument("page") PageInput page
     ) {
         SearchFilter searchFilter = mapFilter(filter);
-        int pageNum = page != null && page.get("page") != null ? (int) page.get("page") : 0;
-        int pageSize = page != null && page.get("size") != null ? (int) page.get("size") : 10;
+        int pageNum = page != null && page.page() != null ? page.page() : 0;
+        int pageSize = page != null && page.size() != null ? page.size() : 10;
 
         SearchPage result = searchEstablishmentsUseCase.execute(searchFilter, pageNum, pageSize);
 
@@ -70,35 +71,27 @@ public class SearchQueryResolver {
         return new SearchResultResponse(results, result.getTotalHits(), result.getPage(), result.getSize());
     }
 
-    @SuppressWarnings("unchecked")
-    private SearchFilter mapFilter(Map<String, Object> filter) {
+    private SearchFilter mapFilter(EstablishmentFilterInput filter) {
         if (filter == null) return SearchFilter.builder().build();
 
         var builder = SearchFilter.builder();
 
-        if (filter.get("query") instanceof String q) builder.query(q);
-        if (filter.get("city") instanceof String c) builder.city(c);
-        if (filter.get("state") instanceof String s) builder.state(s);
-        if (filter.get("minRating") instanceof Number n) builder.minRating(n.doubleValue());
-        if (filter.get("minPrice") instanceof Number n) builder.minPrice(n.doubleValue());
-        if (filter.get("maxPrice") instanceof Number n) builder.maxPrice(n.doubleValue());
-        if (filter.get("services") instanceof List<?> list) {
-            builder.services(list.stream().map(Object::toString).toList());
-        }
-        if (filter.get("sortBy") instanceof String sortBy) {
+        if (filter.query() != null) builder.query(filter.query());
+        if (filter.city() != null) builder.city(filter.city());
+        if (filter.state() != null) builder.state(filter.state());
+        if (filter.minRating() != null) builder.minRating(filter.minRating());
+        if (filter.minPrice() != null) builder.minPrice(filter.minPrice());
+        if (filter.maxPrice() != null) builder.maxPrice(filter.maxPrice());
+        if (filter.services() != null) builder.services(filter.services());
+        if (filter.sortBy() != null) {
             try {
-                builder.sortBy(SearchFilter.SortBy.valueOf(sortBy));
+                builder.sortBy(SearchFilter.SortBy.valueOf(filter.sortBy()));
             } catch (IllegalArgumentException ignored) {}
         }
-
-        if (filter.get("geo") instanceof Map<?, ?> rawGeo) {
-            Map<String, Object> geo = (Map<String, Object>) rawGeo;
-            if (geo.get("lat") instanceof Number lat &&
-                geo.get("lon") instanceof Number lon &&
-                geo.get("radiusKm") instanceof Number radius) {
-                builder.geoLat(lat.doubleValue())
-                       .geoLon(lon.doubleValue())
-                       .geoRadiusKm(radius.doubleValue());
+        if (filter.geo() != null) {
+            var geo = filter.geo();
+            if (geo.lat() != null && geo.lon() != null && geo.radiusKm() != null) {
+                builder.geoLat(geo.lat()).geoLon(geo.lon()).geoRadiusKm(geo.radiusKm());
             }
         }
 

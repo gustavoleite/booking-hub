@@ -296,7 +296,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Rua Principal\",\n    \"number\": \"100\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
+              "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1000\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01310-100\",\n    \"latitude\": -23.5505,\n    \"longitude\": -46.6333\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments",
@@ -337,7 +337,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Nova descrição.\",\n  \"address\": {\n    \"street\": \"Nova Rua\",\n    \"number\": \"200\",\n    \"zipCode\": \"01234-567\"\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo.\" }\n  ]\n}"
+              "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Melhor barbearia da Av. Paulista, agora com nome atualizado.\",\n  \"address\": {\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1000\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01310-100\",\n    \"latitude\": -23.5505,\n    \"longitude\": -46.6333\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
@@ -399,7 +399,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Salão Inválido\",\n  \"cnpj\": \"12345678000100\",\n  \"description\": \"CNPJ com dígitos verificadores errados.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"zipCode\": \"01234-567\" },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }],\n  \"services\": [{ \"title\": \"Svc\", \"description\": \"Desc\" }]\n}"
+                  "raw": "{\n  \"name\": \"Salão Inválido\",\n  \"cnpj\": \"12345678000100\",\n  \"description\": \"CNPJ com dígitos verificadores errados.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"city\": \"São Paulo\", \"state\": \"SP\", \"zipCode\": \"01310-100\", \"latitude\": -23.5505, \"longitude\": -46.6333 },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }],\n  \"services\": [{ \"title\": \"Svc\", \"description\": \"Desc\" }]\n}"
                 },
                 "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
               }
@@ -411,7 +411,7 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Salão Sem Serviços\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Sem serviços.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"zipCode\": \"01234-567\" },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }]\n}"
+                  "raw": "{\n  \"name\": \"Salão Sem Serviços\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Sem serviços.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"city\": \"São Paulo\", \"state\": \"SP\", \"zipCode\": \"01310-100\", \"latitude\": -23.5505, \"longitude\": -46.6333 },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }]\n}"
                 },
                 "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
               }

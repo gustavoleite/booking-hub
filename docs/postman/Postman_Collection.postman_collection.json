@@ -654,7 +654,8 @@
       ]
     },
     {
-      "name": "7. Review Service - Avaliações",
+      "name": "7. Booking Service - Avaliações",
+      "description": "Endpoints de avaliação agora servidos pelo Booking Service (porta 8082). O gateway roteia /api/reviews → booking-service. Requer que o booking esteja com status COMPLETED antes de submeter avaliação.",
       "item": [
         {
           "name": "Submeter Avaliação (Cliente)",

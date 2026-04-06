@@ -1,16 +1,23 @@
 # Booking Service
 
-Microsserviço responsável pelo ciclo de vida completo de agendamentos no **Booking Hub**. Aplica regras rígidas de negócio e concorrência para evitar *double-booking*, consulta o Catalog Service para validar disponibilidade e publica eventos de domínio no RabbitMQ.
+Microsserviço responsável pelo ciclo de vida completo de **agendamentos e avaliações** no **Booking Hub**. Aplica regras rígidas de negócio e concorrência para evitar *double-booking*, consulta o Catalog Service para validar disponibilidade, publica eventos de domínio no RabbitMQ e gerencia o fluxo de avaliações pós-atendimento diretamente no mesmo banco PostgreSQL.
 
 ---
 
 ## Responsabilidades
 
+### Agendamentos
 - Criar, consultar, cancelar e finalizar agendamentos
 - Validar disponibilidade do profissional consultando o Catalog Service via REST
 - Prevenir agendamentos duplicados com índice único parcial no PostgreSQL
 - Expor slots disponíveis publicamente (sem autenticação)
 - Publicar eventos `BookingCreated`, `BookingCancelled`, `BookingCompleted` no exchange `booking.events`
+
+### Avaliações (incorporado do antigo review-service)
+- Ao finalizar um booking, registrar o booking como **elegível para avaliação** diretamente no banco (tabela `tb_eligible_bookings`) — sem RabbitMQ intermediário
+- Receber avaliações de clientes (`POST /reviews`) e validar elegibilidade
+- Publicar evento `ReviewCreated` no exchange `review.events` (consumido pelo search-service para atualizar `averageRating`)
+- Consultar avaliações por profissional, por estabelecimento e por booking
 
 ---
 
@@ -32,17 +39,29 @@ Microsserviço responsável pelo ciclo de vida completo de agendamentos no **Boo
 ```
 core/
   domain/         Booking, BookingStatus, DaySchedule, ScheduleInfo
-  usecases/       Um caso de uso por classe (CreateBooking, Cancel, Complete, ...)
+                  Review, EligibleBooking
+  usecases/       CreateBookingUseCase, CancelBookingUseCase, CompleteBookingUseCase,
+                  GetAvailableSlotsUseCase, GetBookingDetailsUseCase, ListClientBookingsUseCase,
+                  ListEstablishmentBookingsUseCase, ListProfessionalAgendaUseCase, MarkNoShowUseCase
+                  ConsumeBookingCompletedUseCase, CreateReviewUseCase,
+                  GetReviewsByProfessionalUseCase, GetReviewsByEstablishmentUseCase, GetReviewByBookingUseCase
   ports/          BookingRepository, CatalogServiceClient, BookingEventPublisher
-  exceptions/     BookingNotFoundException, SlotUnavailableException, ...
+                  ReviewRepository, EligibleBookingRepository, ReviewEventPublisher
+  exceptions/     BookingNotFoundException, SlotUnavailableException, BookingStatusException,
+                  ForbiddenBookingAccessException, CatalogServiceException
+                  BookingNotEligibleException, ForbiddenReviewAccessException, InvalidReviewException,
+                  ReviewAlreadyExistsException, ReviewNotFoundException
 
 application/
-  dto/            CreateBookingRequest, BookingResponse, AvailabilityResponse, ...
+  dto/            CreateBookingRequest, BookingResponse, AvailabilityResponse
+                  CreateReviewRequest, ReviewResponse, ReviewSummary, ReviewListResponse, RatingStatsResponse
 
 infrastructure/
-  adapters/in/rest/         BookingController, AvailabilityController, GlobalExceptionHandler
+  adapters/in/rest/         BookingController, AvailabilityController, ReviewController, GlobalExceptionHandler
   adapters/out/database/    JpaBookingRepository, PostgresBookingRepositoryAdapter, BookingEntity
-  adapters/out/messaging/   RabbitMQBookingEventPublisher
+                            JpaReviewRepository, PostgresReviewRepositoryAdapter, ReviewJpaEntity
+                            JpaEligibleBookingRepository, PostgresEligibleBookingRepositoryAdapter, EligibleBookingJpaEntity
+  adapters/out/messaging/   RabbitMQBookingEventPublisher, RabbitMQReviewEventPublisher
   adapters/out/catalog/     CatalogServiceRestClient, ScheduleResponse
   configuration/            BeanConfig, RabbitMQConfig, RestClientConfig, OpenApiConfig
 ```
@@ -65,6 +84,19 @@ Porta local direta: `8082`
 | `PATCH` | `/bookings/{id}/no-show`       | PROF ou OWNER   | Marcar como não compareceu                     |
 | `GET`   | `/bookings/professional`       | `ROLE_PROFESSIONAL` | Minha agenda (por professional id no token) |
 | `GET`   | `/bookings/establishment/{id}` | PROF ou OWNER   | Todos os agendamentos do estabelecimento       |
+
+### Endpoints de Avaliação
+
+Base path via API Gateway: `/api/reviews`
+
+| Método | Path                                      | Auth            | Descrição                                         |
+|--------|-------------------------------------------|-----------------|---------------------------------------------------|
+| `POST` | `/reviews`                                | `ROLE_CLIENT`   | Criar avaliação para um booking completado        |
+| `GET`  | `/reviews/professional/{id}`              | Pública         | Listar avaliações de um profissional              |
+| `GET`  | `/reviews/professional/{id}/stats`        | Pública         | Média e total de avaliações do profissional       |
+| `GET`  | `/reviews/establishment/{id}`             | Pública         | Listar avaliações de um estabelecimento           |
+| `GET`  | `/reviews/establishment/{id}/stats`       | Pública         | Média e total de avaliações do estabelecimento    |
+| `GET`  | `/reviews/booking/{id}`                   | CLIENT/PROF/OWNER | Avaliação de um booking específico              |
 
 ### GET /bookings/availability
 
@@ -154,19 +186,24 @@ CREATE UNIQUE INDEX uk_booking_active_slot
   WHERE status NOT IN ('CANCELLED', 'NO_SHOW');
 ```
 
+### Tabelas de Avaliação (V2)
+
+- **`tb_eligible_bookings`** — bookings completados que podem ser avaliados. Chave primária é o `booking_id`.
+- **`tb_reviews`** — avaliações submetidas. Cada booking pode ter no máximo uma avaliação (constraint `UNIQUE` em `booking_id`).
+
 ---
 
 ## Eventos RabbitMQ
 
-Exchange: `booking.events` (topic, durable)
+### Exchange `booking.events` (topic, durable)
 
-| Routing Key         | Quando é publicado               |
-|---------------------|----------------------------------|
-| `booking.created`   | Agendamento criado com sucesso   |
-| `booking.cancelled` | Agendamento cancelado            |
-| `booking.completed` | Atendimento marcado como concluído |
+| Routing Key         | Quando é publicado                 | Consumido por    |
+|---------------------|------------------------------------|------------------|
+| `booking.created`   | Agendamento criado com sucesso     | —                |
+| `booking.cancelled` | Agendamento cancelado              | —                |
+| `booking.completed` | Atendimento marcado como concluído | —                |
 
-Payload (todos os eventos):
+Payload `booking.events`:
 ```json
 {
   "bookingId": "uuid",
@@ -178,10 +215,34 @@ Payload (todos os eventos):
   "endDatetime": "2026-04-07T11:00:00",
   "price": 120.00,
   "durationMinutes": 60,
-  "status": "CONFIRMED",
+  "status": "COMPLETED",
   "occurredAt": "2026-04-03T12:00:00"
 }
 ```
+
+### Exchange `review.events` (topic, durable)
+
+| Routing Key      | Quando é publicado             | Consumido por              |
+|------------------|--------------------------------|----------------------------|
+| `review.created` | Avaliação criada pelo cliente  | search-service (atualiza `averageRating`) |
+
+Payload `review.events`:
+```json
+{
+  "reviewId": "uuid",
+  "bookingId": "uuid",
+  "clientId": "uuid",
+  "professionalId": "uuid",
+  "establishmentId": "uuid",
+  "professionalRating": 5,
+  "establishmentRating": 4,
+  "occurredAt": "2026-04-03T13:00:00"
+}
+```
+
+### Fluxo interno (sem mensageria)
+
+Ao chamar `PATCH /bookings/{id}/complete`, o `CompleteBookingUseCase` invoca `ConsumeBookingCompletedUseCase` diretamente, gravando o booking elegível em `tb_eligible_bookings` na mesma transação — sem depender de um consumer RabbitMQ externo.
 
 ---
 
@@ -250,10 +311,11 @@ Excluídos da contagem: entidades JPA (`*Entity`), DTOs de request/response.
 
 ### Suíte de testes
 
-| Classe                         | Tipo      | Cenários                                               |
-|--------------------------------|-----------|--------------------------------------------------------|
-| `BookingTest`                  | Unit      | Criação, transições de status, validações de domínio   |
-| `CreateBookingUseCaseTest`     | Unit      | Happy path, slot ocupado, data passada, fora do horário |
-| `CancelBookingUseCaseTest`     | Unit      | Cancel por cliente, por owner, acesso negado           |
-| `GetAvailableSlotsUseCaseTest` | Unit      | Dia sem agenda, serviço inativo, slots futuros         |
-| `CucumberTest`                 | BDD / E2E | Disponibilidade com e sem agenda no dia                |
+| Classe                             | Tipo      | Cenários                                                |
+|------------------------------------|-----------|---------------------------------------------------------|
+| `BookingTest`                      | Unit      | Criação, transições de status, validações de domínio    |
+| `CreateBookingUseCaseTest`         | Unit      | Happy path, slot ocupado, data passada, fora do horário |
+| `CancelBookingUseCaseTest`         | Unit      | Cancel por cliente, por owner, acesso negado            |
+| `CompleteBookingUseCaseTest`       | Unit      | Complete por profissional/owner, registro de elegível   |
+| `GetAvailableSlotsUseCaseTest`     | Unit      | Dia sem agenda, serviço inativo, slots futuros          |
+| `CucumberTest`                     | BDD / E2E | Disponibilidade com e sem agenda no dia                 |

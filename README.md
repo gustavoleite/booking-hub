@@ -8,9 +8,9 @@ Este projeto foi desenvolvido como requisito do Tech Challenge (Fase 3), aplican
 
 ## 🏗️ Visão Geral da Arquitetura
 
-O sistema foi desenhado sob uma arquitetura de **Microsserviços Event-Driven**, garantindo escalabilidade independente, tolerância a falhas e separação clara de domínios (Bounded Contexts). 
+O sistema foi desenhado sob uma arquitetura de **Microsserviços Event-Driven**, garantindo escalabilidade independente, tolerância a falhas e separação clara de domínios (Bounded Contexts).
 
-Optamos por uma abordagem de **Persistência Poliglota**, utilizando o banco de dados mais adequado para o padrão de acesso de cada microsserviço (Relacional, Documentos, Motor de Busca e Chave-Valor). Toda a comunicação com clientes externos é centralizada por um **API Gateway**, que atua como *Edge Service* e validador de segurança (Stateless JWT).
+Toda a comunicação com clientes externos é centralizada por um **API Gateway**, que atua como *Edge Service* e validador de segurança (Stateless JWT). A persistência é distribuída por banco de dados especializado por domínio (PostgreSQL + Elasticsearch).
 
 ### Padrões de Comunicação
 - **Externa (Cliente ↔ Gateway):** RESTful (JSON) sobre HTTPS.
@@ -52,39 +52,31 @@ flowchart TB
         direction TB
         Auth["Auth Service\n(IAM / Segurança)"]:::service
         Catalog["Catalog Service\n(Estabelecimentos/Serviços)"]:::service
-        Booking["Booking Service\n(Agendamentos - Core)"]:::service
-        Review["Review Service\n(Avaliações)"]:::service
+        Booking["Booking Service\n(Agendamentos + Avaliações)"]:::service
         Search["Search Service\n(Busca / CQRS)"]:::service
-        Notify["Notification Service\n(Alertas / Sincronização)"]:::service
+        Notify["Notification Service\n(Alertas — planejado)"]:::service
     end
 
     %% Bancos de Dados
-    subgraph Data["Databases (Persistência Poliglota)"]
+    subgraph Data["Databases"]
         direction TB
         DB_Auth[("PostgreSQL\n(Users/Roles)")]:::db
         DB_Catalog[("PostgreSQL\n(Salões/Profs)")]:::db
-        DB_Booking[("PostgreSQL\n(Appointments)")]:::db
-        DB_Review[("MongoDB\n(Comments/Ratings)")]:::db
+        DB_Booking[("PostgreSQL\n(Bookings + Reviews)")]:::db
         DB_Search[("Elasticsearch\n(Índices/Geo)")]:::db
-        DB_Notify[("Redis\n(Cache/Retries)")]:::db
     end
-
-    %% Integrações Externas
-    ExtCal["Google Calendar / Outlook\n(APIs Externas)"]:::external
 
     %% --- CONEXÕES ---
     Client ===|"HTTPS / REST"| GW
     GW -->|"Roteamento REST\n(Valida JWT RS256)"| Auth
     GW -->|"REST"| Catalog
     GW -->|"REST"| Booking
-    GW -->|"REST"| Review
     GW -->|"REST"| Search
 
     Booking -.->|"REST\n(Valida Profissional/Serviço)"| Catalog
 
-    Catalog -.->|"Publica Evento\n(CatalogUpdated)"| RabbitMQ
-    Booking -.->|"Publica Evento\n(BookingCreated/Cancelled)"| RabbitMQ
-    Review -.->|"Publica Evento\n(ReviewCreated)"| RabbitMQ
+    Catalog -.->|"Publica Evento\n(establishment/affiliation)"| RabbitMQ
+    Booking -.->|"Publica Evento\n(booking.completed\nreview.created)"| RabbitMQ
 
     RabbitMQ ==>|"Consome\n(Atualiza Índice/CQRS)"| Search
     RabbitMQ ==>|"Consome\n(Dispara Notificações)"| Notify
@@ -92,10 +84,7 @@ flowchart TB
     Auth --- DB_Auth
     Catalog --- DB_Catalog
     Booking --- DB_Booking
-    Review --- DB_Review
     Search --- DB_Search
-    Notify --- DB_Notify
-    Notify -->|"OAuth2 Sync"| ExtCal
 ```
 
 ---
@@ -112,16 +101,13 @@ Provedor de Identidade (IdP). Responsável por registrar usuários, validar cred
 Gerencia o domínio de negócios estruturais: cadastro de Estabelecimentos, Profissionais associados, Horários de Funcionamento e Serviços (com preço e duração).
 
 ### 4. Booking Service (`booking-service`)
-O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking* (agendamentos duplicados no mesmo horário). Comunica-se via REST com o catálogo para consultas de disponibilidade.
+O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking*. Comunica-se via REST com o catálogo para consultas de disponibilidade. **Incorpora também o domínio de avaliações**: ao finalizar um booking, registra diretamente o elegível para review no mesmo banco (sem RabbitMQ intermediário), e expõe os endpoints `POST /reviews` e `GET /reviews/**` para criação e consulta de avaliações.
 
-### 5. Review Service (`review-service`)
-Coleta notas e comentários após a finalização de um serviço. Utiliza MongoDB pela flexibilidade de esquema na persistência de avaliações em texto livre.
+### 5. Search Service (`search-service`)
+Motor de busca e descoberta altamente otimizado. Implementa o padrão **CQRS** escutando eventos do RabbitMQ (`catalog.events`, `review.events`) para construir um índice consolidado no **Elasticsearch**, permitindo buscas ultrarrápidas por geolocalização, serviços oferecidos e melhor avaliação. Expõe API GraphQL.
 
-### 6. Search Service (`search-service`)
-Motor de busca e descoberta altamente otimizado. Implementa o padrão **CQRS** (Command Query Responsibility Segregation) escutando eventos do RabbitMQ para construir um índice consolidado no **Elasticsearch**, permitindo buscas ultrarrápidas por geolocalização, serviços oferecidos e melhor avaliação.
-
-### 7. Notification Service (`notification-service`)
-Microsserviço puramente reativo/orientado a eventos. Escuta o barramento do RabbitMQ para disparar e-mails/SMS de confirmação e realizar a integração (sincronização) com APIs externas, como o Google Calendar.
+### 6. Notification Service (`notification-service`) — planejado
+Microsserviço reativo/orientado a eventos. Escutará o barramento do RabbitMQ para disparar e-mails/SMS de confirmação. Ainda não implementado.
 
 ---
 
@@ -131,7 +117,7 @@ Microsserviço puramente reativo/orientado a eventos. Escuta o barramento do Rab
 * **Framework Principal:** Spring Boot 3.x / Spring Cloud
 * **Arquitetura de Código:** Clean Architecture (Domain, Application, Infrastructure)
 * **Comunicação:** RESTful (Spring Web), RabbitMQ (Spring AMQP)
-* **Bancos de Dados:** PostgreSQL (Relacional), MongoDB (NoSQL Documento), Elasticsearch (Busca), Redis (Cache)
+* **Bancos de Dados:** PostgreSQL (Relacional — auth, catalog, booking+reviews), Elasticsearch (Busca)
 * **Segurança:** Spring Security, OAuth2 / JWT (RS256 Criptografia Assimétrica), BCrypt
 * **Qualidade e Testes:** JUnit 5, Mockito, Testcontainers, Cucumber (BDD), k6 (Performance)
 * **Infraestrutura/DevOps:** Docker, Docker Compose, GitHub Actions (CI/CD), AWS ECS (Deploy)
@@ -151,11 +137,10 @@ beauty-wellness-system/
  │
  ├── api-gateway/             # Roteamento e Filtro JWT
  ├── auth-service/            # Emissão de Tokens e IAM
- ├── catalog-service/         # Clean Architecture (Core, Application, Infra)
- ├── booking-service/         # Clean Architecture (Core, Application, Infra)
- ├── review-service/          # Clean Architecture (Core, Application, Infra)
- ├── search-service/          # Microsserviço de indexação
- └── notification-service/    # Worker assíncrono
+ ├── catalog-service/         # Estabelecimentos, Profissionais, Serviços
+ ├── booking-service/         # Agendamentos + Avaliações (domínios unificados)
+ ├── search-service/          # Indexação Elasticsearch + GraphQL
+ └── notification-service/    # Worker assíncrono (planejado)
 ```
 
 ---
@@ -177,17 +162,15 @@ docker compose ps          # verifique o estado dos containers
 docker compose logs -f     # acompanhe os logs em tempo real
 ```
 
-| Serviço          | URL local                                      |
-|------------------|------------------------------------------------|
-| API Gateway      | http://localhost:8080 · Swagger: `/swagger-ui.html` |
-| Auth Service     | http://localhost:8081 · Swagger: `/swagger-ui.html` |
-| Booking Service  | http://localhost:8082 · Swagger: `/swagger-ui.html` |
-| Catalog Service  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
-| Review Service   | http://localhost:8084 · Swagger: `/swagger-ui.html` |
-| Search Service   | http://localhost:8085 · GraphiQL: `/graphiql`  |
-| RabbitMQ UI      | http://localhost:15672 (guest / guest)         |
-| Elasticsearch    | http://localhost:9200                          |
-| MongoDB          | localhost:27017                                |
+| Serviço                          | URL local                                           |
+|----------------------------------|-----------------------------------------------------|
+| API Gateway                      | http://localhost:8080 · Swagger: `/swagger-ui.html` |
+| Auth Service                     | http://localhost:8081 · Swagger: `/swagger-ui.html` |
+| Booking Service (+ Reviews)      | http://localhost:8082 · Swagger: `/swagger-ui.html` |
+| Catalog Service                  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
+| Search Service                   | http://localhost:8085 · GraphiQL: `/graphiql`       |
+| RabbitMQ UI                      | http://localhost:15672 (guest / guest)              |
+| Elasticsearch                    | http://localhost:9200                               |
 
 ### Opção 2 — Execução local (IntelliJ / linha de comando)
 
@@ -420,7 +403,7 @@ curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/cancel \
 
 ### Passo 10 — Avaliar o atendimento (Client)
 
-Após o profissional completar o atendimento (Passo 9), o evento `booking.completed` é publicado e o review-service registra o booking como elegível. O cliente pode então submeter uma avaliação:
+Após o profissional completar o atendimento (Passo 9), o booking-service registra o booking como elegível para avaliação diretamente no próprio banco (sem RabbitMQ intermediário). O cliente pode então submeter uma avaliação:
 
 ```bash
 curl -s -X POST http://localhost:8080/api/reviews \
@@ -484,7 +467,7 @@ Owner afilia Professional com agenda + preços → evento affiliation.created/up
 Client consulta disponibilidade (sem token)
 Client cria booking → status: CONFIRMED → evento booking.created publicado
 Professional finaliza → status: COMPLETED → evento booking.completed publicado
-  → review-service registra booking elegível
+  → booking-service registra booking elegível (internamente, mesmo banco)
 Client avalia → review.created publicado → search-service atualiza averageRating
 Client busca via GraphQL → search-service retorna resultados ordenados por relevância/rating/distância
 ```

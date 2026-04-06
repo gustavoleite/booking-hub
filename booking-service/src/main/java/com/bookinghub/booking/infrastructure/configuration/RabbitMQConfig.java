@@ -12,10 +12,16 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String BOOKING_EXCHANGE = "booking.events";
+    public static final String REVIEW_EXCHANGE = "review.events";
 
     @Bean
     public TopicExchange bookingExchange() {
         return ExchangeBuilder.topicExchange(BOOKING_EXCHANGE).durable(true).build();
+    }
+
+    @Bean
+    public TopicExchange reviewExchange() {
+        return ExchangeBuilder.topicExchange(REVIEW_EXCHANGE).durable(true).build();
     }
 
     @Bean

@@ -150,9 +150,12 @@
                 <configuration>
                     <excludes>
                         <exclude>com/bookinghub/booking/infrastructure/adapters/out/database/*Entity.class</exclude>
+                        <exclude>com/bookinghub/booking/application/dto/*.class</exclude>
                         <exclude>com/bookinghub/booking/infrastructure/adapters/in/rest/dto/*.class</exclude>
                         <exclude>com/bookinghub/booking/infrastructure/adapters/out/catalog/dto/*.class</exclude>
                         <exclude>com/bookinghub/booking/infrastructure/adapters/out/messaging/dto/*.class</exclude>
+                        <exclude>com/bookinghub/booking/BookingApplication.class</exclude>
+                        <exclude>com/bookinghub/booking/infrastructure/configuration/*.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>

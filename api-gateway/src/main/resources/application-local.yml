@@ -25,7 +25,7 @@ spring:
             - SetPath=/v3/api-docs
 
         - id: review-service-docs-route
-          uri: ${REVIEW_SERVICE_URI:http://localhost:8084}
+          uri: ${BOOKING_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/reviews/v3/api-docs
           filters:
@@ -48,7 +48,7 @@ spring:
             - RewritePath=/api/catalog/(?<remaining>.*), /${remaining}
 
         - id: review-service-route
-          uri: ${REVIEW_SERVICE_URI:http://localhost:8084}
+          uri: ${BOOKING_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/reviews/**
           filters:

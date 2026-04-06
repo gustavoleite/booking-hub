@@ -20,6 +20,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +30,8 @@ class CompleteBookingUseCaseTest {
     private BookingRepository bookingRepository;
     @Mock
     private BookingEventPublisher eventPublisher;
+    @Mock
+    private ConsumeBookingCompletedUseCase consumeBookingCompletedUseCase;
 
     @InjectMocks
     private CompleteBookingUseCase useCase;
@@ -59,6 +62,8 @@ class CompleteBookingUseCaseTest {
 
         assertThat(result.getStatus()).isEqualTo(BookingStatus.COMPLETED);
         verify(eventPublisher).publishBookingCompleted(result);
+        verify(consumeBookingCompletedUseCase).execute(eq(result.getId()), eq(result.getClientId()),
+                eq(result.getProfessionalId()), eq(result.getEstablishmentId()), any());
     }
 
     @Test
@@ -71,6 +76,7 @@ class CompleteBookingUseCaseTest {
 
         assertThat(result.getStatus()).isEqualTo(BookingStatus.COMPLETED);
         verify(eventPublisher).publishBookingCompleted(result);
+        verify(consumeBookingCompletedUseCase).execute(any(), any(), any(), any(), any());
     }
 
     @Test

@@ -39,7 +39,8 @@
       "Bash(mvn dependency:get -Dartifact=de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0 -q)",
       "Bash(timeout 30 mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
       "Bash(timeout 35 mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
-      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=local -B)"
+      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
+      "Bash(echo \"Deleted: $?\")"
     ]
   }
 }

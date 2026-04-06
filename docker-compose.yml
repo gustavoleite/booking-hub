@@ -22,21 +22,6 @@ services:
       timeout: 5s
       retries: 5
 
-  mongodb:
-    image: mongo:7-jammy
-    container_name: bw-mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodata:/data/db
-    networks:
-      - bw-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   elasticsearch:
     image: elasticsearch:8.13.0
     container_name: bw-elasticsearch
@@ -103,29 +88,6 @@ services:
       catalog-service:
         condition: service_started
 
-  review-service:
-    build:
-      context: .
-      dockerfile: review-service/Dockerfile
-    container_name: bw-review-service
-    ports:
-      - "8084:8084"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - MONGO_HOST=mongodb
-      - MONGO_DB=review_db
-      - RABBIT_HOST=rabbitmq
-      - OPENAPI_SERVER_URL=http://localhost:8080/api/reviews
-    networks:
-      - bw-network
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      booking-service:
-        condition: service_started
-
   search-service:
     build:
       context: .
@@ -161,7 +123,6 @@ services:
       - AUTH_SERVICE_URI=http://auth-service:8081
       - CATALOG_SERVICE_URI=http://catalog-service:8083
       - BOOKING_SERVICE_URI=http://booking-service:8082
-      - REVIEW_SERVICE_URI=http://review-service:8084
       - SEARCH_SERVICE_URI=http://search-service:8085
       - RSA_PUBLIC_KEY_PATH=file:/app/certs/public_key.pem
     volumes:
@@ -172,7 +133,6 @@ services:
       - auth-service
       - catalog-service
       - booking-service
-      - review-service
 
   auth-service:
     build: 
@@ -229,5 +189,4 @@ networks:
 
 volumes:
   pgdata:
-  mongodata:
   esdata:

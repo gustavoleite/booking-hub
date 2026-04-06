@@ -1,8 +1,6 @@
 package com.bookinghub.booking.infrastructure.configuration;
 
-import com.bookinghub.booking.core.ports.BookingEventPublisher;
-import com.bookinghub.booking.core.ports.BookingRepository;
-import com.bookinghub.booking.core.ports.CatalogServiceClient;
+import com.bookinghub.booking.core.ports.*;
 import com.bookinghub.booking.core.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,9 +28,38 @@ public class BeanConfig {
     }
 
     @Bean
+    public ConsumeBookingCompletedUseCase consumeBookingCompletedUseCase(
+            EligibleBookingRepository eligibleBookingRepository) {
+        return new ConsumeBookingCompletedUseCase(eligibleBookingRepository);
+    }
+
+    @Bean
     public CompleteBookingUseCase completeBookingUseCase(BookingRepository bookingRepository,
-                                                          BookingEventPublisher eventPublisher) {
-        return new CompleteBookingUseCase(bookingRepository, eventPublisher);
+                                                          BookingEventPublisher eventPublisher,
+                                                          ConsumeBookingCompletedUseCase consumeBookingCompletedUseCase) {
+        return new CompleteBookingUseCase(bookingRepository, eventPublisher, consumeBookingCompletedUseCase);
+    }
+
+    @Bean
+    public CreateReviewUseCase createReviewUseCase(ReviewRepository reviewRepository,
+                                                    EligibleBookingRepository eligibleBookingRepository,
+                                                    ReviewEventPublisher reviewEventPublisher) {
+        return new CreateReviewUseCase(reviewRepository, eligibleBookingRepository, reviewEventPublisher);
+    }
+
+    @Bean
+    public GetReviewsByProfessionalUseCase getReviewsByProfessionalUseCase(ReviewRepository reviewRepository) {
+        return new GetReviewsByProfessionalUseCase(reviewRepository);
+    }
+
+    @Bean
+    public GetReviewsByEstablishmentUseCase getReviewsByEstablishmentUseCase(ReviewRepository reviewRepository) {
+        return new GetReviewsByEstablishmentUseCase(reviewRepository);
+    }
+
+    @Bean
+    public GetReviewByBookingUseCase getReviewByBookingUseCase(ReviewRepository reviewRepository) {
+        return new GetReviewByBookingUseCase(reviewRepository);
     }
 
     @Bean

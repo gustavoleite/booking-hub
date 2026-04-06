@@ -157,9 +157,18 @@
                 </executions>
                 <configuration>
                     <excludes>
+                        <!-- DTOs and events: no logic to test -->
                         <exclude>com/bookinghub/search/application/dto/*.class</exclude>
-                        <exclude>com/bookinghub/search/infrastructure/adapters/out/elasticsearch/EstablishmentEsDocument*.class</exclude>
                         <exclude>com/bookinghub/search/infrastructure/adapters/in/messaging/*Event.class</exclude>
+                        <!-- ES entity/mapping: no business logic -->
+                        <exclude>com/bookinghub/search/infrastructure/adapters/out/elasticsearch/EstablishmentEsDocument*.class</exclude>
+                        <exclude>com/bookinghub/search/infrastructure/adapters/out/elasticsearch/ElasticsearchSearchRepository.class</exclude>
+                        <!-- ES adapter and CatalogRestClient: covered by BDD tests with Testcontainers/real services -->
+                        <exclude>com/bookinghub/search/infrastructure/adapters/out/elasticsearch/ElasticsearchRepositoryAdapter.class</exclude>
+                        <exclude>com/bookinghub/search/infrastructure/adapters/out/catalog/CatalogRestClient.class</exclude>
+                        <!-- Spring @Configuration glue: no business logic -->
+                        <exclude>com/bookinghub/search/infrastructure/configuration/*.class</exclude>
+                        <exclude>com/bookinghub/search/SearchApplication.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>

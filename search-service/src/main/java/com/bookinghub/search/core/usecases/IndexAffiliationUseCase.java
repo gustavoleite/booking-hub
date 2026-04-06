@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -54,20 +56,21 @@ public class IndexAffiliationUseCase {
             services.add(offering);
         }
 
-        double newMin = services.stream()
+        OptionalDouble minOpt = services.stream()
                 .filter(s -> s.getMinPrice() != null)
                 .mapToDouble(EstablishmentDocument.ServiceEntry::getMinPrice)
-                .min().orElse(0);
-        double newMax = services.stream()
+                .min();
+        OptionalDouble maxOpt = services.stream()
                 .filter(s -> s.getMaxPrice() != null)
                 .mapToDouble(EstablishmentDocument.ServiceEntry::getMaxPrice)
-                .max().orElse(0);
+                .max();
 
-        repository.upsertPartial(establishmentId, Map.of(
-                "professionals", professionals,
-                "services", services,
-                "minPrice", newMin,
-                "maxPrice", newMax
-        ));
+        Map<String, Object> fields = new HashMap<>();
+        fields.put("professionals", professionals);
+        fields.put("services", services);
+        fields.put("minPrice", minOpt.isPresent() ? minOpt.getAsDouble() : null);
+        fields.put("maxPrice", maxOpt.isPresent() ? maxOpt.getAsDouble() : null);
+
+        repository.upsertPartial(establishmentId, fields);
     }
 }

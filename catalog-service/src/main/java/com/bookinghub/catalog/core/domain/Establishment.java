@@ -23,10 +23,11 @@ public class Establishment {
     @Builder.Default
     private List<ProvidedService> providedServices = new java.util.ArrayList<>();
 
-    public void updateDetails(String name, String description, List<String> photos) {
+    public void updateDetails(String name, String description, List<String> photos, Address address) {
         this.name = name;
         this.description = description;
         this.photos = photos;
+        this.address = address;
     }
 
     public void inactivate() {

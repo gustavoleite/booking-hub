@@ -19,12 +19,14 @@ class EstablishmentTest {
         String newName = "New Name";
         String newDescription = "New Description";
         List<String> newPhotos = List.of("photo2.jpg", "photo3.jpg");
+        Address newAddress = Address.builder().street("New Street").city("New City").build();
 
-        establishment.updateDetails(newName, newDescription, newPhotos);
+        establishment.updateDetails(newName, newDescription, newPhotos, newAddress);
 
         assertEquals(newName, establishment.getName());
         assertEquals(newDescription, establishment.getDescription());
         assertEquals(newPhotos, establishment.getPhotos());
+        assertEquals(newAddress, establishment.getAddress());
     }
 
     @Test

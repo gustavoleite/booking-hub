@@ -42,7 +42,10 @@ public class ElasticsearchRepositoryAdapter implements EstablishmentSearchReposi
         Document update = Document.create();
         update.putAll(fields);
         operations.update(
-                UpdateQuery.builder(id).withDocument(update).build(),
+                UpdateQuery.builder(id)
+                        .withDocument(update)
+                        .withDocAsUpsert(true)
+                        .build(),
                 IndexCoordinates.of(INDEX)
         );
     }

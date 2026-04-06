@@ -22,7 +22,7 @@ public class UpdateEstablishmentUseCase {
             throw new ForbiddenException("Only the owner can update the establishment");
         }
 
-        existing.updateDetails(updatedData.getName(), updatedData.getDescription(), updatedData.getPhotos());
+        existing.updateDetails(updatedData.getName(), updatedData.getDescription(), updatedData.getPhotos(), updatedData.getAddress());
 
         Establishment saved = establishmentRepository.save(existing);
         eventPublisher.publishEstablishmentUpdated(saved);

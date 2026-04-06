@@ -15,6 +15,11 @@ public class BeanConfig {
     }
 
     @Bean
+    public UpdateEstablishmentUseCase updateEstablishmentUseCase(EstablishmentSearchRepository repository) {
+        return new UpdateEstablishmentUseCase(repository);
+    }
+
+    @Bean
     public IndexAffiliationUseCase indexAffiliationUseCase(EstablishmentSearchRepository repository) {
         return new IndexAffiliationUseCase(repository);
     }

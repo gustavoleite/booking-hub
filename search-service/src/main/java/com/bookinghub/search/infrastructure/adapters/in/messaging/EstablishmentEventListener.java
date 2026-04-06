@@ -2,6 +2,7 @@ package com.bookinghub.search.infrastructure.adapters.in.messaging;
 
 import com.bookinghub.search.core.domain.EstablishmentDocument;
 import com.bookinghub.search.core.usecases.IndexEstablishmentUseCase;
+import com.bookinghub.search.core.usecases.UpdateEstablishmentUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,6 +16,7 @@ import java.util.Collections;
 public class EstablishmentEventListener {
 
     private final IndexEstablishmentUseCase indexEstablishmentUseCase;
+    private final UpdateEstablishmentUseCase updateEstablishmentUseCase;
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchEstablishmentCreatedQueueName}")
     public void onEstablishmentCreated(EstablishmentEvent event) {
@@ -25,7 +27,16 @@ public class EstablishmentEventListener {
     @RabbitListener(queues = "#{rabbitMQConfig.searchEstablishmentUpdatedQueueName}")
     public void onEstablishmentUpdated(EstablishmentEvent event) {
         log.info("Received establishment.updated for {}", event.id());
-        indexEstablishmentUseCase.execute(toDocument(event));
+        updateEstablishmentUseCase.execute(
+                event.id(),
+                event.name(),
+                event.description(),
+                event.city(),
+                event.state(),
+                event.zipCode(),
+                event.latitude() != null ? event.latitude().doubleValue() : null,
+                event.longitude() != null ? event.longitude().doubleValue() : null
+        );
     }
 
     private EstablishmentDocument toDocument(EstablishmentEvent event) {

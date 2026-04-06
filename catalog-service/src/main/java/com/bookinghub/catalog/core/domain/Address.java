@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 public class Address {
     private String street;
     private String number;
+    private String city;
+    private String state;
     private String zipCode;
     private BigDecimal latitude;
     private BigDecimal longitude;

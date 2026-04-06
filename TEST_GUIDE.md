@@ -82,7 +82,11 @@ As APIs utilizam as seguintes variáveis no Postman:
   "address": {
     "street": "Rua Principal",
     "number": "100",
-    "zipCode": "01234-567"
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "01234-567",
+    "latitude": -23.5616,
+    "longitude": -46.6565
   },
   "businessHours": [
     { "dayOfWeek": 1, "openTime": "08:00:00", "closeTime": "18:00:00" },
@@ -150,14 +154,103 @@ As APIs utilizam as seguintes variáveis no Postman:
 
 ---
 
-## 🌐 Gateway e Outros Serviços
-As chamadas devem ser feitas através do **API Gateway** na porta `8080`. O prefixo da URL indica para qual microsserviço a requisição será roteada:
-- `/api/auth/**` → `auth-service` (Porta interna: 8081)
-- `/api/catalog/**` → `catalog-service` (Porta interna: 8083)
+---
 
-O Gateway valida o JWT (RS256) e injeta os headers `X-User-Id` e `X-User-Role` automaticamente nos serviços downstream. Não é necessário enviar esses headers manualmente via Postman.
+## ⭐ 5. Avaliações (Review Service)
 
-> **Nota:** Rotas para `/api/bookings`, `/api/reviews` e `/api/search` estão reservadas no Gateway mas os serviços ainda não estão implementados nesta versão.
+> Pré-requisito: o booking deve estar com status `COMPLETED` (Passo 9 do happy path). O review-service registra bookings elegíveis automaticamente ao consumir o evento `booking.completed`.
+
+### 5.1 Submeter Avaliação
+- **Endpoint:** `POST /api/reviews`
+- **Role:** `ROLE_CLIENT`
+- **Headers:** `Authorization: Bearer {{access_token}}`, `X-User-Id: {{x_user_id}}`
+- **Corpo de exemplo:**
+```json
+{
+  "bookingId": "{{booking_id}}",
+  "professionalRating": 5,
+  "establishmentRating": 4,
+  "comment": "Atendimento excelente!"
+}
+```
+- **Respostas de erro:**
+  - `400` — Nenhum rating fornecido ou valor fora de 1–5
+  - `409` — Booking já avaliado
+  - `422` — Booking não concluído ou não encontrado
+  - `403` — Booking pertence a outro cliente
+
+### 5.2 Listar Reviews por Profissional (Público)
+- **Endpoint:** `GET /api/reviews/professional/{professionalId}`
+- **Autenticação:** Não requerida.
+
+### 5.3 Stats de Rating do Profissional (Público)
+- **Endpoint:** `GET /api/reviews/professional/{professionalId}/stats`
+- **Retorna:** `{ "subjectId": "...", "averageRating": 4.7, "totalReviews": 42 }`
+
+### 5.4 Listar Reviews por Estabelecimento (Público)
+- **Endpoint:** `GET /api/reviews/establishment/{establishmentId}`
+
+### 5.5 Stats de Rating do Estabelecimento (Público)
+- **Endpoint:** `GET /api/reviews/establishment/{establishmentId}/stats`
+
+---
+
+## 🔍 6. Busca (Search Service — GraphQL)
+
+O search-service expõe um endpoint GraphQL em `/api/search/graphql`. Todas as queries são **públicas** (sem autenticação). O GraphiQL interativo está disponível em http://localhost:8085/graphiql.
+
+### 6.1 Busca por cidade
+```bash
+curl -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ searchEstablishments(filter: { city: \"São Paulo\" }) { results { id name averageRating } totalHits } }"}'
+```
+
+### 6.2 Busca por texto livre
+```bash
+curl -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ searchEstablishments(filter: { query: \"corte feminino\" }) { results { id name services { title minPrice } } totalHits } }"}'
+```
+
+### 6.3 Filtro por raio geográfico
+```bash
+curl -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ searchEstablishments(filter: { geo: { lat: -23.56, lon: -46.63, radiusKm: 3.0 }, sortBy: DISTANCE }) { results { id name distanceKm } totalHits } }"}'
+```
+
+### 6.4 Filtros combinados
+```bash
+curl -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ searchEstablishments(filter: { city: \"São Paulo\", minRating: 4.0, maxPrice: 200.0, sortBy: RATING }, page: { page: 0, size: 5 }) { results { id name averageRating minPrice maxPrice } totalHits } }"}'
+```
+
+### 6.5 Reindexar (ROLE_OWNER)
+```bash
+curl -X POST http://localhost:8080/api/search/admin/reindex \
+  -H "Authorization: Bearer {{access_token}}"
+# → { "status": "accepted", "indexed": N }
+```
+
+---
+
+## 🌐 Gateway — Roteamento
+
+O prefixo da URL indica para qual microsserviço a requisição será roteada:
+
+| Prefixo | Serviço | Porta interna |
+|---------|---------|---------------|
+| `/api/auth/**` | auth-service | 8081 |
+| `/api/bookings/**` | booking-service | 8082 |
+| `/api/catalog/**` | catalog-service | 8083 |
+| `/api/reviews/**` | review-service | 8084 |
+| `/api/search/**` | search-service | 8085 |
+
+O Gateway valida o JWT (RS256) e injeta os headers `X-User-Id` e `X-User-Role` automaticamente nos serviços downstream. Não é necessário enviar esses headers manualmente.
+
+**Endpoints públicos** (sem autenticação): `/api/auth/**`, `GET /api/reviews/professional/**`, `GET /api/reviews/establishment/**`, `POST /api/search/graphql`, `GET /api/search/graphiql`.
 
 ---
 

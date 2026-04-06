@@ -4,6 +4,7 @@ import com.bookinghub.catalog.core.domain.BusinessHour;
 import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
 import com.bookinghub.catalog.core.exceptions.ConflictException;
+import com.bookinghub.catalog.core.ports.CatalogEventPublisher;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CreateEstablishmentUseCase {
     private final EstablishmentRepository establishmentRepository;
+    private final CatalogEventPublisher eventPublisher;
 
     public Establishment execute(Establishment establishment) {
         String cleanCnpj = establishment.getCnpj() != null ? establishment.getCnpj().replaceAll("\\D", "") : null;
@@ -47,7 +49,9 @@ public class CreateEstablishmentUseCase {
                 .providedServices(establishmentWithCleanCnpj.getProvidedServices())
                 .build();
 
-        return establishmentRepository.save(toSave);
+        Establishment saved = establishmentRepository.save(toSave);
+        eventPublisher.publishEstablishmentCreated(saved);
+        return saved;
     }
 
     private void validate(Establishment establishment) {
@@ -57,6 +61,10 @@ public class CreateEstablishmentUseCase {
 
         if (establishment.getAddress() == null) {
             throw new BusinessRuleException("O endereço é obrigatório");
+        }
+
+        if (establishment.getAddress().getLatitude() == null || establishment.getAddress().getLongitude() == null) {
+            throw new BusinessRuleException("Endereço deve conter latitude e longitude");
         }
 
         if (establishment.getProvidedServices() == null || establishment.getProvidedServices().isEmpty()) {

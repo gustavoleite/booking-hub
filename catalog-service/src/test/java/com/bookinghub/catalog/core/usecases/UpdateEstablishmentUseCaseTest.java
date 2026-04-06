@@ -3,6 +3,7 @@ package com.bookinghub.catalog.core.usecases;
 import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.exceptions.ForbiddenException;
 import com.bookinghub.catalog.core.exceptions.NotFoundException;
+import com.bookinghub.catalog.core.ports.CatalogEventPublisher;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,9 @@ class UpdateEstablishmentUseCaseTest {
 
     @Mock
     private EstablishmentRepository repository;
+
+    @Mock
+    private CatalogEventPublisher eventPublisher;
 
     @InjectMocks
     private UpdateEstablishmentUseCase updateEstablishmentUseCase;
@@ -58,7 +62,7 @@ class UpdateEstablishmentUseCaseTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(existing));
 
-        assertThrows(ForbiddenException.class, () -> 
+        assertThrows(ForbiddenException.class, () ->
             updateEstablishmentUseCase.execute(id, ownerId, Establishment.builder().build())
         );
         verify(repository, never()).save(any());
@@ -69,8 +73,29 @@ class UpdateEstablishmentUseCaseTest {
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> 
+        assertThrows(NotFoundException.class, () ->
             updateEstablishmentUseCase.execute(id, "any", Establishment.builder().build())
         );
+    }
+
+    @Test
+    void shouldPublishEstablishmentUpdatedEvent() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .name("Old Name")
+                .build();
+        Establishment updateData = Establishment.builder()
+                .name("New Name")
+                .build();
+
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenReturn(existing);
+
+        updateEstablishmentUseCase.execute(id, ownerId, updateData);
+
+        verify(eventPublisher).publishEstablishmentUpdated(any());
     }
 }

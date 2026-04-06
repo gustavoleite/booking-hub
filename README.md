@@ -181,9 +181,13 @@ docker compose logs -f     # acompanhe os logs em tempo real
 |------------------|------------------------------------------------|
 | API Gateway      | http://localhost:8080 · Swagger: `/swagger-ui.html` |
 | Auth Service     | http://localhost:8081 · Swagger: `/swagger-ui.html` |
-| Catalog Service  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
 | Booking Service  | http://localhost:8082 · Swagger: `/swagger-ui.html` |
+| Catalog Service  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
+| Review Service   | http://localhost:8084 · Swagger: `/swagger-ui.html` |
+| Search Service   | http://localhost:8085 · GraphiQL: `/graphiql`  |
 | RabbitMQ UI      | http://localhost:15672 (guest / guest)         |
+| Elasticsearch    | http://localhost:9200                          |
+| MongoDB          | localhost:27017                                |
 
 ### Opção 2 — Execução local (IntelliJ / linha de comando)
 
@@ -281,7 +285,8 @@ curl -s -X POST http://localhost:8080/api/catalog/establishments \
     "description": "Salão completo de beleza",
     "address": {
       "street": "Rua das Flores", "number": "100",
-      "city": "São Paulo", "state": "SP", "zipCode": "01310-100"
+      "city": "São Paulo", "state": "SP", "zipCode": "01310-100",
+      "latitude": -23.5616, "longitude": -46.6565
     },
     "businessHours": [
       {"dayOfWeek": 1, "openTime": "09:00:00", "closeTime": "18:00:00"},
@@ -411,13 +416,75 @@ curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/cancel \
 
 ---
 
+---
+
+### Passo 10 — Avaliar o atendimento (Client)
+
+Após o profissional completar o atendimento (Passo 9), o evento `booking.completed` é publicado e o review-service registra o booking como elegível. O cliente pode então submeter uma avaliação:
+
+```bash
+curl -s -X POST http://localhost:8080/api/reviews \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <CLIENT_TOKEN>" \
+  -H "X-User-Id: <CLIENT_ID>" \
+  -d '{
+    "bookingId": "<BOOKING_ID>",
+    "professionalRating": 5,
+    "establishmentRating": 4,
+    "comment": "Atendimento excelente!"
+  }'
+# → { "id": "<REVIEW_ID>", "professionalRating": 5, "establishmentRating": 4, ... }
+```
+
+---
+
+### Passo 11 — Buscar estabelecimentos (público, sem token)
+
+O search-service é alimentado automaticamente pelos eventos do catalog e do review. Para buscar:
+
+```bash
+# Busca por texto e cidade via GraphQL
+curl -s -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "{ searchEstablishments(filter: { query: \"Salão\", city: \"São Paulo\" }) { results { id name averageRating minPrice } totalHits } }"
+  }'
+
+# Busca por raio geográfico
+curl -s -X POST http://localhost:8080/api/search/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "{ searchEstablishments(filter: { geo: { lat: -23.56, lon: -46.63, radiusKm: 5.0 }, sortBy: DISTANCE }) { results { id name distanceKm } totalHits } }"
+  }'
+```
+
+> Use o GraphiQL interativo em http://localhost:8085/graphiql para explorar o schema com autocompletar.
+
+---
+
+### Passo 12 — Reindexar (caso o índice esteja vazio)
+
+Se o search-service subiu antes dos outros ou o volume do ES foi perdido:
+
+```bash
+curl -s -X POST http://localhost:8080/api/search/admin/reindex \
+  -H "Authorization: Bearer <OWNER_TOKEN>"
+# → { "status": "accepted", "indexed": 3 }
+```
+
+---
+
 ### Resumo do Fluxo
 
 ```
-Owner registra → Owner cria estabelecimento + serviços
+Owner registra → Owner cria estabelecimento (com lat/lon) + serviços
+  → eventos establishment.created + affiliation.created → search-service indexa
 Professional registra → Professional cria perfil
-Owner afilia Professional com agenda + preços
+Owner afilia Professional com agenda + preços → evento affiliation.created/updated
 Client consulta disponibilidade (sem token)
-Client cria booking → status: CONFIRMED → evento BookingCreated publicado no RabbitMQ
-Professional finaliza → status: COMPLETED → evento BookingCompleted publicado
+Client cria booking → status: CONFIRMED → evento booking.created publicado
+Professional finaliza → status: COMPLETED → evento booking.completed publicado
+  → review-service registra booking elegível
+Client avalia → review.created publicado → search-service atualiza averageRating
+Client busca via GraphQL → search-service retorna resultados ordenados por relevância/rating/distância
 ```

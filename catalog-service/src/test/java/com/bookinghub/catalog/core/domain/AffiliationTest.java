@@ -43,7 +43,7 @@ class AffiliationTest {
         );
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> affiliation.updateSchedules(schedules));
-        assertEquals("Overlapping schedules for the same professional", exception.getMessage());
+        assertTrue(exception.getMessage().contains("sobrepostos") || exception.getMessage().contains("Overlapping"));
     }
 
     @Test

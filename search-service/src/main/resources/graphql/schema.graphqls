@@ -1,0 +1,69 @@
+type Query {
+  searchEstablishments(
+    filter: EstablishmentFilter!
+    page: PageInput
+  ): SearchResult!
+}
+
+input EstablishmentFilter {
+  query: String
+  city: String
+  state: String
+  geo: GeoFilter
+  services: [String]
+  minRating: Float
+  minPrice: Float
+  maxPrice: Float
+  sortBy: SortBy
+}
+
+input GeoFilter {
+  lat: Float!
+  lon: Float!
+  radiusKm: Float!
+}
+
+input PageInput {
+  page: Int = 0
+  size: Int = 10
+}
+
+enum SortBy {
+  RELEVANCE
+  RATING
+  DISTANCE
+}
+
+type SearchResult {
+  results: [EstablishmentResult!]!
+  totalHits: Int!
+  page: Int!
+  size: Int!
+}
+
+type EstablishmentResult {
+  id: ID!
+  name: String!
+  description: String
+  city: String!
+  state: String!
+  services: [ServiceSummary!]!
+  professionals: [ProfessionalSummary!]!
+  minPrice: Float
+  maxPrice: Float
+  averageRating: Float
+  totalReviews: Int!
+  distanceKm: Float
+  score: Float
+}
+
+type ServiceSummary {
+  title: String!
+  minPrice: Float
+  maxPrice: Float
+}
+
+type ProfessionalSummary {
+  name: String!
+  specialties: [String!]!
+}

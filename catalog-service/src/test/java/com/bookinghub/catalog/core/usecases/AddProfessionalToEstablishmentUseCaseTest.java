@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +60,8 @@ class AddProfessionalToEstablishmentUseCaseTest {
 
         professional = Professional.builder()
                 .id(professionalId)
+                .name("Dr. Test")
+                .specialties(List.of("Haircut", "Styling"))
                 .build();
     }
 
@@ -78,23 +81,24 @@ class AddProfessionalToEstablishmentUseCaseTest {
 
         when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.of(establishment));
         when(professionalRepository.findById(professionalId)).thenReturn(Optional.of(professional));
+        when(affiliationRepository.findByEstablishmentIdAndProfessionalId(establishmentId, professionalId)).thenReturn(Optional.empty());
         when(affiliationRepository.save(any(Affiliation.class))).thenReturn(affiliation);
 
         Affiliation result = useCase.execute(establishmentId, professionalId, affiliation);
 
         assertNotNull(result);
         verify(affiliationRepository).save(affiliation);
-        verify(eventPublisher).publishAffiliationCreated(result);
+        verify(eventPublisher).publishAffiliationCreated(eq(result), any(Professional.class), any(Establishment.class));
     }
 
     @Test
     void shouldThrowExceptionWhenEstablishmentNotFound() {
         when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> useCase.execute(establishmentId, professionalId, Affiliation.builder().build()));
-        
-        assertEquals("Establishment not found", exception.getMessage());
+
+        assertTrue(exception.getMessage().contains("Estabelecimento não encontrado"));
     }
 
     @Test
@@ -102,10 +106,10 @@ class AddProfessionalToEstablishmentUseCaseTest {
         when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.of(establishment));
         when(professionalRepository.findById(professionalId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> useCase.execute(establishmentId, professionalId, Affiliation.builder().build()));
-        
-        assertEquals("Professional not found", exception.getMessage());
+
+        assertTrue(exception.getMessage().contains("Profissional não encontrado"));
     }
 
     @Test
@@ -119,10 +123,10 @@ class AddProfessionalToEstablishmentUseCaseTest {
         when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.of(establishment));
         when(professionalRepository.findById(professionalId)).thenReturn(Optional.of(professional));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> useCase.execute(establishmentId, professionalId, affiliation));
-        
-        assertEquals("Salon is closed on day 2", exception.getMessage());
+
+        assertTrue(exception.getMessage().contains("O salão não funciona no dia 2"));
     }
 
     @Test
@@ -136,9 +140,45 @@ class AddProfessionalToEstablishmentUseCaseTest {
         when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.of(establishment));
         when(professionalRepository.findById(professionalId)).thenReturn(Optional.of(professional));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> useCase.execute(establishmentId, professionalId, affiliation));
-        
+
         assertEquals("Horário do profissional fora do expediente do salão", exception.getMessage());
+    }
+
+    @Test
+    void shouldPublishAffiliationUpdatedWhenAffiliationAlreadyExists() {
+        UUID existingAffiliationId = UUID.randomUUID();
+        Affiliation existingAffiliation = Affiliation.builder()
+                .id(existingAffiliationId)
+                .establishmentId(establishmentId)
+                .professionalId(professionalId)
+                .active(true)
+                .build();
+
+        Affiliation incomingAffiliation = Affiliation.builder()
+                .establishmentId(establishmentId)
+                .professionalId(professionalId)
+                .active(true)
+                .workSchedules(List.of(
+                        WorkSchedule.builder()
+                                .dayOfWeek(1)
+                                .startTime(LocalTime.of(9, 0))
+                                .endTime(LocalTime.of(17, 0))
+                                .build()
+                ))
+                .build();
+
+        when(establishmentRepository.findById(establishmentId)).thenReturn(Optional.of(establishment));
+        when(professionalRepository.findById(professionalId)).thenReturn(Optional.of(professional));
+        when(affiliationRepository.findByEstablishmentIdAndProfessionalId(establishmentId, professionalId))
+                .thenReturn(Optional.of(existingAffiliation));
+        when(affiliationRepository.save(any(Affiliation.class))).thenReturn(incomingAffiliation);
+
+        Affiliation result = useCase.execute(establishmentId, professionalId, incomingAffiliation);
+
+        assertNotNull(result);
+        verify(eventPublisher).publishAffiliationUpdated(eq(result), any(Professional.class), any(Establishment.class));
+        verify(eventPublisher, never()).publishAffiliationCreated(any(), any(), any());
     }
 }

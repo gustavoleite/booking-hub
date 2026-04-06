@@ -1,0 +1,13 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    listener:
+      simple:
+        auto-startup: false
+  elasticsearch:
+    uris: http://localhost:9200
+
+catalog:
+  service:
+    uri: http://localhost:8083

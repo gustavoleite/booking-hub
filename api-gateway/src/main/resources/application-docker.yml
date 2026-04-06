@@ -56,10 +56,17 @@ spring:
             - RewritePath=/api/(?<remaining>.*), /${remaining}
 
 
+        - id: search-service-admin-route
+          uri: ${SEARCH_SERVICE_URI:http://search-service:8085}
+          predicates:
+            - Path=/api/search/admin/**
+          filters:
+            - JwtAuthFilter
+            - RewritePath=/api/search/(?<remaining>.*), /${remaining}
+
         - id: search-service-route
           uri: ${SEARCH_SERVICE_URI:http://search-service:8085}
           predicates:
             - Path=/api/search/**
           filters:
-            - JwtAuthFilter
             - RewritePath=/api/search/(?<remaining>.*), /${remaining}

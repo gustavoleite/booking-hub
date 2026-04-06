@@ -6,6 +6,7 @@ import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.domain.ProvidedService;
 import com.bookinghub.catalog.core.exceptions.BusinessRuleException;
 import com.bookinghub.catalog.core.exceptions.ConflictException;
+import com.bookinghub.catalog.core.ports.CatalogEventPublisher;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +31,9 @@ class CreateEstablishmentUseCaseTest {
     @Mock
     private EstablishmentRepository establishmentRepository;
 
+    @Mock
+    private CatalogEventPublisher eventPublisher;
+
     @InjectMocks
     private CreateEstablishmentUseCase createEstablishmentUseCase;
 
@@ -40,7 +45,11 @@ class CreateEstablishmentUseCaseTest {
                 .ownerId("owner-1")
                 .name("Test Salon")
                 .cnpj("12345678000195")
-                .address(Address.builder().street("Main St").build())
+                .address(Address.builder()
+                        .street("Main St")
+                        .latitude(new BigDecimal("-23.5505"))
+                        .longitude(new BigDecimal("-46.6333"))
+                        .build())
                 .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
                 .defaultBusinessHours(List.of(
                         BusinessHour.builder()
@@ -68,7 +77,11 @@ class CreateEstablishmentUseCaseTest {
                 .ownerId("owner-1")
                 .name("Test Salon")
                 .cnpj("12.345.678/0001-95")
-                .address(Address.builder().street("Main St").build())
+                .address(Address.builder()
+                        .street("Main St")
+                        .latitude(new BigDecimal("-23.5505"))
+                        .longitude(new BigDecimal("-46.6333"))
+                        .build())
                 .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
                 .build();
 
@@ -91,7 +104,11 @@ class CreateEstablishmentUseCaseTest {
     void shouldThrowExceptionWhenCnpjIsInvalid() {
         validEstablishment = Establishment.builder()
                 .cnpj("123")
-                .address(Address.builder().street("Main St").build())
+                .address(Address.builder()
+                        .street("Main St")
+                        .latitude(new BigDecimal("-23.5505"))
+                        .longitude(new BigDecimal("-46.6333"))
+                        .build())
                 .build();
 
         assertThrows(BusinessRuleException.class, () -> createEstablishmentUseCase.execute(validEstablishment));
@@ -110,7 +127,11 @@ class CreateEstablishmentUseCaseTest {
     void shouldThrowExceptionWhenNoServicesProvided() {
         validEstablishment = Establishment.builder()
                 .cnpj("12345678000195")
-                .address(Address.builder().street("Main St").build())
+                .address(Address.builder()
+                        .street("Main St")
+                        .latitude(new BigDecimal("-23.5505"))
+                        .longitude(new BigDecimal("-46.6333"))
+                        .build())
                 .providedServices(Collections.emptyList())
                 .build();
 
@@ -121,7 +142,11 @@ class CreateEstablishmentUseCaseTest {
     void shouldThrowExceptionWhenBusinessHoursAreInvalid() {
         validEstablishment = Establishment.builder()
                 .cnpj("12345678000195")
-                .address(Address.builder().street("Main St").build())
+                .address(Address.builder()
+                        .street("Main St")
+                        .latitude(new BigDecimal("-23.5505"))
+                        .longitude(new BigDecimal("-46.6333"))
+                        .build())
                 .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
                 .defaultBusinessHours(List.of(
                         BusinessHour.builder()
@@ -133,5 +158,28 @@ class CreateEstablishmentUseCaseTest {
                 .build();
 
         assertThrows(BusinessRuleException.class, () -> createEstablishmentUseCase.execute(validEstablishment));
+    }
+
+    @Test
+    void shouldPublishEstablishmentCreatedEvent() {
+        when(establishmentRepository.existsByCnpj(any())).thenReturn(false);
+        when(establishmentRepository.save(any())).thenReturn(validEstablishment);
+
+        createEstablishmentUseCase.execute(validEstablishment);
+
+        verify(eventPublisher).publishEstablishmentCreated(any());
+    }
+
+    @Test
+    void shouldThrowWhenLatLonMissing() {
+        Establishment noLatLon = Establishment.builder()
+                .ownerId("owner-1")
+                .name("Test Salon")
+                .cnpj("12345678000195")
+                .address(Address.builder().street("Main St").build())
+                .providedServices(List.of(ProvidedService.builder().title("Cut").build()))
+                .build();
+
+        assertThrows(BusinessRuleException.class, () -> createEstablishmentUseCase.execute(noLatLon));
     }
 }

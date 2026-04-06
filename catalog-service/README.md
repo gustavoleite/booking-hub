@@ -74,7 +74,21 @@ O acesso aos endpoints é controlado via **API Gateway**, que valida o JWT e enc
 - `POST /affiliations` tem comportamento de **upsert**: se já existir uma afiliação para o par (estabelecimento, profissional), ela é atualizada em vez de criar um novo registro.
 
 ### Mensageria (RabbitMQ)
-- Ao criar/atualizar uma afiliação, o evento `affiliation.created` é publicado na exchange `catalog.events` serializado em **JSON** via `Jackson2JsonMessageConverter`.
+
+Exchange: `catalog.events` (topic, durable). Todos os eventos são serializados em **JSON** via `Jackson2JsonMessageConverter`.
+
+| Routing Key | Quando publicado |
+|---|---|
+| `establishment.created` | `POST /catalog/establishments` com sucesso |
+| `establishment.updated` | `PUT /catalog/establishments/{id}` com sucesso |
+| `affiliation.created` | Nova afiliação profissional criada |
+| `affiliation.updated` | Afiliação existente atualizada (preços, horários ou status) |
+
+Os payloads de afiliação incluem `professionalName`, `professionalSpecialties` e `serviceOfferings[].serviceTitle` — enriquecidos para consumo pelo `search-service` sem chamadas síncronas adicionais.
+
+### Campos obrigatórios no endereço
+
+A partir da versão atual, os campos `latitude` e `longitude` são **obrigatórios** no `AddressDto` de criação e atualização de estabelecimentos (`@NotNull`). Isso garante que 100% dos documentos indexados no `search-service` tenham coordenadas geográficas válidas. Os campos `city` e `state` também fazem parte do payload de endereço.
 
 ## 📚 Documentação da API (Swagger)
 A documentação dos endpoints REST pode ser acessada em:

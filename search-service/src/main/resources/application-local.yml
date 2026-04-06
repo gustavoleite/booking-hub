@@ -1,0 +1,12 @@
+spring:
+  elasticsearch:
+    uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+catalog:
+  service:
+    uri: ${CATALOG_SERVICE_URI:http://localhost:8083}

@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Configuration;
 public class BeanConfig {
 
     @Bean
-    public CreateEstablishmentUseCase createEstablishmentUseCase(EstablishmentRepository repository) {
-        return new CreateEstablishmentUseCase(repository);
+    public CreateEstablishmentUseCase createEstablishmentUseCase(EstablishmentRepository repository, CatalogEventPublisher eventPublisher) {
+        return new CreateEstablishmentUseCase(repository, eventPublisher);
     }
 
     @Bean
-    public UpdateEstablishmentUseCase updateEstablishmentUseCase(EstablishmentRepository repository) {
-        return new UpdateEstablishmentUseCase(repository);
+    public UpdateEstablishmentUseCase updateEstablishmentUseCase(EstablishmentRepository repository, CatalogEventPublisher eventPublisher) {
+        return new UpdateEstablishmentUseCase(repository, eventPublisher);
     }
 
     @Bean

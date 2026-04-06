@@ -25,7 +25,7 @@ public class AddProfessionalToEstablishmentUseCase {
         Establishment establishment = establishmentRepository.findById(establishmentId)
                 .orElseThrow(() -> new NotFoundException("Estabelecimento não encontrado: " + establishmentId));
 
-        professionalRepository.findById(professionalId)
+        Professional professional = professionalRepository.findById(professionalId)
                 .orElseThrow(() -> new NotFoundException("Profissional não encontrado: " + professionalId));
 
         List<WorkSchedule> schedules = affiliation.getWorkSchedules() != null
@@ -51,6 +51,7 @@ public class AddProfessionalToEstablishmentUseCase {
 
         // Reuse existing affiliation ID if one already exists for this pair
         Optional<Affiliation> existing = affiliationRepository.findByEstablishmentIdAndProfessionalId(establishmentId, professionalId);
+        boolean isNew = existing.isEmpty();
         Affiliation toSave = existing.map(ex -> Affiliation.builder()
                 .id(ex.getId())
                 .establishmentId(affiliation.getEstablishmentId())
@@ -61,7 +62,11 @@ public class AddProfessionalToEstablishmentUseCase {
                 .build()).orElse(affiliation);
 
         Affiliation savedAffiliation = affiliationRepository.save(toSave);
-        eventPublisher.publishAffiliationCreated(savedAffiliation);
+        if (isNew) {
+            eventPublisher.publishAffiliationCreated(savedAffiliation, professional, establishment);
+        } else {
+            eventPublisher.publishAffiliationUpdated(savedAffiliation, professional, establishment);
+        }
         return savedAffiliation;
     }
 }

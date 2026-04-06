@@ -25,6 +25,7 @@
         <module>catalog-service</module>
         <module>booking-service</module>
         <module>review-service</module>
+        <module>search-service</module>
     </modules>
 
     <dependencyManagement>

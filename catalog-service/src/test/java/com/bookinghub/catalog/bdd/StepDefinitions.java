@@ -25,6 +25,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -87,6 +88,8 @@ public class StepDefinitions {
         address.setStreet("Main St");
         address.setNumber("123");
         address.setZipCode("12345678");
+        address.setLatitude(new BigDecimal("-23.5505"));
+        address.setLongitude(new BigDecimal("-46.6333"));
         request.setAddress(address);
 
         EstablishmentRequest.BusinessHourDto bh = new EstablishmentRequest.BusinessHourDto();
@@ -128,6 +131,8 @@ public class StepDefinitions {
         address.setStreet("Street");
         address.setNumber("1");
         address.setZipCode("12345678");
+        address.setLatitude(new BigDecimal("-23.5505"));
+        address.setLongitude(new BigDecimal("-46.6333"));
         request.setAddress(address);
         request.setServices(List.of(new EstablishmentRequest.ProvidedServiceDto() {{ setTitle("Service"); }}));
 
@@ -146,8 +151,10 @@ public class StepDefinitions {
         
         EstablishmentRequest.AddressDto address = new EstablishmentRequest.AddressDto();
         address.setStreet("Main St");
+        address.setLatitude(new BigDecimal("-23.5505"));
+        address.setLongitude(new BigDecimal("-46.6333"));
         request.setAddress(address);
-        
+
         EstablishmentRequest.ProvidedServiceDto ps = new EstablishmentRequest.ProvidedServiceDto();
         ps.setTitle("Haircut");
         request.setServices(List.of(ps));
@@ -178,6 +185,8 @@ public class StepDefinitions {
         
         EstablishmentRequest.AddressDto address = new EstablishmentRequest.AddressDto();
         address.setStreet("Main St");
+        address.setLatitude(new BigDecimal("-23.5505"));
+        address.setLongitude(new BigDecimal("-46.6333"));
         request.setAddress(address);
 
         EstablishmentRequest.BusinessHourDto bh = new EstablishmentRequest.BusinessHourDto();
@@ -259,8 +268,10 @@ public class StepDefinitions {
         address.setStreet("Street");
         address.setNumber("1");
         address.setZipCode("12345678");
+        address.setLatitude(new BigDecimal("-23.5505"));
+        address.setLongitude(new BigDecimal("-46.6333"));
         request.setAddress(address);
-        
+
         EstablishmentRequest.ProvidedServiceDto ps = new EstablishmentRequest.ProvidedServiceDto();
         ps.setTitle("Service");
         request.setServices(List.of(ps));

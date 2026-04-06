@@ -3,6 +3,7 @@ package com.bookinghub.catalog.core.usecases;
 import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.exceptions.ForbiddenException;
 import com.bookinghub.catalog.core.exceptions.NotFoundException;
+import com.bookinghub.catalog.core.ports.CatalogEventPublisher;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UpdateEstablishmentUseCase {
     private final EstablishmentRepository establishmentRepository;
+    private final CatalogEventPublisher eventPublisher;
 
     public Establishment execute(UUID id, String ownerId, Establishment updatedData) {
         Establishment existing = establishmentRepository.findById(id)
@@ -22,6 +24,8 @@ public class UpdateEstablishmentUseCase {
 
         existing.updateDetails(updatedData.getName(), updatedData.getDescription(), updatedData.getPhotos());
 
-        return establishmentRepository.save(existing);
+        Establishment saved = establishmentRepository.save(existing);
+        eventPublisher.publishEstablishmentUpdated(saved);
+        return saved;
     }
 }

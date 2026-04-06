@@ -37,6 +37,25 @@ services:
       timeout: 5s
       retries: 5
 
+  elasticsearch:
+    image: elasticsearch:8.13.0
+    container_name: bw-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - bw-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: bw-rabbitmq
@@ -107,6 +126,29 @@ services:
       booking-service:
         condition: service_started
 
+  search-service:
+    build:
+      context: .
+      dockerfile: search-service/Dockerfile
+    container_name: bw-search-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - RABBIT_HOST=rabbitmq
+      - CATALOG_SERVICE_URI=http://catalog-service:8083
+    networks:
+      - bw-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+
   api-gateway:
     build:
       context: .
@@ -120,6 +162,7 @@ services:
       - CATALOG_SERVICE_URI=http://catalog-service:8083
       - BOOKING_SERVICE_URI=http://booking-service:8082
       - REVIEW_SERVICE_URI=http://review-service:8084
+      - SEARCH_SERVICE_URI=http://search-service:8085
       - RSA_PUBLIC_KEY_PATH=file:/app/certs/public_key.pem
     volumes:
       - ./infra/certs:/app/certs:ro # Read-only para as chaves
@@ -187,3 +230,4 @@ networks:
 volumes:
   pgdata:
   mongodata:
+  esdata:

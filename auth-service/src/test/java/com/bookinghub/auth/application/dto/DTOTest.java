@@ -3,7 +3,7 @@ package com.bookinghub.auth.application.dto;
 import com.bookinghub.auth.core.domain.Role;
 import org.junit.jupiter.api.Test;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DTOTest {
 

@@ -3,7 +3,7 @@ package com.bookinghub.catalog.infrastructure.adapters.in.rest.dto;
 import org.junit.jupiter.api.Test;
 import java.time.LocalTime;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EstablishmentRequestTest {
 

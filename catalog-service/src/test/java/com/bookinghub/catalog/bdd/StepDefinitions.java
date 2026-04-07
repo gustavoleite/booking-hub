@@ -1,11 +1,9 @@
 package com.bookinghub.catalog.bdd;
 
 import com.bookinghub.catalog.core.domain.Address;
-import com.bookinghub.catalog.core.domain.BusinessHour;
 import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.domain.Professional;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
-import com.bookinghub.catalog.core.ports.ProfessionalRepository;
 import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.EstablishmentRequest;
 import com.bookinghub.catalog.infrastructure.adapters.in.rest.dto.ProfessionalProfileRequest;
 import com.bookinghub.catalog.infrastructure.adapters.out.database.JpaEstablishmentRepository;
@@ -22,7 +20,6 @@ import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -31,7 +28,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @CucumberContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

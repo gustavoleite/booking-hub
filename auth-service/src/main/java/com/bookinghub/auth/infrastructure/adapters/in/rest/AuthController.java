@@ -1,6 +1,9 @@
 package com.bookinghub.auth.infrastructure.adapters.in.rest;
 
-import com.bookinghub.auth.application.dto.*;
+import com.bookinghub.auth.application.dto.LoginRequestDTO;
+import com.bookinghub.auth.application.dto.RegisterRequestDTO;
+import com.bookinghub.auth.application.dto.TokenResponseDTO;
+import com.bookinghub.auth.application.dto.UserResponseDTO;
 import com.bookinghub.auth.core.domain.User;
 import com.bookinghub.auth.core.usecases.AuthenticateUserUseCase;
 import com.bookinghub.auth.core.usecases.RegisterUserUseCase;

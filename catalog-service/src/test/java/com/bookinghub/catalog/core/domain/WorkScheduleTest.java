@@ -2,7 +2,8 @@ package com.bookinghub.catalog.core.domain;
 
 import org.junit.jupiter.api.Test;
 import java.time.LocalTime;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkScheduleTest {
 

@@ -3,7 +3,8 @@ package com.bookinghub.catalog.core.domain;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ProfessionalTest {
 

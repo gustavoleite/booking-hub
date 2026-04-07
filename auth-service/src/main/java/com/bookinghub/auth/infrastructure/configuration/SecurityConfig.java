@@ -16,7 +16,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring()
+        return web -> web.ignoring()
                 .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**"))
                 .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**"))
                 .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html"))

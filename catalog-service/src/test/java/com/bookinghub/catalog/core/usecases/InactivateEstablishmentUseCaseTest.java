@@ -2,7 +2,6 @@ package com.bookinghub.catalog.core.usecases;
 
 import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.exceptions.ForbiddenException;
-import com.bookinghub.catalog.core.exceptions.NotFoundException;
 import com.bookinghub.catalog.core.ports.EstablishmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

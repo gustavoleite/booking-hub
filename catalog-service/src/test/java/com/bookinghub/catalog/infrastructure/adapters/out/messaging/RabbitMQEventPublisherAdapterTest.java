@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class RabbitMQEventPublisherAdapterTest {

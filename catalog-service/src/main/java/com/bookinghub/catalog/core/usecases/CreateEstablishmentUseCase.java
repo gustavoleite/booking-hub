@@ -94,14 +94,14 @@ public class CreateEstablishmentUseCase {
                 sum1 += Character.getNumericValue(cnpj.charAt(i)) * weights1[i];
             }
             int digit1 = 11 - (sum1 % 11);
-            if (digit1 >= 10) digit1 = 0;
+            if (digit1 >= 10) { digit1 = 0; }
 
             int sum2 = 0;
             for (int i = 0; i < 13; i++) {
                 sum2 += Character.getNumericValue(cnpj.charAt(i)) * weights2[i];
             }
             int digit2 = 11 - (sum2 % 11);
-            if (digit2 >= 10) digit2 = 0;
+            if (digit2 >= 10) { digit2 = 0; }
 
             return Character.getNumericValue(cnpj.charAt(12)) == digit1 &&
                     Character.getNumericValue(cnpj.charAt(13)) == digit2;

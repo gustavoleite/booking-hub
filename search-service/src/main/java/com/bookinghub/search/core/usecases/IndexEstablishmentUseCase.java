@@ -12,7 +12,9 @@ public class IndexEstablishmentUseCase {
     private final EstablishmentSearchRepository repository;
 
     public void execute(EstablishmentDocument doc) {
-        log.info("Indexing establishment {}", doc.getId());
+        if (log.isInfoEnabled()) {
+            log.info("Indexing establishment {}", doc.getId());
+        }
         repository.upsert(doc);
     }
 }

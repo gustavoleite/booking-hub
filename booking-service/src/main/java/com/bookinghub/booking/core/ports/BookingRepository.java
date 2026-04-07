@@ -1,7 +1,6 @@
 package com.bookinghub.booking.core.ports;
 
 import com.bookinghub.booking.core.domain.Booking;
-import com.bookinghub.booking.core.domain.BookingStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

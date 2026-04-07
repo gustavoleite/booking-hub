@@ -11,7 +11,8 @@ import java.util.UUID;
 public class GlobalFilterConfig {
 
     @Bean
-    public GlobalFilter correlationIdFilter() {return (exchange, chain) -> {
+    public GlobalFilter correlationIdFilter() {
+        return (exchange, chain) -> {
             String correlationId = exchange.getRequest().getHeaders().getFirst("X-Correlation-ID");
 
             if (correlationId == null || correlationId.isEmpty()) {

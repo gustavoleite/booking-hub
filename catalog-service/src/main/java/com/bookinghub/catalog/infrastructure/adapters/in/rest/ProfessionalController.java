@@ -72,7 +72,7 @@ public class ProfessionalController {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            throw new BusinessRuleException("O X-User-Id fornecido não é um UUID válido: " + id);
+            throw new BusinessRuleException("O X-User-Id fornecido não é um UUID válido: " + id, e);
         }
     }
 
@@ -83,7 +83,7 @@ public class ProfessionalController {
                     .map(ResponseEntity::ok)
                     .orElseThrow(() -> new ProfessionalNotFoundException("Perfil profissional não encontrado para o ID: " + id));
         } catch (IllegalArgumentException e) {
-            throw new ProfessionalNotFoundException("ID fornecido não é um UUID válido: " + id);
+            throw new ProfessionalNotFoundException("ID fornecido não é um UUID válido: " + id, e);
         }
     }
 }

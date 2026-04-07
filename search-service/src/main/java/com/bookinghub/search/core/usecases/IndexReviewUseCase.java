@@ -31,7 +31,7 @@ public class IndexReviewUseCase {
         EstablishmentDocument doc = existing.get();
         double ratingSum = (doc.getRatingSum() != null ? doc.getRatingSum() : 0.0) + establishmentRating;
         int totalReviews = (doc.getTotalReviews() != null ? doc.getTotalReviews() : 0) + 1;
-        double averageRating = Math.round((ratingSum / totalReviews) * 10.0) / 10.0;
+        double averageRating = Math.round(ratingSum / totalReviews * 10.0) / 10.0;
 
         Map<String, Object> fields = new HashMap<>();
         fields.put("ratingSum", ratingSum);

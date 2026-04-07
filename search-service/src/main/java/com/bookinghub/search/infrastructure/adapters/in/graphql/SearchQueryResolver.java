@@ -72,17 +72,17 @@ public class SearchQueryResolver {
     }
 
     private SearchFilter mapFilter(EstablishmentFilterInput filter) {
-        if (filter == null) return SearchFilter.builder().build();
+        if (filter == null) { return SearchFilter.builder().build(); }
 
         var builder = SearchFilter.builder();
 
-        if (filter.query() != null) builder.query(filter.query());
-        if (filter.city() != null) builder.city(filter.city());
-        if (filter.state() != null) builder.state(filter.state());
-        if (filter.minRating() != null) builder.minRating(filter.minRating());
-        if (filter.minPrice() != null) builder.minPrice(filter.minPrice());
-        if (filter.maxPrice() != null) builder.maxPrice(filter.maxPrice());
-        if (filter.services() != null) builder.services(filter.services());
+        if (filter.query() != null) { builder.query(filter.query()); }
+        if (filter.city() != null) { builder.city(filter.city()); }
+        if (filter.state() != null) { builder.state(filter.state()); }
+        if (filter.minRating() != null) { builder.minRating(filter.minRating()); }
+        if (filter.minPrice() != null) { builder.minPrice(filter.minPrice()); }
+        if (filter.maxPrice() != null) { builder.maxPrice(filter.maxPrice()); }
+        if (filter.services() != null) { builder.services(filter.services()); }
         if (filter.sortBy() != null) {
             try {
                 builder.sortBy(SearchFilter.SortBy.valueOf(filter.sortBy()));

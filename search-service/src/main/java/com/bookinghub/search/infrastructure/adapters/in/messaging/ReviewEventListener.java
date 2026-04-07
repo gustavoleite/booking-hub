@@ -15,7 +15,9 @@ public class ReviewEventListener {
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchReviewCreatedQueueName}")
     public void onReviewCreated(ReviewEvent event) {
-        log.info("Received review.created for establishment {}", event.establishmentId());
+        if (log.isInfoEnabled()) {
+            log.info("Received review.created for establishment {}", event.establishmentId());
+        }
         indexReviewUseCase.execute(event.establishmentId(), event.establishmentRating());
     }
 }

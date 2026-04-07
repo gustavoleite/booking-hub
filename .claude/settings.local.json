@@ -40,7 +40,8 @@
       "Bash(timeout 30 mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
       "Bash(timeout 35 mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
       "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
-      "Bash(echo \"Deleted: $?\")"
+      "Bash(echo \"Deleted: $?\")",
+      "Bash(mvn pmd:check --no-transfer-progress)"
     ]
   }
 }

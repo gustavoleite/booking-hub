@@ -20,13 +20,17 @@ public class EstablishmentEventListener {
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchEstablishmentCreatedQueueName}")
     public void onEstablishmentCreated(EstablishmentEvent event) {
-        log.info("Received establishment.created for {}", event.id());
+        if (log.isInfoEnabled()) {
+            log.info("Received establishment.created for {}", event.id());
+        }
         indexEstablishmentUseCase.execute(toDocument(event));
     }
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchEstablishmentUpdatedQueueName}")
     public void onEstablishmentUpdated(EstablishmentEvent event) {
-        log.info("Received establishment.updated for {}", event.id());
+        if (log.isInfoEnabled()) {
+            log.info("Received establishment.updated for {}", event.id());
+        }
         updateEstablishmentUseCase.execute(
                 event.id(),
                 event.name(),

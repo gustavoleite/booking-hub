@@ -19,13 +19,17 @@ public class AffiliationEventListener {
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationCreatedQueueName}")
     public void onAffiliationCreated(AffiliationEvent event) {
-        log.info("Received affiliation.created for establishment {}", event.establishmentId());
+        if (log.isInfoEnabled()) {
+            log.info("Received affiliation.created for establishment {}", event.establishmentId());
+        }
         process(event);
     }
 
     @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationUpdatedQueueName}")
     public void onAffiliationUpdated(AffiliationEvent event) {
-        log.info("Received affiliation.updated for establishment {}", event.establishmentId());
+        if (log.isInfoEnabled()) {
+            log.info("Received affiliation.updated for establishment {}", event.establishmentId());
+        }
         process(event);
     }
 

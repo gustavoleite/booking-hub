@@ -29,7 +29,9 @@ public class RabbitMQReviewEventPublisher implements ReviewEventPublisher {
                 review.getProfessionalRating(),
                 review.getEstablishmentRating(),
                 LocalDateTime.now());
-        log.info("Publishing event [review.created] for review {}", review.getId());
+        if (log.isInfoEnabled()) {
+            log.info("Publishing event [review.created] for review {}", review.getId());
+        }
         rabbitTemplate.convertAndSend(EXCHANGE, "review.created", payload);
     }
 }

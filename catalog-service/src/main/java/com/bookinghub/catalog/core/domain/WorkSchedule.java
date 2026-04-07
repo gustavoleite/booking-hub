@@ -17,10 +17,8 @@ public class WorkSchedule {
     private final LocalTime endTime;
 
     public boolean overlaps(WorkSchedule other) {
-        if (this.dayOfWeek != other.dayOfWeek) {
-            return false;
-        }
-        return !(this.endTime.isBefore(other.startTime) || this.endTime.equals(other.startTime) ||
-                 this.startTime.isAfter(other.endTime) || this.startTime.equals(other.endTime));
+        return this.dayOfWeek == other.dayOfWeek
+            && !(this.endTime.isBefore(other.startTime) || this.endTime.equals(other.startTime)
+                 || this.startTime.isAfter(other.endTime) || this.startTime.equals(other.endTime));
     }
 }

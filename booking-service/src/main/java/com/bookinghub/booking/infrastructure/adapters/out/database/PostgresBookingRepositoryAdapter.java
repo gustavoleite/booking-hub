@@ -1,7 +1,6 @@
 package com.bookinghub.booking.infrastructure.adapters.out.database;
 
 import com.bookinghub.booking.core.domain.Booking;
-import com.bookinghub.booking.core.domain.BookingStatus;
 import com.bookinghub.booking.core.ports.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

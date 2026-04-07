@@ -35,28 +35,28 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 
-    @ExceptionHandler(com.bookinghub.booking.core.exceptions.BookingNotEligibleException.class)
-    public ProblemDetail handleBookingNotEligible(com.bookinghub.booking.core.exceptions.BookingNotEligibleException ex) {
+    @ExceptionHandler(BookingNotEligibleException.class)
+    public ProblemDetail handleBookingNotEligible(BookingNotEligibleException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
-    @ExceptionHandler(com.bookinghub.booking.core.exceptions.ForbiddenReviewAccessException.class)
-    public ProblemDetail handleForbiddenReview(com.bookinghub.booking.core.exceptions.ForbiddenReviewAccessException ex) {
+    @ExceptionHandler(ForbiddenReviewAccessException.class)
+    public ProblemDetail handleForbiddenReview(ForbiddenReviewAccessException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
-    @ExceptionHandler(com.bookinghub.booking.core.exceptions.InvalidReviewException.class)
-    public ProblemDetail handleInvalidReview(com.bookinghub.booking.core.exceptions.InvalidReviewException ex) {
+    @ExceptionHandler(InvalidReviewException.class)
+    public ProblemDetail handleInvalidReview(InvalidReviewException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    @ExceptionHandler(com.bookinghub.booking.core.exceptions.ReviewAlreadyExistsException.class)
-    public ProblemDetail handleReviewAlreadyExists(com.bookinghub.booking.core.exceptions.ReviewAlreadyExistsException ex) {
+    @ExceptionHandler(ReviewAlreadyExistsException.class)
+    public ProblemDetail handleReviewAlreadyExists(ReviewAlreadyExistsException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    @ExceptionHandler(com.bookinghub.booking.core.exceptions.ReviewNotFoundException.class)
-    public ProblemDetail handleReviewNotFound(com.bookinghub.booking.core.exceptions.ReviewNotFoundException ex) {
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ProblemDetail handleReviewNotFound(ReviewNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 

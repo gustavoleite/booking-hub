@@ -34,7 +34,7 @@ public class AuthController {
 
     @PostMapping("register")
     @Operation(summary = "Registrar um novo usuário", description = "Cria conta para clientes, profissionais ou donos de salão.")
-    @ApiResponses(value = {
+    @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos (Senha fraca ou Role inexistente)", 
                      content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -48,7 +48,7 @@ public class AuthController {
 
     @PostMapping("login")
     @Operation(summary = "Autenticar usuário", description = "Autentica o usuário e retorna um token de acesso JWT")
-    @ApiResponses(value = {
+    @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
         @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
                      content = @Content(schema = @Schema(implementation = ProblemDetail.class))),

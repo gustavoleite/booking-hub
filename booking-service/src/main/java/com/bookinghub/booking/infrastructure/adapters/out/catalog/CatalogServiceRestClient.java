@@ -48,12 +48,12 @@ public class CatalogServiceRestClient implements CatalogServiceClient {
             return new ScheduleInfo(response.active(), response.price(), response.durationMinutes(), schedule);
 
         } catch (HttpClientErrorException.NotFound e) {
-            throw new CatalogServiceException("Professional or service not found in catalog");
+            throw new CatalogServiceException("Professional or service not found in catalog", e);
         } catch (CatalogServiceException e) {
             throw e;
         } catch (Exception e) {
             log.error("Failed to fetch schedule from catalog service", e);
-            throw new CatalogServiceException("Catalog service unavailable: " + e.getMessage());
+            throw new CatalogServiceException("Catalog service unavailable: " + e.getMessage(), e);
         }
     }
 }

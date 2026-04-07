@@ -47,7 +47,9 @@ public class RabbitMQBookingEventPublisher implements BookingEventPublisher {
                 booking.getStatus().name(),
                 LocalDateTime.now()
         );
-        log.info("Publishing event [{}] for booking {}", routingKey, booking.getId());
+        if (log.isInfoEnabled()) {
+            log.info("Publishing event [{}] for booking {}", routingKey, booking.getId());
+        }
         rabbitTemplate.convertAndSend(EXCHANGE, routingKey, payload);
     }
 }

@@ -49,28 +49,28 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
 
             // Public endpoints that dont need JWT (UUID-identified resources only)
             String uuidPattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "$") && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
-            if (path.matches("^/api/catalog/professionals/" + uuidPattern + "$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/catalog/professionals/" + uuidPattern + "$") && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
-            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "/affiliations/professional/" + uuidPattern + "/schedule$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/catalog/establishments/" + uuidPattern + "/affiliations/professional/" + uuidPattern + "/schedule$") && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
-            if (path.equals("/api/bookings/availability") && request.getMethod().name().equals("GET")) {
+            if ("/api/bookings/availability".equals(path) && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
 
             // Public review endpoints (listing and stats — no auth required)
-            if (path.matches("^/api/reviews/professional/" + uuidPattern + "(/stats)?$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/reviews/professional/" + uuidPattern + "(/stats)?$") && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
-            if (path.matches("^/api/reviews/establishment/" + uuidPattern + "(/stats)?$") && request.getMethod().name().equals("GET")) {
+            if (path.matches("^/api/reviews/establishment/" + uuidPattern + "(/stats)?$") && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
 
-            if (path.equals("/api/search") && request.getMethod().name().equals("GET")) {
+            if ("/api/search".equals(path) && "GET".equals(request.getMethod().name())) {
                 return chain.filter(exchange);
             }
 

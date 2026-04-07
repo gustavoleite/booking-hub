@@ -16,13 +16,19 @@ public class ReindexUseCase {
     private final EstablishmentSearchRepository repository;
 
     public int execute() {
-        log.info("Starting reindex from catalog-service");
+        if (log.isInfoEnabled()) {
+            log.info("Starting reindex from catalog-service");
+        }
         List<EstablishmentDocument> establishments = catalogClient.fetchAllEstablishments();
-        log.info("Fetched {} establishments from catalog-service", establishments.size());
+        if (log.isInfoEnabled()) {
+            log.info("Fetched {} establishments from catalog-service", establishments.size());
+        }
         for (EstablishmentDocument doc : establishments) {
             repository.upsert(doc);
         }
-        log.info("Reindex complete: {} documents indexed", establishments.size());
+        if (log.isInfoEnabled()) {
+            log.info("Reindex complete: {} documents indexed", establishments.size());
+        }
         return establishments.size();
     }
 }

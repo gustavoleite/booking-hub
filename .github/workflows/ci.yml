@@ -172,7 +172,6 @@ jobs:
         run: |
           mvn -B test \
             -pl ${{ matrix.module }} \
-            -Dexcludes="**/*IT.java,**/CucumberTest.java,**/StepDefinitions.java,**/SpringIntegrationConfig.java" \
             --no-transfer-progress
 
       - name: Generate JaCoCo report — ${{ matrix.module }}

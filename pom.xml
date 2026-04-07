@@ -86,9 +86,57 @@
 
         <!-- Plugins que executam em todos os módulos filhos -->
         <plugins>
+            <!--
+              Surefire: exclui testes de integração/BDD da fase 'test' (unit tests).
+              Configurado aqui no POM para garantir comportamento consistente
+              independente do JUnit engine (Vintage, Jupiter ou Platform Suite).
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/CucumberTest.java</exclude>
+                        <exclude>**/StepDefinitions.java</exclude>
+                        <exclude>**/SpringIntegrationConfig.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <!--
+                  Exclusões globais consolidadas de todos os módulos:
+                  classes sem lógica de negócio que distorcem a cobertura.
+                  - Infraestrutura sem lógica: Application, Entity, Embeddable
+                  - DTOs / eventos de mensageria (mapeamento puro)
+                  - Adaptadores de saída para sistemas externos (ES, REST clients,
+                    JPA repositories) — cobertos por testes de integração/BDD
+                  - Configurações Spring (@Configuration / @Bean glue code)
+                -->
+                <configuration>
+                    <excludes>
+                        <!-- Bootstrap e infraestrutura sem lógica de negócio -->
+                        <exclude>**/*Application.class</exclude>
+                        <exclude>**/*Entity.class</exclude>
+                        <exclude>**/*Embeddable.class</exclude>
+                        <!-- DTOs e eventos (mapeamento puro, sem lógica) -->
+                        <exclude>**/dto/**</exclude>
+                        <exclude>**/messaging/*Event.class</exclude>
+                        <!-- Adaptadores de saída para sistemas externos
+                             (cobertura garantida pelos testes de integração/BDD) -->
+                        <exclude>**/*EsDocument*.class</exclude>
+                        <exclude>**/*SearchRepository.class</exclude>
+                        <exclude>**/*RepositoryAdapter.class</exclude>
+                        <exclude>**/*RestClient.class</exclude>
+                        <!-- Configurações Spring -->
+                        <exclude>**/configuration/**</exclude>
+                        <exclude>**/config/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>

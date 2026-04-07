@@ -15,11 +15,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressEmbeddable {
-  private String street;
-  private String number;
-  private String city;
-  private String state;
-  private String zipCode;
-  private BigDecimal latitude;
-  private BigDecimal longitude;
+    private String street;
+    private String number;
+    private String city;
+    private String state;
+    private String zipCode;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 }

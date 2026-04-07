@@ -24,15 +24,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessHourEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "establishment_id")
-  private EstablishmentEntity establishment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "establishment_id")
+    private EstablishmentEntity establishment;
 
-  private int dayOfWeek;
-  private LocalTime openTime;
-  private LocalTime closeTime;
+    private int dayOfWeek;
+    private LocalTime openTime;
+    private LocalTime closeTime;
 }

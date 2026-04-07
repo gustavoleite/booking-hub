@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ListClientBookingsUseCase {
 
-  private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
-  public List<Booking> execute(String clientId) {
-    return bookingRepository.findByClientId(clientId);
-  }
+    public List<Booking> execute(String clientId) {
+        return bookingRepository.findByClientId(clientId);
+    }
 }

@@ -13,15 +13,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IndexEstablishmentUseCaseTest {
 
-  @Mock
-  EstablishmentSearchRepository repository;
-  @InjectMocks
-  IndexEstablishmentUseCase useCase;
+    @Mock
+    EstablishmentSearchRepository repository;
+    @InjectMocks
+    IndexEstablishmentUseCase useCase;
 
-  @Test
-  void shouldUpsertDocumentOnIndex() {
-    var doc = EstablishmentDocument.builder().id("abc").name("Salão").build();
-    useCase.execute(doc);
-    verify(repository).upsert(doc);
-  }
+    @Test
+    void shouldUpsertDocumentOnIndex() {
+        var doc = EstablishmentDocument.builder().id("abc").name("Salão").build();
+        useCase.execute(doc);
+        verify(repository).upsert(doc);
+    }
 }

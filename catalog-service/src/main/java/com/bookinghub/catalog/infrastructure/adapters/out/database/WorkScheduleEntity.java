@@ -24,15 +24,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkScheduleEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "affiliation_id")
-  private AffiliationEntity affiliation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "affiliation_id")
+    private AffiliationEntity affiliation;
 
-  private int dayOfWeek;
-  private LocalTime startTime;
-  private LocalTime endTime;
+    private int dayOfWeek;
+    private LocalTime startTime;
+    private LocalTime endTime;
 }

@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @SuppressWarnings("PMD.UseUtilityClass")
 public class SearchApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(SearchApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(SearchApplication.class, args);
+    }
 }

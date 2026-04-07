@@ -9,29 +9,29 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UpdateProfessionalProfileUseCase {
-  private final ProfessionalRepository professionalRepository;
+    private final ProfessionalRepository professionalRepository;
 
-  public Professional execute(UUID id, Professional professionalData) {
-    validate(professionalData);
+    public Professional execute(UUID id, Professional professionalData) {
+        validate(professionalData);
 
-    return professionalRepository.findById(id)
-        .map(existing -> {
-          existing.updateProfile(
-              professionalData.getName(),
-              professionalData.getBio(),
-              professionalData.getAvatarUrl(),
-              professionalData.getSpecialties()
-          );
-          return professionalRepository.save(existing);
-        })
-        .orElseThrow(
-            () -> new ProfessionalNotFoundException(
-                "Perfil profissional não encontrado para o ID: " + id));
-  }
-
-  private void validate(Professional professional) {
-    if (professional.getName() == null || professional.getName().trim().isEmpty()) {
-      throw new BusinessRuleException("O nome do profissional é obrigatório");
+        return professionalRepository.findById(id)
+                .map(existing -> {
+                    existing.updateProfile(
+                            professionalData.getName(),
+                            professionalData.getBio(),
+                            professionalData.getAvatarUrl(),
+                            professionalData.getSpecialties()
+                    );
+                    return professionalRepository.save(existing);
+                })
+                .orElseThrow(
+                        () -> new ProfessionalNotFoundException(
+                                "Perfil profissional não encontrado para o ID: " + id));
     }
-  }
+
+    private void validate(Professional professional) {
+        if (professional.getName() == null || professional.getName().trim().isEmpty()) {
+            throw new BusinessRuleException("O nome do profissional é obrigatório");
+        }
+    }
 }

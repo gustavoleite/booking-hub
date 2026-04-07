@@ -27,44 +27,46 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Endpoints for user registration and authentication")
 public class AuthController {
 
-  private final RegisterUserUseCase registerUserUseCase;
-  private final AuthenticateUserUseCase authenticateUserUseCase;
+    private final RegisterUserUseCase registerUserUseCase;
+    private final AuthenticateUserUseCase authenticateUserUseCase;
 
-  public AuthController(RegisterUserUseCase registerUserUseCase,
-      AuthenticateUserUseCase authenticateUserUseCase) {
-    this.registerUserUseCase = registerUserUseCase;
-    this.authenticateUserUseCase = authenticateUserUseCase;
-  }
+    public AuthController(RegisterUserUseCase registerUserUseCase,
+                        AuthenticateUserUseCase authenticateUserUseCase) {
+        this.registerUserUseCase = registerUserUseCase;
+        this.authenticateUserUseCase = authenticateUserUseCase;
+    }
 
-  @PostMapping("register")
-  @Operation(summary = "Registrar um novo usuário",
-      description = "Cria conta para clientes, profissionais ou donos de salão.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
-      @ApiResponse(responseCode = "400",
-          description = "Dados inválidos (Senha fraca ou Role inexistente)",
-          content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-      @ApiResponse(responseCode = "409", description = "E-mail já cadastrado",
-          content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-  })
-  public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid RegisterRequestDTO request) {
-    User user = registerUserUseCase.execute(request.email(), request.password(), request.role());
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new UserResponseDTO(user.getId(), user.getEmail()));
-  }
+    @PostMapping("register")
+    @Operation(summary = "Registrar um novo usuário",
+            description = "Cria conta para clientes, profissionais ou donos de salão.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
+            @ApiResponse(responseCode = "400",
+                    description = "Dados inválidos (Senha fraca ou Role inexistente)",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "E-mail já cadastrado",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<UserResponseDTO> register(
+            @RequestBody @Valid RegisterRequestDTO request) {
+        User user = registerUserUseCase.execute(
+                request.email(), request.password(), request.role());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new UserResponseDTO(user.getId(), user.getEmail()));
+    }
 
-  @PostMapping("login")
-  @Operation(summary = "Autenticar usuário",
-      description = "Autentica o usuário e retorna um token de acesso JWT")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
-      @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
-          content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-      @ApiResponse(responseCode = "403", description = "Usuário inativo",
-          content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-  })
-  public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
-    String token = authenticateUserUseCase.execute(request.email(), request.password());
-    return ResponseEntity.ok(new TokenResponseDTO(token, 3600, "Bearer"));
-  }
+    @PostMapping("login")
+    @Operation(summary = "Autenticar usuário",
+            description = "Autentica o usuário e retorna um token de acesso JWT")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "Usuário inativo",
+                    content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
+        String token = authenticateUserUseCase.execute(request.email(), request.password());
+        return ResponseEntity.ok(new TokenResponseDTO(token, 3600, "Bearer"));
+    }
 }

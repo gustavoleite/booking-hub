@@ -9,29 +9,29 @@ import com.bookinghub.auth.core.ports.UserRepository;
 
 public class AuthenticateUserUseCase {
 
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final TokenGenerator tokenGenerator;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenGenerator tokenGenerator;
 
-  public AuthenticateUserUseCase(UserRepository userRepository,
-      PasswordEncoder passwordEncoder, TokenGenerator tokenGenerator) {
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.tokenGenerator = tokenGenerator;
-  }
-
-  public String execute(String email, String password) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new InvalidCredentialsException("E-mail ou senha incorretos."));
-
-    if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-      throw new InvalidCredentialsException("E-mail ou senha incorretos.");
+    public AuthenticateUserUseCase(UserRepository userRepository,
+                                 PasswordEncoder passwordEncoder, TokenGenerator tokenGenerator) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenGenerator = tokenGenerator;
     }
 
-    if (!user.isActive()) {
-      throw new InactiveUserException("O usuário está inativo.");
-    }
+    public String execute(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("E-mail ou senha incorretos."));
 
-    return tokenGenerator.generateToken(user);
-  }
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw new InvalidCredentialsException("E-mail ou senha incorretos.");
+        }
+
+        if (!user.isActive()) {
+            throw new InactiveUserException("O usuário está inativo.");
+        }
+
+        return tokenGenerator.generateToken(user);
+    }
 }

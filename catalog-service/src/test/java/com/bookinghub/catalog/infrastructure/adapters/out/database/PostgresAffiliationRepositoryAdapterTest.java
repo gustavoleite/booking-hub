@@ -25,53 +25,53 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PostgresAffiliationRepositoryAdapterTest {
 
-  @Mock
-  private JpaAffiliationRepository jpaRepository;
+    @Mock
+    private JpaAffiliationRepository jpaRepository;
 
-  @InjectMocks
-  private PostgresAffiliationRepositoryAdapter adapter;
+    @InjectMocks
+    private PostgresAffiliationRepositoryAdapter adapter;
 
-  @Test
-  void shouldSaveAffiliation() {
-    UUID id = UUID.randomUUID();
-    Affiliation domain = Affiliation.builder()
-        .id(id)
-        .establishmentId(UUID.randomUUID())
-        .professionalId(UUID.randomUUID())
-        .workSchedules(List.of(WorkSchedule.builder().dayOfWeek(1).startTime(LocalTime.MIN).endTime(LocalTime.MAX).build()))
-        .serviceOfferings(List.of(ServiceOffering.builder().providedServiceId(UUID.randomUUID()).price(BigDecimal.TEN).build()))
-        .build();
+    @Test
+    void shouldSaveAffiliation() {
+        UUID id = UUID.randomUUID();
+        Affiliation domain = Affiliation.builder()
+                .id(id)
+                .establishmentId(UUID.randomUUID())
+                .professionalId(UUID.randomUUID())
+                .workSchedules(List.of(WorkSchedule.builder().dayOfWeek(1).startTime(LocalTime.MIN).endTime(LocalTime.MAX).build()))
+                .serviceOfferings(List.of(ServiceOffering.builder().providedServiceId(UUID.randomUUID()).price(BigDecimal.TEN).build()))
+                .build();
 
-    AffiliationEntity entity = AffiliationEntity.builder()
-        .id(id)
-        .establishment(EstablishmentEntity.builder().id(domain.getEstablishmentId()).build())
-        .professional(ProfessionalEntity.builder().id(domain.getProfessionalId()).build())
-        .workSchedules(new ArrayList<>())
-        .serviceOfferings(new ArrayList<>())
-        .build();
-    when(jpaRepository.save(any(AffiliationEntity.class))).thenReturn(entity);
+        AffiliationEntity entity = AffiliationEntity.builder()
+                .id(id)
+                .establishment(EstablishmentEntity.builder().id(domain.getEstablishmentId()).build())
+                .professional(ProfessionalEntity.builder().id(domain.getProfessionalId()).build())
+                .workSchedules(new ArrayList<>())
+                .serviceOfferings(new ArrayList<>())
+                .build();
+        when(jpaRepository.save(any(AffiliationEntity.class))).thenReturn(entity);
 
-    Affiliation result = adapter.save(domain);
+        Affiliation result = adapter.save(domain);
 
-    assertNotNull(result);
-    verify(jpaRepository).save(any(AffiliationEntity.class));
-  }
+        assertNotNull(result);
+        verify(jpaRepository).save(any(AffiliationEntity.class));
+    }
 
-  @Test
-  void shouldFindByEstablishmentIdAndProfessionalId() {
-    UUID estId = UUID.randomUUID();
-    UUID profId = UUID.randomUUID();
-    AffiliationEntity entity = AffiliationEntity.builder()
-        .establishment(EstablishmentEntity.builder().id(estId).build())
-        .professional(ProfessionalEntity.builder().id(profId).build())
-        .workSchedules(new ArrayList<>())
-        .serviceOfferings(new ArrayList<>())
-        .build();
-    when(jpaRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.of(entity));
+    @Test
+    void shouldFindByEstablishmentIdAndProfessionalId() {
+        UUID estId = UUID.randomUUID();
+        UUID profId = UUID.randomUUID();
+        AffiliationEntity entity = AffiliationEntity.builder()
+                .establishment(EstablishmentEntity.builder().id(estId).build())
+                .professional(ProfessionalEntity.builder().id(profId).build())
+                .workSchedules(new ArrayList<>())
+                .serviceOfferings(new ArrayList<>())
+                .build();
+        when(jpaRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.of(entity));
 
-    Optional<Affiliation> result = adapter.findByEstablishmentIdAndProfessionalId(estId, profId);
+        Optional<Affiliation> result = adapter.findByEstablishmentIdAndProfessionalId(estId, profId);
 
-    assertTrue(result.isPresent());
-    assertEquals(estId, result.get().getEstablishmentId());
-  }
+        assertTrue(result.isPresent());
+        assertEquals(estId, result.get().getEstablishmentId());
+    }
 }

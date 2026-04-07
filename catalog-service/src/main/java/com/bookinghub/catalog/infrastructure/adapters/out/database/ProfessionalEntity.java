@@ -24,17 +24,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfessionalEntity {
-  @Id
-  private UUID id;
-  private String name;
-  private String bio;
-  private String avatarUrl;
-  @Builder.Default
-  private boolean active = true;
+    @Id
+    private UUID id;
+    private String name;
+    private String bio;
+    private String avatarUrl;
+    @Builder.Default
+    private boolean active = true;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-      name = "tb_professional_specialties", joinColumns = @JoinColumn(name = "professional_id"))
-  @Column(name = "specialty")
-  private List<String> specialties;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "tb_professional_specialties",
+            joinColumns = @JoinColumn(name = "professional_id"))
+    @Column(name = "specialty")
+    private List<String> specialties;
 }

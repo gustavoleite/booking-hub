@@ -16,21 +16,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ListProfessionalAgendaUseCaseTest {
 
-  @Mock
-  private BookingRepository bookingRepository;
+    @Mock
+    private BookingRepository bookingRepository;
 
-  @InjectMocks
-  private ListProfessionalAgendaUseCase useCase;
+    @InjectMocks
+    private ListProfessionalAgendaUseCase useCase;
 
-  @Test
-  void shouldListBookingsByProfessional() {
-    UUID professionalId = UUID.randomUUID();
-    List<Booking> bookings = List.of(Booking.builder().professionalId(professionalId).build());
-    when(bookingRepository.findByProfessionalId(professionalId)).thenReturn(bookings);
+    @Test
+    void shouldListBookingsByProfessional() {
+        UUID professionalId = UUID.randomUUID();
+        List<Booking> bookings = List.of(Booking.builder().professionalId(professionalId).build());
+        when(bookingRepository.findByProfessionalId(professionalId)).thenReturn(bookings);
 
-    List<Booking> result = useCase.execute(professionalId);
+        List<Booking> result = useCase.execute(professionalId);
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getProfessionalId()).isEqualTo(professionalId);
-  }
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getProfessionalId()).isEqualTo(professionalId);
+    }
 }

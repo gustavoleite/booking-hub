@@ -13,24 +13,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RabbitMQReviewEventPublisher implements ReviewEventPublisher {
 
-  private static final String EXCHANGE = "review.events";
+    private static final String EXCHANGE = "review.events";
 
-  private final RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-  @Override
-  public void publishReviewCreated(Review review) {
-    ReviewEventPayload payload = new ReviewEventPayload(
-        review.getId(),
-        review.getBookingId(),
-        review.getClientId(),
-        review.getProfessionalId(),
-        review.getEstablishmentId(),
-        review.getProfessionalRating(),
-        review.getEstablishmentRating(),
-        LocalDateTime.now());
-    if (log.isInfoEnabled()) {
-      log.info("Publishing event [review.created] for review {}", review.getId());
+    @Override
+    public void publishReviewCreated(Review review) {
+        ReviewEventPayload payload = new ReviewEventPayload(
+                review.getId(),
+                review.getBookingId(),
+                review.getClientId(),
+                review.getProfessionalId(),
+                review.getEstablishmentId(),
+                review.getProfessionalRating(),
+                review.getEstablishmentRating(),
+                LocalDateTime.now());
+        if (log.isInfoEnabled()) {
+            log.info("Publishing event [review.created] for review {}", review.getId());
+        }
+        rabbitTemplate.convertAndSend(EXCHANGE, "review.created", payload);
     }
-    rabbitTemplate.convertAndSend(EXCHANGE, "review.created", payload);
-  }
 }

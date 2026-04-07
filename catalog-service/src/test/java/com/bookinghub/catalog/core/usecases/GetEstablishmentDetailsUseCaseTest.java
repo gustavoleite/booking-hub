@@ -19,29 +19,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GetEstablishmentDetailsUseCaseTest {
 
-  @Mock
-  private EstablishmentRepository establishmentRepository;
+    @Mock
+    private EstablishmentRepository establishmentRepository;
 
-  @InjectMocks
-  private GetEstablishmentDetailsUseCase useCase;
+    @InjectMocks
+    private GetEstablishmentDetailsUseCase useCase;
 
-  @Test
-  void shouldReturnEstablishmentDetails() {
-    UUID id = UUID.randomUUID();
-    Establishment establishment = Establishment.builder().id(id).build();
-    when(establishmentRepository.findById(id)).thenReturn(Optional.of(establishment));
+    @Test
+    void shouldReturnEstablishmentDetails() {
+        UUID id = UUID.randomUUID();
+        Establishment establishment = Establishment.builder().id(id).build();
+        when(establishmentRepository.findById(id)).thenReturn(Optional.of(establishment));
 
-    Establishment result = useCase.execute(id);
+        Establishment result = useCase.execute(id);
 
-    assertNotNull(result);
-    assertEquals(id, result.getId());
-  }
+        assertNotNull(result);
+        assertEquals(id, result.getId());
+    }
 
-  @Test
-  void shouldThrowNotFoundWhenDoesNotExist() {
-    UUID id = UUID.randomUUID();
-    when(establishmentRepository.findById(id)).thenReturn(Optional.empty());
+    @Test
+    void shouldThrowNotFoundWhenDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(establishmentRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () -> useCase.execute(id));
-  }
+        assertThrows(NotFoundException.class, () -> useCase.execute(id));
+    }
 }

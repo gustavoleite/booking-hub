@@ -9,30 +9,30 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CreateProfessionalProfileUseCase {
-  private final ProfessionalRepository professionalRepository;
+    private final ProfessionalRepository professionalRepository;
 
-  public Professional execute(UUID id, Professional professionalData) {
-    validate(professionalData);
+    public Professional execute(UUID id, Professional professionalData) {
+        validate(professionalData);
 
-    if (professionalRepository.findById(id).isPresent()) {
-      throw new ConflictException("Perfil profissional já existe para este usuário.");
+        if (professionalRepository.findById(id).isPresent()) {
+            throw new ConflictException("Perfil profissional já existe para este usuário.");
+        }
+
+        Professional newProfile = Professional.builder()
+                .id(id)
+                .name(professionalData.getName())
+                .bio(professionalData.getBio())
+                .avatarUrl(professionalData.getAvatarUrl())
+                .specialties(professionalData.getSpecialties())
+                .active(true)
+                .build();
+
+        return professionalRepository.save(newProfile);
     }
 
-    Professional newProfile = Professional.builder()
-        .id(id)
-        .name(professionalData.getName())
-        .bio(professionalData.getBio())
-        .avatarUrl(professionalData.getAvatarUrl())
-        .specialties(professionalData.getSpecialties())
-        .active(true)
-        .build();
-
-    return professionalRepository.save(newProfile);
-  }
-
-  private void validate(Professional professional) {
-    if (professional.getName() == null || professional.getName().trim().isEmpty()) {
-      throw new BusinessRuleException("O nome do profissional é obrigatório");
+    private void validate(Professional professional) {
+        if (professional.getName() == null || professional.getName().trim().isEmpty()) {
+            throw new BusinessRuleException("O nome do profissional é obrigatório");
+        }
     }
-  }
 }

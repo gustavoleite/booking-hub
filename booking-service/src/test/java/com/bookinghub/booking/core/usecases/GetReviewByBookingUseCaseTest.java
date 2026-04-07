@@ -19,50 +19,50 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GetReviewByBookingUseCaseTest {
 
-  @Mock
-  private ReviewRepository reviewRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
-  @InjectMocks
-  private GetReviewByBookingUseCase useCase;
+    @InjectMocks
+    private GetReviewByBookingUseCase useCase;
 
-  @Test
-  void shouldReturnReviewForOwner() {
-    UUID bookingId = UUID.randomUUID();
-    Review review = Review.builder().clientId("client-1").build();
-    when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
+    @Test
+    void shouldReturnReviewForOwner() {
+        UUID bookingId = UUID.randomUUID();
+        Review review = Review.builder().clientId("client-1").build();
+        when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
 
-    Review result = useCase.execute(bookingId, "any", "ROLE_OWNER");
+        Review result = useCase.execute(bookingId, "any", "ROLE_OWNER");
 
-    assertThat(result).isEqualTo(review);
-  }
+        assertThat(result).isEqualTo(review);
+    }
 
-  @Test
-  void shouldReturnReviewForClientOwner() {
-    UUID bookingId = UUID.randomUUID();
-    Review review = Review.builder().clientId("client-1").build();
-    when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
+    @Test
+    void shouldReturnReviewForClientOwner() {
+        UUID bookingId = UUID.randomUUID();
+        Review review = Review.builder().clientId("client-1").build();
+        when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
 
-    Review result = useCase.execute(bookingId, "client-1", "ROLE_CLIENT");
+        Review result = useCase.execute(bookingId, "client-1", "ROLE_CLIENT");
 
-    assertThat(result).isEqualTo(review);
-  }
+        assertThat(result).isEqualTo(review);
+    }
 
-  @Test
-  void shouldThrowWhenNotAuthorized() {
-    UUID bookingId = UUID.randomUUID();
-    Review review = Review.builder().clientId("client-1").build();
-    when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
+    @Test
+    void shouldThrowWhenNotAuthorized() {
+        UUID bookingId = UUID.randomUUID();
+        Review review = Review.builder().clientId("client-1").build();
+        when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.of(review));
 
-    assertThatThrownBy(() -> useCase.execute(bookingId, "other-client", "ROLE_CLIENT"))
-        .isInstanceOf(ForbiddenReviewAccessException.class);
-  }
+        assertThatThrownBy(() -> useCase.execute(bookingId, "other-client", "ROLE_CLIENT"))
+                .isInstanceOf(ForbiddenReviewAccessException.class);
+    }
 
-  @Test
-  void shouldThrowWhenReviewNotFound() {
-    UUID bookingId = UUID.randomUUID();
-    when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
+    @Test
+    void shouldThrowWhenReviewNotFound() {
+        UUID bookingId = UUID.randomUUID();
+        when(reviewRepository.findByBookingId(bookingId)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> useCase.execute(bookingId, "any", "ROLE_OWNER"))
-        .isInstanceOf(ReviewNotFoundException.class);
-  }
+        assertThatThrownBy(() -> useCase.execute(bookingId, "any", "ROLE_OWNER"))
+                .isInstanceOf(ReviewNotFoundException.class);
+    }
 }

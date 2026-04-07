@@ -10,76 +10,76 @@ import org.junit.jupiter.api.Test;
 
 class EstablishmentTest {
 
-  @Test
-  void shouldUpdateDetails() {
-    Establishment establishment = Establishment.builder()
-        .id(UUID.randomUUID())
-        .name("Old Name")
-        .description("Old Description")
-        .photos(List.of("photo1.jpg"))
-        .build();
+    @Test
+    void shouldUpdateDetails() {
+        Establishment establishment = Establishment.builder()
+                .id(UUID.randomUUID())
+                .name("Old Name")
+                .description("Old Description")
+                .photos(List.of("photo1.jpg"))
+                .build();
 
-    String newName = "New Name";
-    String newDescription = "New Description";
-    List<String> newPhotos = List.of("photo2.jpg", "photo3.jpg");
-    Address newAddress = Address.builder().street("New Street").city("New City").build();
+        String newName = "New Name";
+        String newDescription = "New Description";
+        List<String> newPhotos = List.of("photo2.jpg", "photo3.jpg");
+        Address newAddress = Address.builder().street("New Street").city("New City").build();
 
-    establishment.updateDetails(newName, newDescription, newPhotos, newAddress);
+        establishment.updateDetails(newName, newDescription, newPhotos, newAddress);
 
-    assertEquals(newName, establishment.getName());
-    assertEquals(newDescription, establishment.getDescription());
-    assertEquals(newPhotos, establishment.getPhotos());
-    assertEquals(newAddress, establishment.getAddress());
-  }
+        assertEquals(newName, establishment.getName());
+        assertEquals(newDescription, establishment.getDescription());
+        assertEquals(newPhotos, establishment.getPhotos());
+        assertEquals(newAddress, establishment.getAddress());
+    }
 
-  @Test
-  void shouldInactivate() {
-    Establishment establishment = Establishment.builder()
-        .id(UUID.randomUUID())
-        .active(true)
-        .build();
+    @Test
+    void shouldInactivate() {
+        Establishment establishment = Establishment.builder()
+                .id(UUID.randomUUID())
+                .active(true)
+                .build();
 
-    establishment.inactivate();
+        establishment.inactivate();
 
-    assertFalse(establishment.isActive());
-  }
+        assertFalse(establishment.isActive());
+    }
 
-  @Test
-  void shouldCreateWithDefaultActiveStatus() {
-    Establishment establishment = Establishment.builder()
-        .id(UUID.randomUUID())
-        .build();
+    @Test
+    void shouldCreateWithDefaultActiveStatus() {
+        Establishment establishment = Establishment.builder()
+                .id(UUID.randomUUID())
+                .build();
 
-    assertTrue(establishment.isActive());
-  }
+        assertTrue(establishment.isActive());
+    }
 
-  @Test
-  void shouldHaveGettersForFields() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-1";
-    String cnpj = "12345678000199";
-    Address address = Address.builder().street("Street").build();
-    List<BusinessHour> hours = List.of();
-    List<ProvidedService> services = List.of();
+    @Test
+    void shouldHaveGettersForFields() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-1";
+        String cnpj = "12345678000199";
+        Address address = Address.builder().street("Street").build();
+        List<BusinessHour> hours = List.of();
+        List<ProvidedService> services = List.of();
 
-    Establishment establishment = Establishment.builder()
-        .id(id)
-        .ownerId(ownerId)
-        .name("Name")
-        .cnpj(cnpj)
-        .description("Desc")
-        .address(address)
-        .defaultBusinessHours(hours)
-        .providedServices(services)
-        .build();
+        Establishment establishment = Establishment.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .name("Name")
+                .cnpj(cnpj)
+                .description("Desc")
+                .address(address)
+                .defaultBusinessHours(hours)
+                .providedServices(services)
+                .build();
 
-    assertEquals(id, establishment.getId());
-    assertEquals(ownerId, establishment.getOwnerId());
-    assertEquals("Name", establishment.getName());
-    assertEquals(cnpj, establishment.getCnpj());
-    assertEquals("Desc", establishment.getDescription());
-    assertEquals(address, establishment.getAddress());
-    assertEquals(hours, establishment.getDefaultBusinessHours());
-    assertEquals(services, establishment.getProvidedServices());
-  }
+        assertEquals(id, establishment.getId());
+        assertEquals(ownerId, establishment.getOwnerId());
+        assertEquals("Name", establishment.getName());
+        assertEquals(cnpj, establishment.getCnpj());
+        assertEquals("Desc", establishment.getDescription());
+        assertEquals(address, establishment.getAddress());
+        assertEquals(hours, establishment.getDefaultBusinessHours());
+        assertEquals(services, establishment.getProvidedServices());
+    }
 }

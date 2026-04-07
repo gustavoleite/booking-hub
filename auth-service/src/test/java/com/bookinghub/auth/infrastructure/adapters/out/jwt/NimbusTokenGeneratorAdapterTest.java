@@ -15,57 +15,57 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class NimbusTokenGeneratorAdapterTest {
 
-  private NimbusTokenGeneratorAdapter adapter;
+    private NimbusTokenGeneratorAdapter adapter;
 
-  @BeforeEach
-  void setUp() {
-    adapter = new NimbusTokenGeneratorAdapter();
-    // Não setamos privateKeyContent nem privateKeyResource para testar o fallback (geração automática)
-  }
+    @BeforeEach
+    void setUp() {
+        adapter = new NimbusTokenGeneratorAdapter();
+        // Não setamos privateKeyContent nem privateKeyResource para testar o fallback (geração automática)
+    }
 
-  @Test
-  void shouldGenerateValidToken() throws Exception {
-    User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
+    @Test
+    void shouldGenerateValidToken() throws Exception {
+        User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
 
-    String token = adapter.generateToken(user);
+        String token = adapter.generateToken(user);
 
-    assertNotNull(token);
-    assertFalse(token.isBlank());
+        assertNotNull(token);
+        assertFalse(token.isBlank());
 
-    SignedJWT signedJWT = SignedJWT.parse(token);
-    assertEquals(user.getId().toString(), signedJWT.getJWTClaimsSet().getSubject());
-    assertEquals(user.getEmail(), signedJWT.getJWTClaimsSet().getClaim("email"));
-    assertEquals("ROLE_CLIENT", signedJWT.getJWTClaimsSet().getClaim("role"));
-  }
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        assertEquals(user.getId().toString(), signedJWT.getJWTClaimsSet().getSubject());
+        assertEquals(user.getEmail(), signedJWT.getJWTClaimsSet().getClaim("email"));
+        assertEquals("ROLE_CLIENT", signedJWT.getJWTClaimsSet().getClaim("role"));
+    }
 
-  @Test
-  void shouldHandleCustomPrivateKey() throws Exception {
-    // RSA 2048 private key in PKCS#8 format (dummy for test)
-    // Gerando uma de verdade para garantir que o parser funciona
-    java.security.KeyPairGenerator kpg = java.security.KeyPairGenerator.getInstance("RSA");
-    kpg.initialize(2048);
-    java.security.PrivateKey privateKey = kpg.generateKeyPair().getPrivate();
-    String encodedKey = java.util.Base64.getEncoder().encodeToString(privateKey.getEncoded());
-    String pem = "-----BEGIN PRIVATE KEY-----\n" + encodedKey + "\n-----END PRIVATE KEY-----";
+    @Test
+    void shouldHandleCustomPrivateKey() throws Exception {
+        // RSA 2048 private key in PKCS#8 format (dummy for test)
+        // Gerando uma de verdade para garantir que o parser funciona
+        java.security.KeyPairGenerator kpg = java.security.KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        java.security.PrivateKey privateKey = kpg.generateKeyPair().getPrivate();
+        String encodedKey = java.util.Base64.getEncoder().encodeToString(privateKey.getEncoded());
+        String pem = "-----BEGIN PRIVATE KEY-----\n" + encodedKey + "\n-----END PRIVATE KEY-----";
 
-    ReflectionTestUtils.setField(adapter, "privateKeyContent", pem);
+        ReflectionTestUtils.setField(adapter, "privateKeyContent", pem);
 
-    User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
-    String token = adapter.generateToken(user);
+        User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
+        String token = adapter.generateToken(user);
 
-    assertNotNull(token);
-    SignedJWT signedJWT = SignedJWT.parse(token);
-    assertEquals(user.getId().toString(), signedJWT.getJWTClaimsSet().getSubject());
-  }
+        assertNotNull(token);
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        assertEquals(user.getId().toString(), signedJWT.getJWTClaimsSet().getSubject());
+    }
 
-  @Test
-  void shouldFallbackWhenKeyIsInvalid() {
-    ReflectionTestUtils.setField(adapter, "privateKeyContent", "invalid-key-content");
+    @Test
+    void shouldFallbackWhenKeyIsInvalid() {
+        ReflectionTestUtils.setField(adapter, "privateKeyContent", "invalid-key-content");
 
-    User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
+        User user = new User(UUID.randomUUID(), "test@example.com", "hashed", Set.of(Role.ROLE_CLIENT), true);
 
-    // Deve funcionar pois faz fallback para geração automática
-    String token = adapter.generateToken(user);
-    assertNotNull(token);
-  }
+        // Deve funcionar pois faz fallback para geração automática
+        String token = adapter.generateToken(user);
+        assertNotNull(token);
+    }
 }

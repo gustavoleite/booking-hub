@@ -19,31 +19,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ReindexUseCaseTest {
 
-  @Mock
-  CatalogClient catalogClient;
-  @Mock
-  EstablishmentSearchRepository repository;
-  @InjectMocks
-  ReindexUseCase useCase;
+    @Mock
+    CatalogClient catalogClient;
+    @Mock
+    EstablishmentSearchRepository repository;
+    @InjectMocks
+    ReindexUseCase useCase;
 
-  @Test
-  void shouldFetchFromCatalogAndUpsertAll() {
-    var doc1 = EstablishmentDocument.builder().id("1").name("A").build();
-    var doc2 = EstablishmentDocument.builder().id("2").name("B").build();
-    when(catalogClient.fetchAllEstablishments()).thenReturn(List.of(doc1, doc2));
+    @Test
+    void shouldFetchFromCatalogAndUpsertAll() {
+        var doc1 = EstablishmentDocument.builder().id("1").name("A").build();
+        var doc2 = EstablishmentDocument.builder().id("2").name("B").build();
+        when(catalogClient.fetchAllEstablishments()).thenReturn(List.of(doc1, doc2));
 
-    int count = useCase.execute();
+        int count = useCase.execute();
 
-    assertThat(count).isEqualTo(2);
-    verify(repository).upsert(doc1);
-    verify(repository).upsert(doc2);
-  }
+        assertThat(count).isEqualTo(2);
+        verify(repository).upsert(doc1);
+        verify(repository).upsert(doc2);
+    }
 
-  @Test
-  void shouldReturnZeroWhenNothingToIndex() {
-    when(catalogClient.fetchAllEstablishments()).thenReturn(List.of());
-    int count = useCase.execute();
-    assertThat(count).isZero();
-    verify(repository, never()).upsert(any());
-  }
+    @Test
+    void shouldReturnZeroWhenNothingToIndex() {
+        when(catalogClient.fetchAllEstablishments()).thenReturn(List.of());
+        int count = useCase.execute();
+        assertThat(count).isZero();
+        verify(repository, never()).upsert(any());
+    }
 }

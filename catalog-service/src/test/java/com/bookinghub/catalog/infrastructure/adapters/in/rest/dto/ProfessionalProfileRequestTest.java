@@ -7,17 +7,17 @@ import org.junit.jupiter.api.Test;
 
 class ProfessionalProfileRequestTest {
 
-  @Test
-  void testGettersSetters() {
-    ProfessionalProfileRequest request = new ProfessionalProfileRequest();
-    request.setName("Name");
-    request.setBio("Bio");
-    request.setAvatarUrl("url");
-    request.setSpecialties(List.of("Spec"));
+    @Test
+    void testGettersSetters() {
+        ProfessionalProfileRequest request = new ProfessionalProfileRequest();
+        request.setName("Name");
+        request.setBio("Bio");
+        request.setAvatarUrl("url");
+        request.setSpecialties(List.of("Spec"));
 
-    assertEquals("Name", request.getName());
-    assertEquals("Bio", request.getBio());
-    assertEquals("url", request.getAvatarUrl());
-    assertEquals(1, request.getSpecialties().size());
-  }
+        assertEquals("Name", request.getName());
+        assertEquals("Bio", request.getBio());
+        assertEquals("url", request.getAvatarUrl());
+        assertEquals(1, request.getSpecialties().size());
+    }
 }

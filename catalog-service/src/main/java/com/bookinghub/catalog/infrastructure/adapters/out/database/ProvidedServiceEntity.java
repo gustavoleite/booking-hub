@@ -21,15 +21,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProvidedServiceEntity {
-  @Id
-  private UUID id;
+    @Id
+    private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "establishment_id")
-  private EstablishmentEntity establishment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "establishment_id")
+    private EstablishmentEntity establishment;
 
-  private String title;
-  private String description;
-  @Builder.Default
-  private boolean active = true;
+    private String title;
+    private String description;
+    @Builder.Default
+    private boolean active = true;
 }

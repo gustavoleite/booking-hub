@@ -10,22 +10,22 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class Professional {
-  private final UUID id; // Same ID as Auth Service
-  private String name;
-  private String bio;
-  private String avatarUrl;
-  @Builder.Default
-  private boolean active = true;
-  private List<String> specialties;
+    private final UUID id; // Same ID as Auth Service
+    private String name;
+    private String bio;
+    private String avatarUrl;
+    @Builder.Default
+    private boolean active = true;
+    private List<String> specialties;
 
-  public void updateProfile(String name, String bio, String avatarUrl, List<String> specialties) {
-    this.name = name;
-    this.bio = bio;
-    this.avatarUrl = avatarUrl;
-    this.specialties = specialties;
-  }
+    public void updateProfile(String name, String bio, String avatarUrl, List<String> specialties) {
+        this.name = name;
+        this.bio = bio;
+        this.avatarUrl = avatarUrl;
+        this.specialties = specialties;
+    }
 
-  public void inactivate() {
-    this.active = false;
-  }
+    public void inactivate() {
+        this.active = false;
+    }
 }

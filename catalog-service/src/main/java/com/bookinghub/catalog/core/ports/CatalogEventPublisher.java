@@ -5,13 +5,13 @@ import com.bookinghub.catalog.core.domain.Establishment;
 import com.bookinghub.catalog.core.domain.Professional;
 
 public interface CatalogEventPublisher {
-  void publishEstablishmentCreated(Establishment establishment);
+    void publishEstablishmentCreated(Establishment establishment);
 
-  void publishEstablishmentUpdated(Establishment establishment);
+    void publishEstablishmentUpdated(Establishment establishment);
 
-  void publishAffiliationCreated(
+    void publishAffiliationCreated(
       Affiliation affiliation, Professional professional, Establishment establishment);
 
-  void publishAffiliationUpdated(
+    void publishAffiliationUpdated(
       Affiliation affiliation, Professional professional, Establishment establishment);
 }

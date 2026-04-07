@@ -26,23 +26,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AffiliationEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "establishment_id")
-  private EstablishmentEntity establishment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "establishment_id")
+    private EstablishmentEntity establishment;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "professional_id")
-  private ProfessionalEntity professional;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professional_id")
+    private ProfessionalEntity professional;
 
-  private boolean active;
+    private boolean active;
 
-  @OneToMany(mappedBy = "affiliation", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<WorkScheduleEntity> workSchedules;
+    @OneToMany(mappedBy = "affiliation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkScheduleEntity> workSchedules;
 
-  @OneToMany(mappedBy = "affiliation", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ServiceOfferingEntity> serviceOfferings;
+    @OneToMany(mappedBy = "affiliation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceOfferingEntity> serviceOfferings;
 }

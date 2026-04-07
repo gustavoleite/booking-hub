@@ -5,6 +5,6 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaAffiliationRepository extends JpaRepository<AffiliationEntity, UUID> {
-  Optional<AffiliationEntity> findByEstablishmentIdAndProfessionalId(
+    Optional<AffiliationEntity> findByEstablishmentIdAndProfessionalId(
       UUID establishmentId, UUID professionalId);
 }

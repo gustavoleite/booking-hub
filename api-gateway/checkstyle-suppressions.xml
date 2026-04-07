@@ -6,4 +6,7 @@
   <!-- Javadoc is not required for internal application code (course project) -->
   <suppress checks="MissingJavadocType" files=".*\.java"/>
   <suppress checks="MissingJavadocMethod" files=".*\.java"/>
+
+  <!-- Code uses 4-space indentation (OpenRewrite style); google_checks expects 2-space -->
+  <suppress checks="Indentation" files=".*\.java"/>
 </suppressions>

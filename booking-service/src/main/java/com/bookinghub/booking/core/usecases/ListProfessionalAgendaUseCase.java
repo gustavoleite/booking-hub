@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ListProfessionalAgendaUseCase {
 
-  private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
-  public List<Booking> execute(UUID professionalId) {
-    return bookingRepository.findByProfessionalId(professionalId);
-  }
+    public List<Booking> execute(UUID professionalId) {
+        return bookingRepository.findByProfessionalId(professionalId);
+    }
 }

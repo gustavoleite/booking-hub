@@ -18,35 +18,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PostgresProfessionalRepositoryAdapterTest {
 
-  @Mock
-  private JpaProfessionalRepository jpaRepository;
+    @Mock
+    private JpaProfessionalRepository jpaRepository;
 
-  @InjectMocks
-  private PostgresProfessionalRepositoryAdapter adapter;
+    @InjectMocks
+    private PostgresProfessionalRepositoryAdapter adapter;
 
-  @Test
-  void shouldSaveProfessional() {
-    UUID id = UUID.randomUUID();
-    Professional domain = Professional.builder().id(id).name("Pro").build();
-    ProfessionalEntity entity = ProfessionalEntity.builder().id(id).name("Pro").build();
+    @Test
+    void shouldSaveProfessional() {
+        UUID id = UUID.randomUUID();
+        Professional domain = Professional.builder().id(id).name("Pro").build();
+        ProfessionalEntity entity = ProfessionalEntity.builder().id(id).name("Pro").build();
 
-    when(jpaRepository.save(any(ProfessionalEntity.class))).thenReturn(entity);
+        when(jpaRepository.save(any(ProfessionalEntity.class))).thenReturn(entity);
 
-    Professional result = adapter.save(domain);
+        Professional result = adapter.save(domain);
 
-    assertNotNull(result);
-    assertEquals(id, result.getId());
-  }
+        assertNotNull(result);
+        assertEquals(id, result.getId());
+    }
 
-  @Test
-  void shouldFindById() {
-    UUID id = UUID.randomUUID();
-    ProfessionalEntity entity = ProfessionalEntity.builder().id(id).build();
-    when(jpaRepository.findByIdAndActiveTrue(id)).thenReturn(Optional.of(entity));
+    @Test
+    void shouldFindById() {
+        UUID id = UUID.randomUUID();
+        ProfessionalEntity entity = ProfessionalEntity.builder().id(id).build();
+        when(jpaRepository.findByIdAndActiveTrue(id)).thenReturn(Optional.of(entity));
 
-    Optional<Professional> result = adapter.findById(id);
+        Optional<Professional> result = adapter.findById(id);
 
-    assertTrue(result.isPresent());
-    assertEquals(id, result.get().getId());
-  }
+        assertTrue(result.isPresent());
+        assertEquals(id, result.get().getId());
+    }
 }

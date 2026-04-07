@@ -14,43 +14,44 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AffiliationEventListener {
 
-  private final IndexAffiliationUseCase indexAffiliationUseCase;
+    private final IndexAffiliationUseCase indexAffiliationUseCase;
 
-  @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationCreatedQueueName}")
-  public void onAffiliationCreated(AffiliationEvent event) {
-    if (log.isInfoEnabled()) {
-      log.info("Received affiliation.created for establishment {}", event.establishmentId());
+    @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationCreatedQueueName}")
+    public void onAffiliationCreated(AffiliationEvent event) {
+        if (log.isInfoEnabled()) {
+            log.info("Received affiliation.created for establishment {}", event.establishmentId());
+        }
+        process(event);
     }
-    process(event);
-  }
 
-  @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationUpdatedQueueName}")
-  public void onAffiliationUpdated(AffiliationEvent event) {
-    if (log.isInfoEnabled()) {
-      log.info("Received affiliation.updated for establishment {}", event.establishmentId());
+    @RabbitListener(queues = "#{rabbitMQConfig.searchAffiliationUpdatedQueueName}")
+    public void onAffiliationUpdated(AffiliationEvent event) {
+        if (log.isInfoEnabled()) {
+            log.info("Received affiliation.updated for establishment {}", event.establishmentId());
+        }
+        process(event);
     }
-    process(event);
-  }
 
-  private void process(AffiliationEvent event) {
-    List<EstablishmentDocument.ServiceEntry> offerings = event.serviceOfferings() != null
-        ? event.serviceOfferings().stream().map(so -> EstablishmentDocument.ServiceEntry.builder()
-        .serviceId(so.providedServiceId())
-        .title(so.serviceTitle())
-        .minPrice(so.price() != null ? so.price().doubleValue() : null)
-        .maxPrice(so.price() != null ? so.price().doubleValue() : null)
-        .build())
-        .toList()
-        : Collections.emptyList();
+    private void process(AffiliationEvent event) {
+        List<EstablishmentDocument.ServiceEntry> offerings = event.serviceOfferings() != null
+                ? event.serviceOfferings().stream()
+                .map(so -> EstablishmentDocument.ServiceEntry.builder()
+                .serviceId(so.providedServiceId())
+                .title(so.serviceTitle())
+                .minPrice(so.price() != null ? so.price().doubleValue() : null)
+                .maxPrice(so.price() != null ? so.price().doubleValue() : null)
+                .build())
+                .toList()
+                : Collections.emptyList();
 
-    indexAffiliationUseCase.execute(
-        event.establishmentId(),
-        event.professionalId(),
-        event.professionalName(),
-        event.professionalSpecialties() != null
-            ? event.professionalSpecialties() : Collections.emptyList(),
-        event.active(),
-        offerings
-    );
-  }
+        indexAffiliationUseCase.execute(
+                event.establishmentId(),
+                event.professionalId(),
+                event.professionalName(),
+                event.professionalSpecialties() != null
+                        ? event.professionalSpecialties() : Collections.emptyList(),
+                event.active(),
+                offerings
+        );
+    }
 }

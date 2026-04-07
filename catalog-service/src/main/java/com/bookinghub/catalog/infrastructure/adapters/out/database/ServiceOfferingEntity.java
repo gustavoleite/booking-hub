@@ -24,18 +24,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceOfferingEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "affiliation_id")
-  private AffiliationEntity affiliation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "affiliation_id")
+    private AffiliationEntity affiliation;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "service_id")
-  private ProvidedServiceEntity providedService;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private ProvidedServiceEntity providedService;
 
-  private BigDecimal price;
-  private int durationMinutes;
+    private BigDecimal price;
+    private int durationMinutes;
 }

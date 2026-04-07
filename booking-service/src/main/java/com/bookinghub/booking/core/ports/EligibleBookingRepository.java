@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface EligibleBookingRepository {
-  void save(EligibleBooking eligibleBooking);
+    void save(EligibleBooking eligibleBooking);
 
-  Optional<EligibleBooking> findById(UUID bookingId);
+    Optional<EligibleBooking> findById(UUID bookingId);
 
-  boolean existsById(UUID bookingId);
+    boolean existsById(UUID bookingId);
 }

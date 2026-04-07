@@ -15,10 +15,10 @@ public record ReviewResponse(
         String comment,
         LocalDateTime createdAt
 ) {
-  public static ReviewResponse from(Review r) {
-    return new ReviewResponse(r.getId(), r.getBookingId(), r.getClientId(),
-        r.getProfessionalId(), r.getEstablishmentId(),
-        r.getProfessionalRating(), r.getEstablishmentRating(),
-        r.getComment(), r.getCreatedAt());
-  }
+    public static ReviewResponse from(Review r) {
+        return new ReviewResponse(r.getId(), r.getBookingId(), r.getClientId(),
+                r.getProfessionalId(), r.getEstablishmentId(),
+                r.getProfessionalRating(), r.getEstablishmentRating(),
+                r.getComment(), r.getCreatedAt());
+    }
 }

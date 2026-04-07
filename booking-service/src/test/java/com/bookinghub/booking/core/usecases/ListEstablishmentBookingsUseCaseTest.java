@@ -16,21 +16,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ListEstablishmentBookingsUseCaseTest {
 
-  @Mock
-  private BookingRepository bookingRepository;
+    @Mock
+    private BookingRepository bookingRepository;
 
-  @InjectMocks
-  private ListEstablishmentBookingsUseCase useCase;
+    @InjectMocks
+    private ListEstablishmentBookingsUseCase useCase;
 
-  @Test
-  void shouldListBookingsByEstablishment() {
-    UUID establishmentId = UUID.randomUUID();
-    List<Booking> bookings = List.of(Booking.builder().establishmentId(establishmentId).build());
-    when(bookingRepository.findByEstablishmentId(establishmentId)).thenReturn(bookings);
+    @Test
+    void shouldListBookingsByEstablishment() {
+        UUID establishmentId = UUID.randomUUID();
+        List<Booking> bookings = List.of(Booking.builder().establishmentId(establishmentId).build());
+        when(bookingRepository.findByEstablishmentId(establishmentId)).thenReturn(bookings);
 
-    List<Booking> result = useCase.execute(establishmentId);
+        List<Booking> result = useCase.execute(establishmentId);
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getEstablishmentId()).isEqualTo(establishmentId);
-  }
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEstablishmentId()).isEqualTo(establishmentId);
+    }
 }

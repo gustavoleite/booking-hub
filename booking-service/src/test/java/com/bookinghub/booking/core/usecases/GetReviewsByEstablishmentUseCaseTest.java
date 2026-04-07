@@ -16,37 +16,37 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GetReviewsByEstablishmentUseCaseTest {
 
-  @Mock
-  private ReviewRepository reviewRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
-  @InjectMocks
-  private GetReviewsByEstablishmentUseCase useCase;
+    @InjectMocks
+    private GetReviewsByEstablishmentUseCase useCase;
 
-  @Test
-  void shouldCalculateAverageSuccessfully() {
-    UUID establishmentId = UUID.randomUUID();
-    List<Review> reviews = List.of(
-        Review.builder().establishmentRating(5).build(),
-        Review.builder().establishmentRating(4).build(),
-        Review.builder().establishmentRating(null).build()
-    );
-    when(reviewRepository.findByEstablishmentId(establishmentId)).thenReturn(reviews);
+    @Test
+    void shouldCalculateAverageSuccessfully() {
+        UUID establishmentId = UUID.randomUUID();
+        List<Review> reviews = List.of(
+                Review.builder().establishmentRating(5).build(),
+                Review.builder().establishmentRating(4).build(),
+                Review.builder().establishmentRating(null).build()
+        );
+        when(reviewRepository.findByEstablishmentId(establishmentId)).thenReturn(reviews);
 
-    GetReviewsByEstablishmentUseCase.Result result = useCase.execute(establishmentId);
+        GetReviewsByEstablishmentUseCase.Result result = useCase.execute(establishmentId);
 
-    assertThat(result.reviews()).hasSize(3);
-    assertThat(result.averageRating()).isEqualTo(4.5);
-    assertThat(result.totalReviews()).isEqualTo(2);
-  }
+        assertThat(result.reviews()).hasSize(3);
+        assertThat(result.averageRating()).isEqualTo(4.5);
+        assertThat(result.totalReviews()).isEqualTo(2);
+    }
 
-  @Test
-  void shouldReturnNullAverageWhenNoRatings() {
-    UUID establishmentId = UUID.randomUUID();
-    when(reviewRepository.findByEstablishmentId(establishmentId)).thenReturn(List.of());
+    @Test
+    void shouldReturnNullAverageWhenNoRatings() {
+        UUID establishmentId = UUID.randomUUID();
+        when(reviewRepository.findByEstablishmentId(establishmentId)).thenReturn(List.of());
 
-    GetReviewsByEstablishmentUseCase.Result result = useCase.execute(establishmentId);
+        GetReviewsByEstablishmentUseCase.Result result = useCase.execute(establishmentId);
 
-    assertThat(result.averageRating()).isNull();
-    assertThat(result.totalReviews()).isZero();
-  }
+        assertThat(result.averageRating()).isNull();
+        assertThat(result.totalReviews()).isZero();
+    }
 }

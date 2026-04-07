@@ -7,19 +7,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class BCryptPasswordEncoderAdapter implements PasswordEncoder {
 
-  private final BCryptPasswordEncoder bcryptEncoder;
+    private final BCryptPasswordEncoder bcryptEncoder;
 
-  public BCryptPasswordEncoderAdapter() {
-    this.bcryptEncoder = new BCryptPasswordEncoder();
-  }
+    public BCryptPasswordEncoderAdapter() {
+        this.bcryptEncoder = new BCryptPasswordEncoder();
+    }
 
-  @Override
-  public String encode(String rawPassword) {
-    return bcryptEncoder.encode(rawPassword);
-  }
+    @Override
+    public String encode(String rawPassword) {
+        return bcryptEncoder.encode(rawPassword);
+    }
 
-  @Override
-  public boolean matches(String rawPassword, String encodedPassword) {
-    return bcryptEncoder.matches(rawPassword, encodedPassword);
-  }
+    @Override
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return bcryptEncoder.matches(rawPassword, encodedPassword);
+    }
 }

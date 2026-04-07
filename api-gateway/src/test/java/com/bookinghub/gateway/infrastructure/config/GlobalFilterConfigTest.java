@@ -20,70 +20,70 @@ import reactor.core.publisher.Mono;
 
 class GlobalFilterConfigTest {
 
-  @Mock
-  private ServerWebExchange exchange;
+    @Mock
+    private ServerWebExchange exchange;
 
-  @Mock
-  private GatewayFilterChain chain;
+    @Mock
+    private GatewayFilterChain chain;
 
-  @Mock
-  private ServerHttpRequest request;
+    @Mock
+    private ServerHttpRequest request;
 
-  @Mock
-  private ServerHttpResponse response;
+    @Mock
+    private ServerHttpResponse response;
 
-  @Mock
-  private ServerWebExchange.Builder exchangeBuilder;
+    @Mock
+    private ServerWebExchange.Builder exchangeBuilder;
 
-  @Mock
-  private ServerHttpRequest.Builder requestBuilder;
+    @Mock
+    private ServerHttpRequest.Builder requestBuilder;
 
-  private GlobalFilterConfig globalFilterConfig;
+    private GlobalFilterConfig globalFilterConfig;
 
-  @BeforeEach
-  void setUp() {
-    MockitoAnnotations.openMocks(this);
-    globalFilterConfig = new GlobalFilterConfig();
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        globalFilterConfig = new GlobalFilterConfig();
 
-    when(exchange.getRequest()).thenReturn(request);
-    when(exchange.getResponse()).thenReturn(response);
-    when(response.getHeaders()).thenReturn(new HttpHeaders());
-    when(exchange.mutate()).thenReturn(exchangeBuilder);
-    when(request.mutate()).thenReturn(requestBuilder);
-    when(requestBuilder.header(anyString(), anyString())).thenReturn(requestBuilder);
-    when(requestBuilder.build()).thenReturn(request);
-    when(exchangeBuilder.request(any(ServerHttpRequest.class))).thenReturn(exchangeBuilder);
-    when(exchangeBuilder.build()).thenReturn(exchange);
-    when(chain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
-  }
+        when(exchange.getRequest()).thenReturn(request);
+        when(exchange.getResponse()).thenReturn(response);
+        when(response.getHeaders()).thenReturn(new HttpHeaders());
+        when(exchange.mutate()).thenReturn(exchangeBuilder);
+        when(request.mutate()).thenReturn(requestBuilder);
+        when(requestBuilder.header(anyString(), anyString())).thenReturn(requestBuilder);
+        when(requestBuilder.build()).thenReturn(request);
+        when(exchangeBuilder.request(any(ServerHttpRequest.class))).thenReturn(exchangeBuilder);
+        when(exchangeBuilder.build()).thenReturn(exchange);
+        when(chain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+    }
 
-  @Test
-  void shouldAddCorrelationIdWhenMissing() {
-    // Given
-    when(request.getHeaders()).thenReturn(new HttpHeaders());
+    @Test
+    void shouldAddCorrelationIdWhenMissing() {
+        // Given
+        when(request.getHeaders()).thenReturn(new HttpHeaders());
 
-    // When
-    GlobalFilter filter = globalFilterConfig.correlationIdFilter();
-    filter.filter(exchange, chain).block();
+        // When
+        GlobalFilter filter = globalFilterConfig.correlationIdFilter();
+        filter.filter(exchange, chain).block();
 
-    // Then
-    verify(requestBuilder).header(eq("X-Correlation-ID"), anyString());
-    verify(chain).filter(any(ServerWebExchange.class));
-  }
+        // Then
+        verify(requestBuilder).header(eq("X-Correlation-ID"), anyString());
+        verify(chain).filter(any(ServerWebExchange.class));
+    }
 
-  @Test
-  void shouldKeepExistingCorrelationId() {
-    // Given
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("X-Correlation-ID", "existing-id");
-    when(request.getHeaders()).thenReturn(headers);
+    @Test
+    void shouldKeepExistingCorrelationId() {
+        // Given
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Correlation-ID", "existing-id");
+        when(request.getHeaders()).thenReturn(headers);
 
-    // When
-    GlobalFilter filter = globalFilterConfig.correlationIdFilter();
-    filter.filter(exchange, chain).block();
+        // When
+        GlobalFilter filter = globalFilterConfig.correlationIdFilter();
+        filter.filter(exchange, chain).block();
 
-    // Then
-    verify(requestBuilder).header("X-Correlation-ID", "existing-id");
-    verify(chain).filter(any(ServerWebExchange.class));
-  }
+        // Then
+        verify(requestBuilder).header("X-Correlation-ID", "existing-id");
+        verify(chain).filter(any(ServerWebExchange.class));
+    }
 }

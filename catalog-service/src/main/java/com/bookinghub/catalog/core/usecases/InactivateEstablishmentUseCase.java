@@ -9,17 +9,17 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class InactivateEstablishmentUseCase {
-  private final EstablishmentRepository establishmentRepository;
+    private final EstablishmentRepository establishmentRepository;
 
-  public void execute(UUID id, String ownerId) {
-    Establishment existing = establishmentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Establishment not found"));
+    public void execute(UUID id, String ownerId) {
+        Establishment existing = establishmentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Establishment not found"));
 
-    if (!existing.getOwnerId().equals(ownerId)) {
-      throw new ForbiddenException("Only the owner can inactivate the establishment");
+        if (!existing.getOwnerId().equals(ownerId)) {
+            throw new ForbiddenException("Only the owner can inactivate the establishment");
+        }
+
+        existing.inactivate();
+        establishmentRepository.save(existing);
     }
-
-    existing.inactivate();
-    establishmentRepository.save(existing);
-  }
 }

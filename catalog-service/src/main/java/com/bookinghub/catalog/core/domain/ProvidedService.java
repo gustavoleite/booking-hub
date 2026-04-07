@@ -9,13 +9,13 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ProvidedService {
-  private final UUID id;
-  private final String title;
-  private final String description;
-  @Builder.Default
-  private boolean active = true;
+    private final UUID id;
+    private final String title;
+    private final String description;
+    @Builder.Default
+    private boolean active = true;
 
-  public void inactivate() {
-    this.active = false;
-  }
+    public void inactivate() {
+        this.active = false;
+    }
 }

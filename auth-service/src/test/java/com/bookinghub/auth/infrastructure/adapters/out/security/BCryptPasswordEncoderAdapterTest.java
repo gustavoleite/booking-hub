@@ -10,28 +10,28 @@ import org.junit.jupiter.api.Test;
 
 class BCryptPasswordEncoderAdapterTest {
 
-  private BCryptPasswordEncoderAdapter adapter;
+    private BCryptPasswordEncoderAdapter adapter;
 
-  @BeforeEach
-  void setUp() {
-    adapter = new BCryptPasswordEncoderAdapter();
-  }
+    @BeforeEach
+    void setUp() {
+        adapter = new BCryptPasswordEncoderAdapter();
+    }
 
-  @Test
-  void shouldEncodePassword() {
-    String raw = "password123";
-    String encoded = adapter.encode(raw);
+    @Test
+    void shouldEncodePassword() {
+        String raw = "password123";
+        String encoded = adapter.encode(raw);
 
-    assertNotNull(encoded);
-    assertNotEquals(raw, encoded);
-    assertTrue(adapter.matches(raw, encoded));
-  }
+        assertNotNull(encoded);
+        assertNotEquals(raw, encoded);
+        assertTrue(adapter.matches(raw, encoded));
+    }
 
-  @Test
-  void shouldNotMatchWrongPassword() {
-    String raw = "password123";
-    String encoded = adapter.encode(raw);
+    @Test
+    void shouldNotMatchWrongPassword() {
+        String raw = "password123";
+        String encoded = adapter.encode(raw);
 
-    assertFalse(adapter.matches("wrongpassword", encoded));
-  }
+        assertFalse(adapter.matches("wrongpassword", encoded));
+    }
 }

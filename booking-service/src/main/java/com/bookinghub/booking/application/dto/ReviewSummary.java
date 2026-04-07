@@ -11,8 +11,8 @@ public record ReviewSummary(
         String comment,
         LocalDateTime createdAt
 ) {
-  public static ReviewSummary from(Review r) {
-    return new ReviewSummary(r.getId(), r.getProfessionalRating(),
-        r.getEstablishmentRating(), r.getComment(), r.getCreatedAt());
-  }
+    public static ReviewSummary from(Review r) {
+        return new ReviewSummary(r.getId(), r.getProfessionalRating(),
+                r.getEstablishmentRating(), r.getComment(), r.getCreatedAt());
+    }
 }

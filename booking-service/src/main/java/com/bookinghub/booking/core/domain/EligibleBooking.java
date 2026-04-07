@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class EligibleBooking {
-  private final UUID bookingId;
-  private final String clientId;
-  private final UUID professionalId;
-  private final UUID establishmentId;
-  private final LocalDateTime completedAt;
+    private final UUID bookingId;
+    private final String clientId;
+    private final UUID professionalId;
+    private final UUID establishmentId;
+    private final LocalDateTime completedAt;
 }

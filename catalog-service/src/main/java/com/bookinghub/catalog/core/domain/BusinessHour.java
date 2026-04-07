@@ -10,13 +10,13 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class BusinessHour {
-  private final int dayOfWeek; // 1 (Monday) to 7 (Sunday)
-  @JsonFormat(pattern = "HH:mm:ss")
-  private final LocalTime openTime;
-  @JsonFormat(pattern = "HH:mm:ss")
-  private final LocalTime closeTime;
+    private final int dayOfWeek; // 1 (Monday) to 7 (Sunday)
+    @JsonFormat(pattern = "HH:mm:ss")
+    private final LocalTime openTime;
+    @JsonFormat(pattern = "HH:mm:ss")
+    private final LocalTime closeTime;
 
-  public boolean isWithin(LocalTime start, LocalTime end) {
-    return !start.isBefore(openTime) && !end.isAfter(closeTime);
-  }
+    public boolean isWithin(LocalTime start, LocalTime end) {
+        return !start.isBefore(openTime) && !end.isAfter(closeTime);
+    }
 }

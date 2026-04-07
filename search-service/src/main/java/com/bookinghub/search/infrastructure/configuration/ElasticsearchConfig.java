@@ -5,6 +5,6 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 @Configuration
 @EnableElasticsearchRepositories(
-    basePackages = "com.bookinghub.search.infrastructure.adapters.out.elasticsearch")
+        basePackages = "com.bookinghub.search.infrastructure.adapters.out.elasticsearch")
 public class ElasticsearchConfig {
 }

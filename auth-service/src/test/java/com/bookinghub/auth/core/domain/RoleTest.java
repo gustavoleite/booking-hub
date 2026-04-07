@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 
 class RoleTest {
 
-  @Test
-  void shouldHaveAllRoles() {
-    assertNotNull(Role.valueOf("ROLE_CLIENT"));
-    assertNotNull(Role.valueOf("ROLE_PROFESSIONAL"));
-    assertNotNull(Role.valueOf("ROLE_OWNER"));
-    assertEquals(3, Role.values().length);
-  }
+    @Test
+    void shouldHaveAllRoles() {
+        assertNotNull(Role.valueOf("ROLE_CLIENT"));
+        assertNotNull(Role.valueOf("ROLE_PROFESSIONAL"));
+        assertNotNull(Role.valueOf("ROLE_OWNER"));
+        assertEquals(3, Role.values().length);
+    }
 }

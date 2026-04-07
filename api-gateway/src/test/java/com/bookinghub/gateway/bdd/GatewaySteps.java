@@ -33,128 +33,128 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ActiveProfiles("local")
 public class GatewaySteps {
 
-  @Autowired
-  private WebTestClient webClient;
+    @Autowired
+    private WebTestClient webClient;
 
-  private WebTestClient.ResponseSpec response;
-  private String validToken;
-  private static final KeyPair keyPair;
+    private WebTestClient.ResponseSpec response;
+    private String validToken;
+    private static final KeyPair keyPair;
 
-  static {
-    try {
-      KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-      keyPairGenerator.initialize(2048);
-      keyPair = keyPairGenerator.generateKeyPair();
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @DynamicPropertySource
-  static void setProperties(DynamicPropertyRegistry registry) {
-    String publicKeyPem = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-    registry.add("RSA_PUBLIC_KEY", () -> publicKeyPem);
-    registry.add("AUTH_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
-    registry.add("BOOKING_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
-    registry.add("CATALOG_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
-    registry.add("REVIEW_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
-    registry.add("SEARCH_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
-  }
-
-  @Given("the {string} Service is up and responding to {string} with {string}")
-  public void serviceIsUpWithMethod(String service, String path, String method) {
-    int status = method.equalsIgnoreCase("POST") ? 201 : 200;
-    MappingBuilder mapping;
-    if (method.equalsIgnoreCase("POST")) {
-      mapping = post(urlEqualTo(path));
-    } else {
-      mapping = get(urlEqualTo(path));
+    static {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            keyPair = keyPairGenerator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    stubFor(mapping
-        .willReturn(aResponse()
-            .withStatus(status)
-            .withHeader("Content-Type", "application/json")
-            .withBody(method.equalsIgnoreCase("POST") ? "{\"id\":\"123\"}" : "{\"status\":\"UP\"}")));
-  }
-
-  @Given("the Auth Service is up and responding to {string}")
-  public void authServiceIsUp(String path) {
-    stubFor(get(urlEqualTo(path))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/json")
-            .withBody("{\"status\":\"UP\"}")));
-  }
-
-  @Given("I have a valid JWT token")
-  public void haveValidToken() {
-    validToken = Jwts.builder()
-        .setSubject("test-user")
-        .claim("role", "ROLE_USER")
-        .setExpiration(new Date(System.currentTimeMillis() + 100000))
-        .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
-        .compact();
-  }
-
-  @Given("I do not provide a JWT token")
-  public void noToken() {
-    validToken = null;
-  }
-
-  @Given("I have an invalid JWT token")
-  public void haveInvalidToken() {
-    validToken = "invalid.token.string";
-  }
-
-  @When("I request the Gateway at {string}")
-  public void requestGateway(String path) {
-    response = webClient.get().uri(path).exchange();
-  }
-
-  @When("I request the Gateway at {string} with {string}")
-  public void requestGatewayWithMethod(String path, String method) {
-    WebTestClient.RequestHeadersSpec<?> spec;
-    if (method.equalsIgnoreCase("POST")) {
-      spec = webClient.post().uri(path);
-    } else {
-      spec = webClient.get().uri(path);
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        String publicKeyPem = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+        registry.add("RSA_PUBLIC_KEY", () -> publicKeyPem);
+        registry.add("AUTH_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("BOOKING_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("CATALOG_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("REVIEW_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("SEARCH_SERVICE_URI", () -> "http://localhost:${wiremock.server.port}");
     }
-    response = spec.exchange();
-  }
 
-  @When("I request the Gateway at {string} with {string} and the token")
-  public void requestWithToken(String path, String method) {
-    WebTestClient.RequestHeadersSpec<?> spec;
-    if (method.equalsIgnoreCase("POST")) {
-      spec = webClient.post().uri(path);
-    } else {
-      spec = webClient.get().uri(path);
+    @Given("the {string} Service is up and responding to {string} with {string}")
+    public void serviceIsUpWithMethod(String service, String path, String method) {
+        int status = method.equalsIgnoreCase("POST") ? 201 : 200;
+        MappingBuilder mapping;
+        if (method.equalsIgnoreCase("POST")) {
+            mapping = post(urlEqualTo(path));
+        } else {
+            mapping = get(urlEqualTo(path));
+        }
+
+        stubFor(mapping
+                .willReturn(aResponse()
+                        .withStatus(status)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(method.equalsIgnoreCase("POST") ? "{\"id\":\"123\"}" : "{\"status\":\"UP\"}")));
     }
-    response = spec
-        .header("Authorization", "Bearer " + validToken)
-        .exchange();
-  }
 
-  @When("I request the Gateway at {string} with the token")
-  public void requestWithTokenSimple(String path) {
-    response = webClient.get().uri(path)
-        .header("Authorization", "Bearer " + validToken)
-        .exchange();
-  }
+    @Given("the Auth Service is up and responding to {string}")
+    public void authServiceIsUp(String path) {
+        stubFor(get(urlEqualTo(path))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"status\":\"UP\"}")));
+    }
 
-  @Then("I should receive a response with status {int}")
-  public void verifyStatus(int status) {
-    response.expectStatus().isEqualTo(status);
-  }
+    @Given("I have a valid JWT token")
+    public void haveValidToken() {
+        validToken = Jwts.builder()
+                .setSubject("test-user")
+                .claim("role", "ROLE_USER")
+                .setExpiration(new Date(System.currentTimeMillis() + 100000))
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .compact();
+    }
 
-  @And("the response body should contain {string}")
-  public void verifyBody(String content) {
-    response.expectBody().json(content);
-  }
+    @Given("I do not provide a JWT token")
+    public void noToken() {
+        validToken = null;
+    }
 
-  @Then("the response should contain a header {string}")
-  public void verifyHeader(String headerName) {
-    response.expectHeader().exists(headerName);
-  }
+    @Given("I have an invalid JWT token")
+    public void haveInvalidToken() {
+        validToken = "invalid.token.string";
+    }
+
+    @When("I request the Gateway at {string}")
+    public void requestGateway(String path) {
+        response = webClient.get().uri(path).exchange();
+    }
+
+    @When("I request the Gateway at {string} with {string}")
+    public void requestGatewayWithMethod(String path, String method) {
+        WebTestClient.RequestHeadersSpec<?> spec;
+        if (method.equalsIgnoreCase("POST")) {
+            spec = webClient.post().uri(path);
+        } else {
+            spec = webClient.get().uri(path);
+        }
+        response = spec.exchange();
+    }
+
+    @When("I request the Gateway at {string} with {string} and the token")
+    public void requestWithToken(String path, String method) {
+        WebTestClient.RequestHeadersSpec<?> spec;
+        if (method.equalsIgnoreCase("POST")) {
+            spec = webClient.post().uri(path);
+        } else {
+            spec = webClient.get().uri(path);
+        }
+        response = spec
+                .header("Authorization", "Bearer " + validToken)
+                .exchange();
+    }
+
+    @When("I request the Gateway at {string} with the token")
+    public void requestWithTokenSimple(String path) {
+        response = webClient.get().uri(path)
+                .header("Authorization", "Bearer " + validToken)
+                .exchange();
+    }
+
+    @Then("I should receive a response with status {int}")
+    public void verifyStatus(int status) {
+        response.expectStatus().isEqualTo(status);
+    }
+
+    @And("the response body should contain {string}")
+    public void verifyBody(String content) {
+        response.expectBody().json(content);
+    }
+
+    @Then("the response should contain a header {string}")
+    public void verifyHeader(String headerName) {
+        response.expectHeader().exists(headerName);
+    }
 }

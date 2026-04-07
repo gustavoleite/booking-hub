@@ -22,81 +22,81 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UpdateEstablishmentUseCaseTest {
 
-  @Mock
-  private EstablishmentRepository repository;
+    @Mock
+    private EstablishmentRepository repository;
 
-  @Mock
-  private CatalogEventPublisher eventPublisher;
+    @Mock
+    private CatalogEventPublisher eventPublisher;
 
-  @InjectMocks
-  private UpdateEstablishmentUseCase updateEstablishmentUseCase;
+    @InjectMocks
+    private UpdateEstablishmentUseCase updateEstablishmentUseCase;
 
-  @Test
-  void shouldUpdateWhenOwnerIsValid() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-123";
-    Establishment existing = Establishment.builder()
-        .id(id)
-        .ownerId(ownerId)
-        .name("Old Name")
-        .build();
-    Establishment updateData = Establishment.builder()
-        .name("New Name")
-        .build();
+    @Test
+    void shouldUpdateWhenOwnerIsValid() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .name("Old Name")
+                .build();
+        Establishment updateData = Establishment.builder()
+                .name("New Name")
+                .build();
 
-    when(repository.findById(id)).thenReturn(Optional.of(existing));
-    when(repository.save(any())).thenReturn(existing);
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenReturn(existing);
 
-    updateEstablishmentUseCase.execute(id, ownerId, updateData);
+        updateEstablishmentUseCase.execute(id, ownerId, updateData);
 
-    verify(repository).save(any());
-  }
+        verify(repository).save(any());
+    }
 
-  @Test
-  void shouldThrowForbiddenWhenNotOwner() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-123";
-    Establishment existing = Establishment.builder()
-        .id(id)
-        .ownerId("other-owner")
-        .build();
+    @Test
+    void shouldThrowForbiddenWhenNotOwner() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId("other-owner")
+                .build();
 
-    when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
 
-    assertThrows(ForbiddenException.class, () ->
-        updateEstablishmentUseCase.execute(id, ownerId, Establishment.builder().build())
-    );
-    verify(repository, never()).save(any());
-  }
+        assertThrows(ForbiddenException.class, () ->
+                updateEstablishmentUseCase.execute(id, ownerId, Establishment.builder().build())
+        );
+        verify(repository, never()).save(any());
+    }
 
-  @Test
-  void shouldThrowNotFoundWhenEstablishmentDoesNotExist() {
-    UUID id = UUID.randomUUID();
-    when(repository.findById(id)).thenReturn(Optional.empty());
+    @Test
+    void shouldThrowNotFoundWhenEstablishmentDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
-    assertThrows(NotFoundException.class, () ->
-        updateEstablishmentUseCase.execute(id, "any", Establishment.builder().build())
-    );
-  }
+        assertThrows(NotFoundException.class, () ->
+                updateEstablishmentUseCase.execute(id, "any", Establishment.builder().build())
+        );
+    }
 
-  @Test
-  void shouldPublishEstablishmentUpdatedEvent() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-123";
-    Establishment existing = Establishment.builder()
-        .id(id)
-        .ownerId(ownerId)
-        .name("Old Name")
-        .build();
-    Establishment updateData = Establishment.builder()
-        .name("New Name")
-        .build();
+    @Test
+    void shouldPublishEstablishmentUpdatedEvent() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .name("Old Name")
+                .build();
+        Establishment updateData = Establishment.builder()
+                .name("New Name")
+                .build();
 
-    when(repository.findById(id)).thenReturn(Optional.of(existing));
-    when(repository.save(any())).thenReturn(existing);
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenReturn(existing);
 
-    updateEstablishmentUseCase.execute(id, ownerId, updateData);
+        updateEstablishmentUseCase.execute(id, ownerId, updateData);
 
-    verify(eventPublisher).publishEstablishmentUpdated(any());
-  }
+        verify(eventPublisher).publishEstablishmentUpdated(any());
+    }
 }

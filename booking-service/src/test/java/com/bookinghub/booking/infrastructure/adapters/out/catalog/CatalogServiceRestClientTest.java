@@ -23,89 +23,89 @@ import org.springframework.web.client.RestClient;
 @ExtendWith(MockitoExtension.class)
 class CatalogServiceRestClientTest {
 
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private RestClient restClient;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private RestClient restClient;
 
-  private CatalogServiceRestClient client;
+    private CatalogServiceRestClient client;
 
-  @BeforeEach
-  void setUp() {
-    client = new CatalogServiceRestClient(restClient);
-  }
+    @BeforeEach
+    void setUp() {
+        client = new CatalogServiceRestClient(restClient);
+    }
 
-  @Test
-  void shouldGetSchedule() {
-    UUID eid = UUID.randomUUID();
-    UUID pid = UUID.randomUUID();
-    UUID sid = UUID.randomUUID();
+    @Test
+    void shouldGetSchedule() {
+        UUID eid = UUID.randomUUID();
+        UUID pid = UUID.randomUUID();
+        UUID sid = UUID.randomUUID();
 
-    ScheduleResponse response = new ScheduleResponse(
-        true,
-        new BigDecimal("100.00"),
-        60,
-        List.of(new ScheduleResponse.DayScheduleResponse(1, "08:00", "18:00"))
-    );
+        ScheduleResponse response = new ScheduleResponse(
+                true,
+                new BigDecimal("100.00"),
+                60,
+                List.of(new ScheduleResponse.DayScheduleResponse(1, "08:00", "18:00"))
+        );
 
-    when(restClient.get()
-        .uri(any(Function.class))
-        .retrieve()
-        .body(ScheduleResponse.class))
-        .thenReturn(response);
+        when(restClient.get()
+                .uri(any(Function.class))
+                .retrieve()
+                .body(ScheduleResponse.class))
+                .thenReturn(response);
 
-    ScheduleInfo result = client.getSchedule(eid, pid, sid);
+        ScheduleInfo result = client.getSchedule(eid, pid, sid);
 
-    assertThat(result.active()).isTrue();
-    assertThat(result.price()).isEqualTo(new BigDecimal("100.00"));
-    assertThat(result.durationMinutes()).isEqualTo(60);
-    assertThat(result.workSchedule()).hasSize(1);
-  }
+        assertThat(result.active()).isTrue();
+        assertThat(result.price()).isEqualTo(new BigDecimal("100.00"));
+        assertThat(result.durationMinutes()).isEqualTo(60);
+        assertThat(result.workSchedule()).hasSize(1);
+    }
 
-  @Test
-  void shouldGetScheduleWithNullFixedSchedule() {
-    ScheduleResponse response = new ScheduleResponse(true, new BigDecimal("100.00"), 60, null);
-    when(restClient.get().uri(any(Function.class)).retrieve().body(ScheduleResponse.class)).thenReturn(response);
+    @Test
+    void shouldGetScheduleWithNullFixedSchedule() {
+        ScheduleResponse response = new ScheduleResponse(true, new BigDecimal("100.00"), 60, null);
+        when(restClient.get().uri(any(Function.class)).retrieve().body(ScheduleResponse.class)).thenReturn(response);
 
-    ScheduleInfo result = client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        ScheduleInfo result = client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
 
-    assertThat(result.workSchedule()).isEmpty();
-  }
+        assertThat(result.workSchedule()).isEmpty();
+    }
 
-  @Test
-  void shouldThrowWhenResponseIsNull() {
-    when(restClient.get()
-        .uri(any(Function.class))
-        .retrieve()
-        .body(ScheduleResponse.class))
-        .thenReturn(null);
+    @Test
+    void shouldThrowWhenResponseIsNull() {
+        when(restClient.get()
+                .uri(any(Function.class))
+                .retrieve()
+                .body(ScheduleResponse.class))
+                .thenReturn(null);
 
-    assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
-        .isInstanceOf(CatalogServiceException.class)
-        .hasMessageContaining("Empty response");
-  }
+        assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
+                .isInstanceOf(CatalogServiceException.class)
+                .hasMessageContaining("Empty response");
+    }
 
-  @Test
-  void shouldThrowWhenNotFound() {
-    when(restClient.get()
-        .uri(any(Function.class))
-        .retrieve()
-        .body(ScheduleResponse.class))
-        .thenThrow(HttpClientErrorException.NotFound.class);
+    @Test
+    void shouldThrowWhenNotFound() {
+        when(restClient.get()
+                .uri(any(Function.class))
+                .retrieve()
+                .body(ScheduleResponse.class))
+                .thenThrow(HttpClientErrorException.NotFound.class);
 
-    assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
-        .isInstanceOf(CatalogServiceException.class)
-        .hasMessageContaining("not found");
-  }
+        assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
+                .isInstanceOf(CatalogServiceException.class)
+                .hasMessageContaining("not found");
+    }
 
-  @Test
-  void shouldThrowGenericException() {
-    when(restClient.get()
-        .uri(any(Function.class))
-        .retrieve()
-        .body(ScheduleResponse.class))
-        .thenThrow(new RuntimeException("API down"));
+    @Test
+    void shouldThrowGenericException() {
+        when(restClient.get()
+                .uri(any(Function.class))
+                .retrieve()
+                .body(ScheduleResponse.class))
+                .thenThrow(new RuntimeException("API down"));
 
-    assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
-        .isInstanceOf(CatalogServiceException.class)
-        .hasMessageContaining("unavailable");
-  }
+        assertThatThrownBy(() -> client.getSchedule(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()))
+                .isInstanceOf(CatalogServiceException.class)
+                .hasMessageContaining("unavailable");
+    }
 }

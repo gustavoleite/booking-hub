@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @SuppressWarnings("PMD.UseUtilityClass")
 public class BookingApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(BookingApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(BookingApplication.class, args);
+    }
 }

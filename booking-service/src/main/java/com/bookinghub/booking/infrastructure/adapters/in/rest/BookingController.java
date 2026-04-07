@@ -35,87 +35,87 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Bookings")
 public class BookingController {
 
-  private final CreateBookingUseCase createBookingUseCase;
-  private final GetBookingDetailsUseCase getBookingDetailsUseCase;
-  private final CancelBookingUseCase cancelBookingUseCase;
-  private final CompleteBookingUseCase completeBookingUseCase;
-  private final MarkNoShowUseCase markNoShowUseCase;
-  private final ListClientBookingsUseCase listClientBookingsUseCase;
-  private final ListProfessionalAgendaUseCase listProfessionalAgendaUseCase;
-  private final ListEstablishmentBookingsUseCase listEstablishmentBookingsUseCase;
+    private final CreateBookingUseCase createBookingUseCase;
+    private final GetBookingDetailsUseCase getBookingDetailsUseCase;
+    private final CancelBookingUseCase cancelBookingUseCase;
+    private final CompleteBookingUseCase completeBookingUseCase;
+    private final MarkNoShowUseCase markNoShowUseCase;
+    private final ListClientBookingsUseCase listClientBookingsUseCase;
+    private final ListProfessionalAgendaUseCase listProfessionalAgendaUseCase;
+    private final ListEstablishmentBookingsUseCase listEstablishmentBookingsUseCase;
 
-  @PostMapping
-  @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Create a booking")
-  public BookingResponse create(
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create a booking")
+    public BookingResponse create(
             @RequestHeader("X-User-Id") String userId,
             @Valid @RequestBody CreateBookingRequest request) {
-    Booking booking = createBookingUseCase.execute(
-        userId,
-        request.professionalId(),
-        request.establishmentId(),
-        request.providedServiceId(),
-        request.startDatetime(),
-        request.notes()
-    );
-    return BookingResponse.from(booking);
-  }
+        Booking booking = createBookingUseCase.execute(
+                userId,
+                request.professionalId(),
+                request.establishmentId(),
+                request.providedServiceId(),
+                request.startDatetime(),
+                request.notes()
+        );
+        return BookingResponse.from(booking);
+    }
 
-  @GetMapping("/me")
-  @Operation(summary = "List bookings for the authenticated client")
-  public List<BookingResponse> listMyBookings(@RequestHeader("X-User-Id") String userId) {
-    return listClientBookingsUseCase.execute(userId)
-        .stream().map(BookingResponse::from).toList();
-  }
+    @GetMapping("/me")
+    @Operation(summary = "List bookings for the authenticated client")
+    public List<BookingResponse> listMyBookings(@RequestHeader("X-User-Id") String userId) {
+        return listClientBookingsUseCase.execute(userId)
+                .stream().map(BookingResponse::from).toList();
+    }
 
-  @GetMapping("/{id}")
-  @Operation(summary = "Get booking details")
-  public BookingResponse getById(
+    @GetMapping("/{id}")
+    @Operation(summary = "Get booking details")
+    public BookingResponse getById(
             @PathVariable("id") UUID id,
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-User-Role") String role) {
-    return BookingResponse.from(getBookingDetailsUseCase.execute(id, userId, role));
-  }
+        return BookingResponse.from(getBookingDetailsUseCase.execute(id, userId, role));
+    }
 
-  @PatchMapping("/{id}/cancel")
-  @Operation(summary = "Cancel a booking")
-  public BookingResponse cancel(
+    @PatchMapping("/{id}/cancel")
+    @Operation(summary = "Cancel a booking")
+    public BookingResponse cancel(
             @PathVariable("id") UUID id,
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-User-Role") String role,
             @RequestBody(required = false) CancelBookingRequest request) {
-    String reason = request != null ? request.reason() : null;
-    return BookingResponse.from(cancelBookingUseCase.execute(id, userId, role, reason));
-  }
+        String reason = request != null ? request.reason() : null;
+        return BookingResponse.from(cancelBookingUseCase.execute(id, userId, role, reason));
+    }
 
-  @PatchMapping("/{id}/complete")
-  @Operation(summary = "Mark a booking as completed")
-  public BookingResponse complete(
+    @PatchMapping("/{id}/complete")
+    @Operation(summary = "Mark a booking as completed")
+    public BookingResponse complete(
             @PathVariable("id") UUID id,
             @RequestHeader("X-User-Role") String role) {
-    return BookingResponse.from(completeBookingUseCase.execute(id, role));
-  }
+        return BookingResponse.from(completeBookingUseCase.execute(id, role));
+    }
 
-  @PatchMapping("/{id}/no-show")
-  @Operation(summary = "Mark a booking as no-show")
-  public BookingResponse noShow(
+    @PatchMapping("/{id}/no-show")
+    @Operation(summary = "Mark a booking as no-show")
+    public BookingResponse noShow(
             @PathVariable("id") UUID id,
             @RequestHeader("X-User-Role") String role) {
-    return BookingResponse.from(markNoShowUseCase.execute(id, role));
-  }
+        return BookingResponse.from(markNoShowUseCase.execute(id, role));
+    }
 
-  @GetMapping("/professional")
-  @Operation(summary = "List agenda for the authenticated professional")
-  public List<BookingResponse> professionalAgenda(@RequestHeader("X-User-Id") String userId) {
-    return listProfessionalAgendaUseCase.execute(UUID.fromString(userId))
-        .stream().map(BookingResponse::from).toList();
-  }
+    @GetMapping("/professional")
+    @Operation(summary = "List agenda for the authenticated professional")
+    public List<BookingResponse> professionalAgenda(@RequestHeader("X-User-Id") String userId) {
+        return listProfessionalAgendaUseCase.execute(UUID.fromString(userId))
+                .stream().map(BookingResponse::from).toList();
+    }
 
-  @GetMapping("/establishment/{establishmentId}")
-  @Operation(summary = "List all bookings for an establishment")
-  public List<BookingResponse> establishmentBookings(
+    @GetMapping("/establishment/{establishmentId}")
+    @Operation(summary = "List all bookings for an establishment")
+    public List<BookingResponse> establishmentBookings(
       @PathVariable("establishmentId") UUID establishmentId) {
-    return listEstablishmentBookingsUseCase.execute(establishmentId)
-        .stream().map(BookingResponse::from).toList();
-  }
+        return listEstablishmentBookingsUseCase.execute(establishmentId)
+                .stream().map(BookingResponse::from).toList();
+    }
 }

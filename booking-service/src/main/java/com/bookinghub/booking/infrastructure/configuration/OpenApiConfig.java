@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-  @Bean
-  public OpenAPI customOpenApi(
+    @Bean
+    public OpenAPI customOpenApi(
             @Value("${app.openapi.server-url:http://localhost:8080/api/bookings}") String serverUrl) {
-    return new OpenAPI()
-        .info(new Info().title("Booking Service API").version("v1")
-            .description("Service for managing bookings, schedules and availability"))
-        .addServersItem(new Server().url(serverUrl).description("API Gateway"));
-  }
+        return new OpenAPI()
+                .info(new Info().title("Booking Service API").version("v1")
+                        .description("Service for managing bookings, schedules and availability"))
+                .addServersItem(new Server().url(serverUrl).description("API Gateway"));
+    }
 }

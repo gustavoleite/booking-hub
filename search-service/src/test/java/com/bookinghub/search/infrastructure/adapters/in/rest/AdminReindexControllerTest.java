@@ -18,29 +18,29 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 class AdminReindexControllerTest {
 
-  @Autowired
-  MockMvc mockMvc;
-  @MockBean
-  ReindexUseCase reindexUseCase;
+    @Autowired
+    MockMvc mockMvc;
+    @MockBean
+    ReindexUseCase reindexUseCase;
 
-  @Test
-  void shouldReturn202WithIndexedCount() throws Exception {
-    when(reindexUseCase.execute()).thenReturn(42);
+    @Test
+    void shouldReturn202WithIndexedCount() throws Exception {
+        when(reindexUseCase.execute()).thenReturn(42);
 
-    mockMvc.perform(post("/admin/reindex"))
-        .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.status").value("accepted"))
-        .andExpect(jsonPath("$.indexed").value(42));
+        mockMvc.perform(post("/admin/reindex"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.status").value("accepted"))
+                .andExpect(jsonPath("$.indexed").value(42));
 
-    verify(reindexUseCase).execute();
-  }
+        verify(reindexUseCase).execute();
+    }
 
-  @Test
-  void shouldReturn202EvenWhenNothingIndexed() throws Exception {
-    when(reindexUseCase.execute()).thenReturn(0);
+    @Test
+    void shouldReturn202EvenWhenNothingIndexed() throws Exception {
+        when(reindexUseCase.execute()).thenReturn(0);
 
-    mockMvc.perform(post("/admin/reindex"))
-        .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.indexed").value(0));
-  }
+        mockMvc.perform(post("/admin/reindex"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.indexed").value(0));
+    }
 }

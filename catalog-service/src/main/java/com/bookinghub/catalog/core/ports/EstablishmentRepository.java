@@ -6,11 +6,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface EstablishmentRepository {
-  Establishment save(Establishment establishment);
+    Establishment save(Establishment establishment);
 
-  Optional<Establishment> findById(UUID id);
+    Optional<Establishment> findById(UUID id);
 
-  List<Establishment> findByOwnerId(String ownerId);
+    List<Establishment> findByOwnerId(String ownerId);
 
-  boolean existsByCnpj(String cnpj);
+    boolean existsByCnpj(String cnpj);
 }

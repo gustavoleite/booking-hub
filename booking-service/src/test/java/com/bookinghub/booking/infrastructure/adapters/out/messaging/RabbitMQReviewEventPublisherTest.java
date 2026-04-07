@@ -16,26 +16,26 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 @ExtendWith(MockitoExtension.class)
 class RabbitMQReviewEventPublisherTest {
 
-  @Mock
-  private RabbitTemplate rabbitTemplate;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
-  @InjectMocks
-  private RabbitMQReviewEventPublisher publisher;
+    @InjectMocks
+    private RabbitMQReviewEventPublisher publisher;
 
-  @Test
-  void shouldPublishReviewCreated() {
-    Review review = Review.builder()
-        .id(UUID.randomUUID())
-        .bookingId(UUID.randomUUID())
-        .clientId("c1")
-        .professionalId(UUID.randomUUID())
-        .establishmentId(UUID.randomUUID())
-        .professionalRating(5)
-        .establishmentRating(5)
-        .build();
+    @Test
+    void shouldPublishReviewCreated() {
+        Review review = Review.builder()
+                .id(UUID.randomUUID())
+                .bookingId(UUID.randomUUID())
+                .clientId("c1")
+                .professionalId(UUID.randomUUID())
+                .establishmentId(UUID.randomUUID())
+                .professionalRating(5)
+                .establishmentRating(5)
+                .build();
 
-    publisher.publishReviewCreated(review);
+        publisher.publishReviewCreated(review);
 
-    verify(rabbitTemplate).convertAndSend(eq("review.events"), eq("review.created"), any(ReviewEventPayload.class));
-  }
+        verify(rabbitTemplate).convertAndSend(eq("review.events"), eq("review.created"), any(ReviewEventPayload.class));
+    }
 }

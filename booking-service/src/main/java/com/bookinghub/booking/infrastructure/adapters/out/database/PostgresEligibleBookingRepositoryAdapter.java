@@ -11,20 +11,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PostgresEligibleBookingRepositoryAdapter implements EligibleBookingRepository {
 
-  private final JpaEligibleBookingRepository jpa;
+    private final JpaEligibleBookingRepository jpa;
 
-  @Override
-  public void save(EligibleBooking eligibleBooking) {
-    jpa.save(EligibleBookingJpaEntity.from(eligibleBooking));
-  }
+    @Override
+    public void save(EligibleBooking eligibleBooking) {
+        jpa.save(EligibleBookingJpaEntity.from(eligibleBooking));
+    }
 
-  @Override
-  public Optional<EligibleBooking> findById(UUID bookingId) {
-    return jpa.findById(bookingId).map(EligibleBookingJpaEntity::toDomain);
-  }
+    @Override
+    public Optional<EligibleBooking> findById(UUID bookingId) {
+        return jpa.findById(bookingId).map(EligibleBookingJpaEntity::toDomain);
+    }
 
-  @Override
-  public boolean existsById(UUID bookingId) {
-    return jpa.existsById(bookingId);
-  }
+    @Override
+    public boolean existsById(UUID bookingId) {
+        return jpa.existsById(bookingId);
+    }
 }

@@ -15,21 +15,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ListMyEstablishmentsUseCaseTest {
 
-  @Mock
-  private EstablishmentRepository establishmentRepository;
+    @Mock
+    private EstablishmentRepository establishmentRepository;
 
-  @InjectMocks
-  private ListMyEstablishmentsUseCase useCase;
+    @InjectMocks
+    private ListMyEstablishmentsUseCase useCase;
 
-  @Test
-  void shouldListEstablishments() {
-    String ownerId = "owner-1";
-    List<Establishment> establishments = List.of(Establishment.builder().ownerId(ownerId).build());
-    when(establishmentRepository.findByOwnerId(ownerId)).thenReturn(establishments);
+    @Test
+    void shouldListEstablishments() {
+        String ownerId = "owner-1";
+        List<Establishment> establishments = List.of(Establishment.builder().ownerId(ownerId).build());
+        when(establishmentRepository.findByOwnerId(ownerId)).thenReturn(establishments);
 
-    List<Establishment> result = useCase.execute(ownerId);
+        List<Establishment> result = useCase.execute(ownerId);
 
-    assertEquals(1, result.size());
-    assertEquals(ownerId, result.get(0).getOwnerId());
-  }
+        assertEquals(1, result.size());
+        assertEquals(ownerId, result.get(0).getOwnerId());
+    }
 }

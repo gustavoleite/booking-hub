@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminReindexController {
 
-  private final ReindexUseCase reindexUseCase;
+    private final ReindexUseCase reindexUseCase;
 
-  @PostMapping("/reindex")
-  public ResponseEntity<Map<String, Object>> reindex() {
-    log.info("Manual reindex triggered");
-    int count = reindexUseCase.execute();
-    return ResponseEntity.accepted().body(Map.of(
-        "status", "accepted",
-        "indexed", count
-    ));
-  }
+    @PostMapping("/reindex")
+    public ResponseEntity<Map<String, Object>> reindex() {
+        log.info("Manual reindex triggered");
+        int count = reindexUseCase.execute();
+        return ResponseEntity.accepted().body(Map.of(
+                "status", "accepted",
+                "indexed", count
+        ));
+    }
 }

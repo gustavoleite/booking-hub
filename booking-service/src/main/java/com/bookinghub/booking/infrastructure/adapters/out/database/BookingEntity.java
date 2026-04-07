@@ -25,42 +25,42 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookingEntity {
 
-  @Id
-  private UUID id;
+    @Id
+    private UUID id;
 
-  @Column(nullable = false)
-  private String clientId;
+    @Column(nullable = false)
+    private String clientId;
 
-  @Column(nullable = false)
-  private UUID professionalId;
+    @Column(nullable = false)
+    private UUID professionalId;
 
-  @Column(nullable = false)
-  private UUID establishmentId;
+    @Column(nullable = false)
+    private UUID establishmentId;
 
-  @Column(nullable = false)
-  private UUID providedServiceId;
+    @Column(nullable = false)
+    private UUID providedServiceId;
 
-  @Column(nullable = false)
-  private LocalDateTime startDatetime;
+    @Column(nullable = false)
+    private LocalDateTime startDatetime;
 
-  @Column(nullable = false)
-  private LocalDateTime endDatetime;
+    @Column(nullable = false)
+    private LocalDateTime endDatetime;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 20)
-  private BookingStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private BookingStatus status;
 
-  @Column(nullable = false, precision = 19, scale = 2)
-  private BigDecimal price;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal price;
 
-  @Column(nullable = false)
-  private int durationMinutes;
+    @Column(nullable = false)
+    private int durationMinutes;
 
-  private String notes;
-  private String cancelReason;
+    private String notes;
+    private String cancelReason;
 
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-  private LocalDateTime cancelledAt;
+    private LocalDateTime cancelledAt;
 }

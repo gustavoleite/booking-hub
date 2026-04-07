@@ -11,24 +11,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CancelBookingUseCase {
 
-  private final BookingRepository bookingRepository;
-  private final BookingEventPublisher eventPublisher;
+    private final BookingRepository bookingRepository;
+    private final BookingEventPublisher eventPublisher;
 
-  public Booking execute(UUID bookingId, String requestingUserId, String role, String reason) {
-    Booking booking = bookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotFoundException("Booking not found: " + bookingId));
+    public Booking execute(UUID bookingId, String requestingUserId, String role, String reason) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found: " + bookingId));
 
-    boolean isClient = "ROLE_CLIENT".equals(role) && booking.isOwnedBy(requestingUserId);
-    boolean isOwner = "ROLE_OWNER".equals(role);
+        boolean isClient = "ROLE_CLIENT".equals(role) && booking.isOwnedBy(requestingUserId);
+        boolean isOwner = "ROLE_OWNER".equals(role);
 
-    if (!isClient && !isOwner) {
-      throw new ForbiddenBookingAccessException(
-          "Only the client or establishment owner can cancel this booking");
+        if (!isClient && !isOwner) {
+            throw new ForbiddenBookingAccessException(
+                    "Only the client or establishment owner can cancel this booking");
+        }
+
+        booking.cancel(reason);
+        Booking saved = bookingRepository.save(booking);
+        eventPublisher.publishBookingCancelled(saved);
+        return saved;
     }
-
-    booking.cancel(reason);
-    Booking saved = bookingRepository.save(booking);
-    eventPublisher.publishBookingCancelled(saved);
-    return saved;
-  }
 }

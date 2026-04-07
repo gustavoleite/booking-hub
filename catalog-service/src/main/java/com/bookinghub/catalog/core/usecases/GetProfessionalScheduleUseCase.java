@@ -8,12 +8,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class GetProfessionalScheduleUseCase {
-  private final AffiliationRepository affiliationRepository;
+    private final AffiliationRepository affiliationRepository;
 
-  public Affiliation execute(UUID establishmentId, UUID professionalId) {
-    return affiliationRepository
-        .findByEstablishmentIdAndProfessionalId(establishmentId, professionalId)
-        .orElseThrow(() -> new NotFoundException(
-            "Afiliação não encontrada para o profissional e estabelecimento informados"));
-  }
+    public Affiliation execute(UUID establishmentId, UUID professionalId) {
+        return affiliationRepository
+                .findByEstablishmentIdAndProfessionalId(establishmentId, professionalId)
+                .orElseThrow(() -> new NotFoundException(
+                        "Afiliação não encontrada para o profissional"
+                                + " e estabelecimento informados"));
+    }
 }

@@ -6,9 +6,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaEstablishmentRepository extends JpaRepository<EstablishmentEntity, UUID> {
-  Optional<EstablishmentEntity> findByIdAndActiveTrue(UUID id);
+    Optional<EstablishmentEntity> findByIdAndActiveTrue(UUID id);
 
-  List<EstablishmentEntity> findByOwnerIdAndActiveTrue(String ownerId);
+    List<EstablishmentEntity> findByOwnerIdAndActiveTrue(String ownerId);
 
-  boolean existsByCnpj(String cnpj);
+    boolean existsByCnpj(String cnpj);
 }

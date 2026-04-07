@@ -27,29 +27,29 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EstablishmentEntity {
-  @Id
-  private UUID id;
-  private String ownerId;
-  private String name;
-  private String cnpj;
-  private String description;
-  @Builder.Default
-  private boolean active = true;
+    @Id
+    private UUID id;
+    private String ownerId;
+    private String name;
+    private String cnpj;
+    private String description;
+    @Builder.Default
+    private boolean active = true;
 
-  @ElementCollection
-  @CollectionTable(
-      name = "tb_establishment_photos", joinColumns = @JoinColumn(name = "establishment_id"))
-  @Column(name = "photo_url")
-  private List<String> photos;
+    @ElementCollection
+    @CollectionTable(
+            name = "tb_establishment_photos", joinColumns = @JoinColumn(name = "establishment_id"))
+    @Column(name = "photo_url")
+    private List<String> photos;
 
-  @Embedded
-  private AddressEmbeddable address;
+    @Embedded
+    private AddressEmbeddable address;
 
-  @OneToMany(mappedBy = "establishment", cascade = CascadeType.ALL,
-      orphanRemoval = true, fetch = FetchType.EAGER)
-  private List<BusinessHourEntity> defaultBusinessHours;
+    @OneToMany(mappedBy = "establishment", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<BusinessHourEntity> defaultBusinessHours;
 
-  @OneToMany(mappedBy = "establishment", cascade = CascadeType.ALL,
-      orphanRemoval = true, fetch = FetchType.EAGER)
-  private List<ProvidedServiceEntity> providedServices;
+    @OneToMany(mappedBy = "establishment", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ProvidedServiceEntity> providedServices;
 }

@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class GetEstablishmentDetailsUseCase {
-  private final EstablishmentRepository establishmentRepository;
+    private final EstablishmentRepository establishmentRepository;
 
-  public Establishment execute(UUID id) {
-    return establishmentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Establishment not found"));
-  }
+    public Establishment execute(UUID id) {
+        return establishmentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Establishment not found"));
+    }
 }

@@ -17,66 +17,66 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PostgresReviewRepositoryAdapterTest {
 
-  @Mock
-  private JpaReviewRepository jpa;
+    @Mock
+    private JpaReviewRepository jpa;
 
-  @InjectMocks
-  private PostgresReviewRepositoryAdapter adapter;
+    @InjectMocks
+    private PostgresReviewRepositoryAdapter adapter;
 
-  @Test
-  void shouldSaveReview() {
-    Review review = Review.builder().id(UUID.randomUUID()).clientId("c1").build();
-    ReviewJpaEntity entity = ReviewJpaEntity.from(review);
-    when(jpa.save(any())).thenReturn(entity);
+    @Test
+    void shouldSaveReview() {
+        Review review = Review.builder().id(UUID.randomUUID()).clientId("c1").build();
+        ReviewJpaEntity entity = ReviewJpaEntity.from(review);
+        when(jpa.save(any())).thenReturn(entity);
 
-    Review result = adapter.save(review);
+        Review result = adapter.save(review);
 
-    assertThat(result.getId()).isEqualTo(review.getId());
-  }
+        assertThat(result.getId()).isEqualTo(review.getId());
+    }
 
-  @Test
-  void shouldFindByBookingId() {
-    UUID bookingId = UUID.randomUUID();
-    Review review = Review.builder().id(UUID.randomUUID()).bookingId(bookingId).clientId("c1").build();
-    when(jpa.findByBookingId(bookingId)).thenReturn(Optional.of(ReviewJpaEntity.from(review)));
+    @Test
+    void shouldFindByBookingId() {
+        UUID bookingId = UUID.randomUUID();
+        Review review = Review.builder().id(UUID.randomUUID()).bookingId(bookingId).clientId("c1").build();
+        when(jpa.findByBookingId(bookingId)).thenReturn(Optional.of(ReviewJpaEntity.from(review)));
 
-    Optional<Review> result = adapter.findByBookingId(bookingId);
+        Optional<Review> result = adapter.findByBookingId(bookingId);
 
-    assertThat(result).isPresent();
-    assertThat(result.get().getBookingId()).isEqualTo(bookingId);
-  }
+        assertThat(result).isPresent();
+        assertThat(result.get().getBookingId()).isEqualTo(bookingId);
+    }
 
-  @Test
-  void shouldFindByProfessionalId() {
-    UUID profId = UUID.randomUUID();
-    Review review = Review.builder().id(UUID.randomUUID()).professionalId(profId).clientId("c1").build();
-    when(jpa.findByProfessionalId(profId)).thenReturn(List.of(ReviewJpaEntity.from(review)));
+    @Test
+    void shouldFindByProfessionalId() {
+        UUID profId = UUID.randomUUID();
+        Review review = Review.builder().id(UUID.randomUUID()).professionalId(profId).clientId("c1").build();
+        when(jpa.findByProfessionalId(profId)).thenReturn(List.of(ReviewJpaEntity.from(review)));
 
-    List<Review> result = adapter.findByProfessionalId(profId);
+        List<Review> result = adapter.findByProfessionalId(profId);
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getProfessionalId()).isEqualTo(profId);
-  }
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getProfessionalId()).isEqualTo(profId);
+    }
 
-  @Test
-  void shouldFindByEstablishmentId() {
-    UUID estId = UUID.randomUUID();
-    Review review = Review.builder().id(UUID.randomUUID()).establishmentId(estId).clientId("c1").build();
-    when(jpa.findByEstablishmentId(estId)).thenReturn(List.of(ReviewJpaEntity.from(review)));
+    @Test
+    void shouldFindByEstablishmentId() {
+        UUID estId = UUID.randomUUID();
+        Review review = Review.builder().id(UUID.randomUUID()).establishmentId(estId).clientId("c1").build();
+        when(jpa.findByEstablishmentId(estId)).thenReturn(List.of(ReviewJpaEntity.from(review)));
 
-    List<Review> result = adapter.findByEstablishmentId(estId);
+        List<Review> result = adapter.findByEstablishmentId(estId);
 
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getEstablishmentId()).isEqualTo(estId);
-  }
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEstablishmentId()).isEqualTo(estId);
+    }
 
-  @Test
-  void shouldExistsByBookingId() {
-    UUID bookingId = UUID.randomUUID();
-    when(jpa.existsByBookingId(bookingId)).thenReturn(true);
+    @Test
+    void shouldExistsByBookingId() {
+        UUID bookingId = UUID.randomUUID();
+        when(jpa.existsByBookingId(bookingId)).thenReturn(true);
 
-    boolean exists = adapter.existsByBookingId(bookingId);
+        boolean exists = adapter.existsByBookingId(bookingId);
 
-    assertThat(exists).isTrue();
-  }
+        assertThat(exists).isTrue();
+    }
 }

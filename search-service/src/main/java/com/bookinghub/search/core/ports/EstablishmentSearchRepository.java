@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface EstablishmentSearchRepository {
-  void upsert(EstablishmentDocument doc);
+    void upsert(EstablishmentDocument doc);
 
-  void upsertPartial(String id, Map<String, Object> fields);
+    void upsertPartial(String id, Map<String, Object> fields);
 
-  Optional<EstablishmentDocument> findById(String id);
+    Optional<EstablishmentDocument> findById(String id);
 
-  SearchPage search(SearchFilter filter, int page, int size);
+    SearchPage search(SearchFilter filter, int page, int size);
 }

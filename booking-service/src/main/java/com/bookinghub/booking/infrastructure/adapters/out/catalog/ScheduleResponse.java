@@ -10,10 +10,10 @@ public record ScheduleResponse(
         @JsonProperty("durationMinutes") int durationMinutes,
         @JsonProperty("fixedSchedule") List<DayScheduleResponse> fixedSchedule
 ) {
-  public record DayScheduleResponse(
+    public record DayScheduleResponse(
       @JsonProperty("dayOfWeek") int dayOfWeek,
       @JsonProperty("startTime") String startTime,
       @JsonProperty("endTime") String endTime
   ) {
-  }
+    }
 }

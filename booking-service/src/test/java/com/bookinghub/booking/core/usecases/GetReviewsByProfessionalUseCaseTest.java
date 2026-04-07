@@ -16,36 +16,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GetReviewsByProfessionalUseCaseTest {
 
-  @Mock
-  private ReviewRepository reviewRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
-  @InjectMocks
-  private GetReviewsByProfessionalUseCase useCase;
+    @InjectMocks
+    private GetReviewsByProfessionalUseCase useCase;
 
-  @Test
-  void shouldCalculateAverageSuccessfully() {
-    UUID professionalId = UUID.randomUUID();
-    List<Review> reviews = List.of(
-        Review.builder().professionalRating(5).build(),
-        Review.builder().professionalRating(3).build()
-    );
-    when(reviewRepository.findByProfessionalId(professionalId)).thenReturn(reviews);
+    @Test
+    void shouldCalculateAverageSuccessfully() {
+        UUID professionalId = UUID.randomUUID();
+        List<Review> reviews = List.of(
+                Review.builder().professionalRating(5).build(),
+                Review.builder().professionalRating(3).build()
+        );
+        when(reviewRepository.findByProfessionalId(professionalId)).thenReturn(reviews);
 
-    GetReviewsByProfessionalUseCase.Result result = useCase.execute(professionalId);
+        GetReviewsByProfessionalUseCase.Result result = useCase.execute(professionalId);
 
-    assertThat(result.reviews()).hasSize(2);
-    assertThat(result.averageRating()).isEqualTo(4.0);
-    assertThat(result.totalReviews()).isEqualTo(2);
-  }
+        assertThat(result.reviews()).hasSize(2);
+        assertThat(result.averageRating()).isEqualTo(4.0);
+        assertThat(result.totalReviews()).isEqualTo(2);
+    }
 
-  @Test
-  void shouldReturnNullAverageWhenNoRatings() {
-    UUID professionalId = UUID.randomUUID();
-    when(reviewRepository.findByProfessionalId(professionalId)).thenReturn(List.of());
+    @Test
+    void shouldReturnNullAverageWhenNoRatings() {
+        UUID professionalId = UUID.randomUUID();
+        when(reviewRepository.findByProfessionalId(professionalId)).thenReturn(List.of());
 
-    GetReviewsByProfessionalUseCase.Result result = useCase.execute(professionalId);
+        GetReviewsByProfessionalUseCase.Result result = useCase.execute(professionalId);
 
-    assertThat(result.averageRating()).isNull();
-    assertThat(result.totalReviews()).isZero();
-  }
+        assertThat(result.averageRating()).isNull();
+        assertThat(result.totalReviews()).isZero();
+    }
 }

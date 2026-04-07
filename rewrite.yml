@@ -4,9 +4,9 @@ name: com.bookinghub.GoogleStyle
 styleConfigs:
   - org.openrewrite.java.style.TabsAndIndentsStyle:
       useTabCharacter: false
-      tabSize: 2
-      indentSize: 2
-      continuationIndent: 4
+      tabSize: 4
+      indentSize: 4
+      continuationIndent: 8
   - org.openrewrite.java.style.ImportLayoutStyle:
       classCountToUseStarImport: 9999
       nameCountToUseStarImport: 9999

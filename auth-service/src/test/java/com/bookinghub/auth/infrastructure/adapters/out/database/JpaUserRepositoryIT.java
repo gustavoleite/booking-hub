@@ -14,19 +14,19 @@ import org.springframework.test.context.ActiveProfiles;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class JpaUserRepositoryIT {
 
-  @Autowired
-  private JpaUserRepository userRepository;
+    @Autowired
+    private JpaUserRepository userRepository;
 
-  @Test
-  void shouldSaveAndFindUser() {
-    UserEntity user = new UserEntity();
-    user.setId(UUID.randomUUID());
-    user.setEmail("test@example.com");
-    user.setPasswordHash("hash");
+    @Test
+    void shouldSaveAndFindUser() {
+        UserEntity user = new UserEntity();
+        user.setId(UUID.randomUUID());
+        user.setEmail("test@example.com");
+        user.setPasswordHash("hash");
 
-    UserEntity savedUser = userRepository.save(user);
+        UserEntity savedUser = userRepository.save(user);
 
-    assertThat(savedUser.getId()).isNotNull();
-    assertThat(userRepository.findByEmail("test@example.com")).isPresent();
-  }
+        assertThat(savedUser.getId()).isNotNull();
+        assertThat(userRepository.findByEmail("test@example.com")).isPresent();
+    }
 }

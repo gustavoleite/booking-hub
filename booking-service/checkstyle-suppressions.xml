@@ -11,4 +11,7 @@
   <suppress checks="AbbreviationAsWordInName" files="RabbitMQConfig\.java"/>
   <suppress checks="AbbreviationAsWordInName" files="RabbitMQBookingEventPublisher\.java"/>
   <suppress checks="AbbreviationAsWordInName" files="RabbitMQReviewEventPublisher\.java"/>
+
+  <!-- Code uses 4-space indentation (OpenRewrite style); google_checks expects 2-space -->
+  <suppress checks="Indentation" files=".*\.java"/>
 </suppressions>

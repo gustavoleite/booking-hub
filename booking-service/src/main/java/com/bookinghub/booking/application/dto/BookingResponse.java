@@ -22,22 +22,22 @@ public record BookingResponse(
         LocalDateTime createdAt,
         LocalDateTime cancelledAt
 ) {
-  public static BookingResponse from(Booking b) {
-    return new BookingResponse(
-        b.getId(),
-        b.getClientId(),
-        b.getProfessionalId(),
-        b.getEstablishmentId(),
-        b.getProvidedServiceId(),
-        b.getStartDatetime(),
-        b.getEndDatetime(),
-        b.getStatus(),
-        b.getPrice(),
-        b.getDurationMinutes(),
-        b.getNotes(),
-        b.getCancelReason(),
-        b.getCreatedAt(),
-        b.getCancelledAt()
-    );
-  }
+    public static BookingResponse from(Booking b) {
+        return new BookingResponse(
+                b.getId(),
+                b.getClientId(),
+                b.getProfessionalId(),
+                b.getEstablishmentId(),
+                b.getProvidedServiceId(),
+                b.getStartDatetime(),
+                b.getEndDatetime(),
+                b.getStatus(),
+                b.getPrice(),
+                b.getDurationMinutes(),
+                b.getNotes(),
+                b.getCancelReason(),
+                b.getCreatedAt(),
+                b.getCancelledAt()
+        );
+    }
 }

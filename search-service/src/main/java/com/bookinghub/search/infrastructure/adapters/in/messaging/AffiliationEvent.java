@@ -14,12 +14,12 @@ public record AffiliationEvent(
         boolean active,
         List<ServiceOfferingEvent> serviceOfferings
 ) {
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  public record ServiceOfferingEvent(
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ServiceOfferingEvent(
       String providedServiceId,
       String serviceTitle,
       BigDecimal price,
       int durationMinutes
   ) {
-  }
+    }
 }

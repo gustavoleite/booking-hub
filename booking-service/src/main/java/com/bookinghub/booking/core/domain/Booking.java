@@ -12,64 +12,64 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class Booking {
-  private final UUID id;
-  private final String clientId;
-  private final UUID professionalId;
-  private final UUID establishmentId;
-  private final UUID providedServiceId;
-  private final LocalDateTime startDatetime;
-  private final LocalDateTime endDatetime;
-  private BookingStatus status;
-  private final BigDecimal price;
-  private final int durationMinutes;
-  private final String notes;
-  private String cancelReason;
-  private final LocalDateTime createdAt;
-  private LocalDateTime cancelledAt;
+    private final UUID id;
+    private final String clientId;
+    private final UUID professionalId;
+    private final UUID establishmentId;
+    private final UUID providedServiceId;
+    private final LocalDateTime startDatetime;
+    private final LocalDateTime endDatetime;
+    private BookingStatus status;
+    private final BigDecimal price;
+    private final int durationMinutes;
+    private final String notes;
+    private String cancelReason;
+    private final LocalDateTime createdAt;
+    private LocalDateTime cancelledAt;
 
-  public static Booking create(String clientId, UUID professionalId, UUID establishmentId,
-                                 UUID providedServiceId, LocalDateTime startDatetime,
-                                 BigDecimal price, int durationMinutes, String notes) {
-    return Booking.builder()
-        .id(UUID.randomUUID())
-        .clientId(clientId)
-        .professionalId(professionalId)
-        .establishmentId(establishmentId)
-        .providedServiceId(providedServiceId)
-        .startDatetime(startDatetime)
-        .endDatetime(startDatetime.plusMinutes(durationMinutes))
-        .status(BookingStatus.CONFIRMED)
-        .price(price)
-        .durationMinutes(durationMinutes)
-        .notes(notes)
-        .createdAt(LocalDateTime.now())
-        .build();
-  }
-
-  public void cancel(String reason) {
-    if (status != BookingStatus.CONFIRMED) {
-      throw new BookingStatusException("Only CONFIRMED bookings can be cancelled");
+    public static Booking create(String clientId, UUID professionalId, UUID establishmentId,
+                               UUID providedServiceId, LocalDateTime startDatetime,
+                               BigDecimal price, int durationMinutes, String notes) {
+        return Booking.builder()
+                .id(UUID.randomUUID())
+                .clientId(clientId)
+                .professionalId(professionalId)
+                .establishmentId(establishmentId)
+                .providedServiceId(providedServiceId)
+                .startDatetime(startDatetime)
+                .endDatetime(startDatetime.plusMinutes(durationMinutes))
+                .status(BookingStatus.CONFIRMED)
+                .price(price)
+                .durationMinutes(durationMinutes)
+                .notes(notes)
+                .createdAt(LocalDateTime.now())
+                .build();
     }
-    this.status = BookingStatus.CANCELLED;
-    this.cancelReason = reason;
-    this.cancelledAt = LocalDateTime.now();
-  }
 
-  public void complete() {
-    if (status != BookingStatus.CONFIRMED) {
-      throw new BookingStatusException("Only CONFIRMED bookings can be completed");
+    public void cancel(String reason) {
+        if (status != BookingStatus.CONFIRMED) {
+            throw new BookingStatusException("Only CONFIRMED bookings can be cancelled");
+        }
+        this.status = BookingStatus.CANCELLED;
+        this.cancelReason = reason;
+        this.cancelledAt = LocalDateTime.now();
     }
-    this.status = BookingStatus.COMPLETED;
-  }
 
-  public void markNoShow() {
-    if (status != BookingStatus.CONFIRMED) {
-      throw new BookingStatusException("Only CONFIRMED bookings can be marked as no-show");
+    public void complete() {
+        if (status != BookingStatus.CONFIRMED) {
+            throw new BookingStatusException("Only CONFIRMED bookings can be completed");
+        }
+        this.status = BookingStatus.COMPLETED;
     }
-    this.status = BookingStatus.NO_SHOW;
-  }
 
-  public boolean isOwnedBy(String userId) {
-    return this.clientId.equals(userId);
-  }
+    public void markNoShow() {
+        if (status != BookingStatus.CONFIRMED) {
+            throw new BookingStatusException("Only CONFIRMED bookings can be marked as no-show");
+        }
+        this.status = BookingStatus.NO_SHOW;
+    }
+
+    public boolean isOwnedBy(String userId) {
+        return this.clientId.equals(userId);
+    }
 }

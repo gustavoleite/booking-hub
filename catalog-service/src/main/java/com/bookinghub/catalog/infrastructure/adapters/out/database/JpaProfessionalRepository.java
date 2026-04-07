@@ -5,5 +5,5 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaProfessionalRepository extends JpaRepository<ProfessionalEntity, UUID> {
-  Optional<ProfessionalEntity> findByIdAndActiveTrue(UUID id);
+    Optional<ProfessionalEntity> findByIdAndActiveTrue(UUID id);
 }

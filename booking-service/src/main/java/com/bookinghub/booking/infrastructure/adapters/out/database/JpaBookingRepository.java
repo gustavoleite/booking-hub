@@ -9,22 +9,22 @@ import org.springframework.data.repository.query.Param;
 
 public interface JpaBookingRepository extends JpaRepository<BookingEntity, UUID> {
 
-  List<BookingEntity> findByClientIdOrderByStartDatetimeDesc(String clientId);
+    List<BookingEntity> findByClientIdOrderByStartDatetimeDesc(String clientId);
 
-  List<BookingEntity> findByProfessionalIdOrderByStartDatetimeDesc(UUID professionalId);
+    List<BookingEntity> findByProfessionalIdOrderByStartDatetimeDesc(UUID professionalId);
 
-  List<BookingEntity> findByEstablishmentIdOrderByStartDatetimeDesc(UUID establishmentId);
+    List<BookingEntity> findByEstablishmentIdOrderByStartDatetimeDesc(UUID establishmentId);
 
-  @Query(value = """
+    @Query(value = """
             SELECT COUNT(*) > 0 FROM tb_bookings
             WHERE professional_id = :professionalId
               AND start_datetime = :startDatetime
               AND status NOT IN ('CANCELLED', 'NO_SHOW')
             """, nativeQuery = true)
-  boolean existsActiveSlot(@Param("professionalId") UUID professionalId,
-                             @Param("startDatetime") LocalDateTime startDatetime);
+    boolean existsActiveSlot(@Param("professionalId") UUID professionalId,
+                           @Param("startDatetime") LocalDateTime startDatetime);
 
-  @Query(value = """
+    @Query(value = """
             SELECT * FROM tb_bookings
             WHERE professional_id = :professionalId
               AND start_datetime >= :dayStart
@@ -32,7 +32,7 @@ public interface JpaBookingRepository extends JpaRepository<BookingEntity, UUID>
               AND status NOT IN ('CANCELLED', 'NO_SHOW')
             ORDER BY start_datetime
             """, nativeQuery = true)
-  List<BookingEntity> findByProfessionalAndDate(@Param("professionalId") UUID professionalId,
-                                                  @Param("dayStart") LocalDateTime dayStart,
-                                                  @Param("dayEnd") LocalDateTime dayEnd);
+    List<BookingEntity> findByProfessionalAndDate(@Param("professionalId") UUID professionalId,
+                                                @Param("dayStart") LocalDateTime dayStart,
+                                                @Param("dayEnd") LocalDateTime dayEnd);
 }

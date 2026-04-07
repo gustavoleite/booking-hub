@@ -20,70 +20,70 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-  @Bean
-  public CreateEstablishmentUseCase createEstablishmentUseCase(
+    @Bean
+    public CreateEstablishmentUseCase createEstablishmentUseCase(
       EstablishmentRepository repository, CatalogEventPublisher eventPublisher) {
-    return new CreateEstablishmentUseCase(repository, eventPublisher);
-  }
+        return new CreateEstablishmentUseCase(repository, eventPublisher);
+    }
 
-  @Bean
-  public UpdateEstablishmentUseCase updateEstablishmentUseCase(
+    @Bean
+    public UpdateEstablishmentUseCase updateEstablishmentUseCase(
       EstablishmentRepository repository, CatalogEventPublisher eventPublisher) {
-    return new UpdateEstablishmentUseCase(repository, eventPublisher);
-  }
+        return new UpdateEstablishmentUseCase(repository, eventPublisher);
+    }
 
-  @Bean
-  public InactivateEstablishmentUseCase inactivateEstablishmentUseCase(
+    @Bean
+    public InactivateEstablishmentUseCase inactivateEstablishmentUseCase(
       EstablishmentRepository repository) {
-    return new InactivateEstablishmentUseCase(repository);
-  }
+        return new InactivateEstablishmentUseCase(repository);
+    }
 
-  @Bean
-  public AddProvidedServiceUseCase addProvidedServiceUseCase(EstablishmentRepository repository) {
-    return new AddProvidedServiceUseCase(repository);
-  }
+    @Bean
+    public AddProvidedServiceUseCase addProvidedServiceUseCase(EstablishmentRepository repository) {
+        return new AddProvidedServiceUseCase(repository);
+    }
 
-  @Bean
-  public CreateProfessionalProfileUseCase createProfessionalProfileUseCase(
+    @Bean
+    public CreateProfessionalProfileUseCase createProfessionalProfileUseCase(
       ProfessionalRepository repository) {
-    return new CreateProfessionalProfileUseCase(repository);
-  }
+        return new CreateProfessionalProfileUseCase(repository);
+    }
 
-  @Bean
-  public UpdateProfessionalProfileUseCase updateProfessionalProfileUseCase(
+    @Bean
+    public UpdateProfessionalProfileUseCase updateProfessionalProfileUseCase(
       ProfessionalRepository repository) {
-    return new UpdateProfessionalProfileUseCase(repository);
-  }
+        return new UpdateProfessionalProfileUseCase(repository);
+    }
 
-  @Bean
-  public GetEstablishmentDetailsUseCase getEstablishmentDetailsUseCase(
+    @Bean
+    public GetEstablishmentDetailsUseCase getEstablishmentDetailsUseCase(
       EstablishmentRepository repository) {
-    return new GetEstablishmentDetailsUseCase(repository);
-  }
+        return new GetEstablishmentDetailsUseCase(repository);
+    }
 
-  @Bean
-  public ListMyEstablishmentsUseCase listMyEstablishmentsUseCase(
+    @Bean
+    public ListMyEstablishmentsUseCase listMyEstablishmentsUseCase(
       EstablishmentRepository repository) {
-    return new ListMyEstablishmentsUseCase(repository);
-  }
+        return new ListMyEstablishmentsUseCase(repository);
+    }
 
-  @Bean
-  public AddProfessionalToEstablishmentUseCase addProfessionalToEstablishmentUseCase(
+    @Bean
+    public AddProfessionalToEstablishmentUseCase addProfessionalToEstablishmentUseCase(
             EstablishmentRepository establishmentRepository,
             ProfessionalRepository professionalRepository,
             AffiliationRepository affiliationRepository,
             CatalogEventPublisher eventPublisher) {
-    return new AddProfessionalToEstablishmentUseCase(
-        establishmentRepository,
-        professionalRepository,
-        affiliationRepository,
-        eventPublisher
-    );
-  }
+        return new AddProfessionalToEstablishmentUseCase(
+                establishmentRepository,
+                professionalRepository,
+                affiliationRepository,
+                eventPublisher
+        );
+    }
 
-  @Bean
-  public GetProfessionalScheduleUseCase getProfessionalScheduleUseCase(
+    @Bean
+    public GetProfessionalScheduleUseCase getProfessionalScheduleUseCase(
       AffiliationRepository repository) {
-    return new GetProfessionalScheduleUseCase(repository);
-  }
+        return new GetProfessionalScheduleUseCase(repository);
+    }
 }

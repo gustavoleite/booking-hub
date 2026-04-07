@@ -12,4 +12,7 @@
 
   <!-- BCrypt is a product name acronym — renaming would misrepresent the algorithm -->
   <suppress checks="AbbreviationAsWordInName" files="BCryptPasswordEncoderAdapter\.java"/>
+
+  <!-- Code uses 4-space indentation (OpenRewrite style); google_checks expects 2-space -->
+  <suppress checks="Indentation" files=".*\.java"/>
 </suppressions>

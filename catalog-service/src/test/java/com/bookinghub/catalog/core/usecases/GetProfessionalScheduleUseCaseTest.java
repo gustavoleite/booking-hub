@@ -18,32 +18,32 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GetProfessionalScheduleUseCaseTest {
 
-  @Mock
-  private AffiliationRepository affiliationRepository;
+    @Mock
+    private AffiliationRepository affiliationRepository;
 
-  @InjectMocks
-  private GetProfessionalScheduleUseCase useCase;
+    @InjectMocks
+    private GetProfessionalScheduleUseCase useCase;
 
-  @Test
-  void shouldReturnSchedule() {
-    UUID estId = UUID.randomUUID();
-    UUID profId = UUID.randomUUID();
-    Affiliation affiliation = Affiliation.builder().establishmentId(estId).professionalId(profId).build();
-    when(affiliationRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.of(affiliation));
+    @Test
+    void shouldReturnSchedule() {
+        UUID estId = UUID.randomUUID();
+        UUID profId = UUID.randomUUID();
+        Affiliation affiliation = Affiliation.builder().establishmentId(estId).professionalId(profId).build();
+        when(affiliationRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.of(affiliation));
 
-    Affiliation result = useCase.execute(estId, profId);
+        Affiliation result = useCase.execute(estId, profId);
 
-    assertNotNull(result);
-    assertEquals(estId, result.getEstablishmentId());
-    assertEquals(profId, result.getProfessionalId());
-  }
+        assertNotNull(result);
+        assertEquals(estId, result.getEstablishmentId());
+        assertEquals(profId, result.getProfessionalId());
+    }
 
-  @Test
-  void shouldThrowExceptionWhenNotFound() {
-    UUID estId = UUID.randomUUID();
-    UUID profId = UUID.randomUUID();
-    when(affiliationRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.empty());
+    @Test
+    void shouldThrowExceptionWhenNotFound() {
+        UUID estId = UUID.randomUUID();
+        UUID profId = UUID.randomUUID();
+        when(affiliationRepository.findByEstablishmentIdAndProfessionalId(estId, profId)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> useCase.execute(estId, profId));
-  }
+        assertThrows(RuntimeException.class, () -> useCase.execute(estId, profId));
+    }
 }

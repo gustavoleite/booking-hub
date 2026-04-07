@@ -14,32 +14,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateReviewUseCase {
 
-  private final ReviewRepository reviewRepository;
-  private final EligibleBookingRepository eligibleBookingRepository;
-  private final ReviewEventPublisher eventPublisher;
+    private final ReviewRepository reviewRepository;
+    private final EligibleBookingRepository eligibleBookingRepository;
+    private final ReviewEventPublisher eventPublisher;
 
-  public Review execute(String clientId, UUID bookingId, Integer professionalRating,
-                          Integer establishmentRating, String comment) {
+    public Review execute(String clientId, UUID bookingId, Integer professionalRating,
+                        Integer establishmentRating, String comment) {
 
-    EligibleBooking eligible = eligibleBookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotEligibleException(
-            "Booking not found or not yet completed"));
+        EligibleBooking eligible = eligibleBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotEligibleException(
+                        "Booking not found or not yet completed"));
 
-    if (!eligible.getClientId().equals(clientId)) {
-      throw new ForbiddenReviewAccessException(
-          "You can only review bookings that belong to you");
+        if (!eligible.getClientId().equals(clientId)) {
+            throw new ForbiddenReviewAccessException(
+                    "You can only review bookings that belong to you");
+        }
+
+        if (reviewRepository.existsByBookingId(bookingId)) {
+            throw new ReviewAlreadyExistsException(
+                    "This booking has already been reviewed");
+        }
+
+        Review review = Review.create(bookingId, clientId, eligible.getProfessionalId(),
+                eligible.getEstablishmentId(), professionalRating, establishmentRating, comment);
+
+        Review saved = reviewRepository.save(review);
+        eventPublisher.publishReviewCreated(saved);
+        return saved;
     }
-
-    if (reviewRepository.existsByBookingId(bookingId)) {
-      throw new ReviewAlreadyExistsException(
-          "This booking has already been reviewed");
-    }
-
-    Review review = Review.create(bookingId, clientId, eligible.getProfessionalId(),
-        eligible.getEstablishmentId(), professionalRating, establishmentRating, comment);
-
-    Review saved = reviewRepository.save(review);
-    eventPublisher.publishReviewCreated(saved);
-    return saved;
-  }
 }

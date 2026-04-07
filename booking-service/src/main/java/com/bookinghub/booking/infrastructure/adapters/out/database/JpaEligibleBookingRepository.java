@@ -4,5 +4,5 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaEligibleBookingRepository
-    extends JpaRepository<EligibleBookingJpaEntity, UUID> {
+        extends JpaRepository<EligibleBookingJpaEntity, UUID> {
 }

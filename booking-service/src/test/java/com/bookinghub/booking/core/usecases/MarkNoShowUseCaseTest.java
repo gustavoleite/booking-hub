@@ -25,65 +25,65 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MarkNoShowUseCaseTest {
 
-  @Mock
-  private BookingRepository bookingRepository;
+    @Mock
+    private BookingRepository bookingRepository;
 
-  @InjectMocks
-  private MarkNoShowUseCase useCase;
+    @InjectMocks
+    private MarkNoShowUseCase useCase;
 
-  private Booking buildBooking() {
-    return Booking.builder()
-        .id(UUID.randomUUID())
-        .clientId("client1")
-        .professionalId(UUID.randomUUID())
-        .establishmentId(UUID.randomUUID())
-        .providedServiceId(UUID.randomUUID())
-        .startDatetime(LocalDateTime.now().minusHours(1))
-        .endDatetime(LocalDateTime.now())
-        .status(BookingStatus.CONFIRMED)
-        .price(new BigDecimal("50.00"))
-        .durationMinutes(60)
-        .createdAt(LocalDateTime.now().minusDays(1))
-        .build();
-  }
+    private Booking buildBooking() {
+        return Booking.builder()
+                .id(UUID.randomUUID())
+                .clientId("client1")
+                .professionalId(UUID.randomUUID())
+                .establishmentId(UUID.randomUUID())
+                .providedServiceId(UUID.randomUUID())
+                .startDatetime(LocalDateTime.now().minusHours(1))
+                .endDatetime(LocalDateTime.now())
+                .status(BookingStatus.CONFIRMED)
+                .price(new BigDecimal("50.00"))
+                .durationMinutes(60)
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .build();
+    }
 
-  @Test
-  void shouldMarkNoShowAsProfessional() {
-    Booking booking = buildBooking();
-    when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
-    when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+    @Test
+    void shouldMarkNoShowAsProfessional() {
+        Booking booking = buildBooking();
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-    Booking result = useCase.execute(booking.getId(), "ROLE_PROFESSIONAL");
+        Booking result = useCase.execute(booking.getId(), "ROLE_PROFESSIONAL");
 
-    assertThat(result.getStatus()).isEqualTo(BookingStatus.NO_SHOW);
-  }
+        assertThat(result.getStatus()).isEqualTo(BookingStatus.NO_SHOW);
+    }
 
-  @Test
-  void shouldMarkNoShowAsOwner() {
-    Booking booking = buildBooking();
-    when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
-    when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+    @Test
+    void shouldMarkNoShowAsOwner() {
+        Booking booking = buildBooking();
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-    Booking result = useCase.execute(booking.getId(), "ROLE_OWNER");
+        Booking result = useCase.execute(booking.getId(), "ROLE_OWNER");
 
-    assertThat(result.getStatus()).isEqualTo(BookingStatus.NO_SHOW);
-  }
+        assertThat(result.getStatus()).isEqualTo(BookingStatus.NO_SHOW);
+    }
 
-  @Test
-  void shouldThrowForbiddenWhenRoleIsNotAllowed() {
-    UUID id = UUID.randomUUID();
-    assertThatThrownBy(() -> useCase.execute(id, "ROLE_CLIENT"))
-        .isInstanceOf(ForbiddenBookingAccessException.class);
+    @Test
+    void shouldThrowForbiddenWhenRoleIsNotAllowed() {
+        UUID id = UUID.randomUUID();
+        assertThatThrownBy(() -> useCase.execute(id, "ROLE_CLIENT"))
+                .isInstanceOf(ForbiddenBookingAccessException.class);
 
-    verify(bookingRepository, never()).findById(any());
-  }
+        verify(bookingRepository, never()).findById(any());
+    }
 
-  @Test
-  void shouldThrowNotFoundWhenBookingDoesNotExist() {
-    UUID id = UUID.randomUUID();
-    when(bookingRepository.findById(id)).thenReturn(Optional.empty());
+    @Test
+    void shouldThrowNotFoundWhenBookingDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(bookingRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> useCase.execute(id, "ROLE_PROFESSIONAL"))
-        .isInstanceOf(BookingNotFoundException.class);
-  }
+        assertThatThrownBy(() -> useCase.execute(id, "ROLE_PROFESSIONAL"))
+                .isInstanceOf(BookingNotFoundException.class);
+    }
 }

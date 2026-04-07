@@ -21,43 +21,43 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InactivateEstablishmentUseCaseTest {
 
-  @Mock
-  private EstablishmentRepository repository;
+    @Mock
+    private EstablishmentRepository repository;
 
-  @InjectMocks
-  private InactivateEstablishmentUseCase inactivateEstablishmentUseCase;
+    @InjectMocks
+    private InactivateEstablishmentUseCase inactivateEstablishmentUseCase;
 
-  @Test
-  void shouldInactivateWhenOwnerIsValid() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-123";
-    Establishment existing = Establishment.builder()
-        .id(id)
-        .ownerId(ownerId)
-        .active(true)
-        .build();
+    @Test
+    void shouldInactivateWhenOwnerIsValid() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId(ownerId)
+                .active(true)
+                .build();
 
-    when(repository.findById(id)).thenReturn(Optional.of(existing));
-    when(repository.save(any())).thenReturn(existing);
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenReturn(existing);
 
-    inactivateEstablishmentUseCase.execute(id, ownerId);
+        inactivateEstablishmentUseCase.execute(id, ownerId);
 
-    assertFalse(existing.isActive());
-    verify(repository).save(existing);
-  }
+        assertFalse(existing.isActive());
+        verify(repository).save(existing);
+    }
 
-  @Test
-  void shouldThrowForbiddenWhenNotOwner() {
-    UUID id = UUID.randomUUID();
-    String ownerId = "owner-123";
-    Establishment existing = Establishment.builder()
-        .id(id)
-        .ownerId("other-owner")
-        .build();
+    @Test
+    void shouldThrowForbiddenWhenNotOwner() {
+        UUID id = UUID.randomUUID();
+        String ownerId = "owner-123";
+        Establishment existing = Establishment.builder()
+                .id(id)
+                .ownerId("other-owner")
+                .build();
 
-    when(repository.findById(id)).thenReturn(Optional.of(existing));
+        when(repository.findById(id)).thenReturn(Optional.of(existing));
 
-    assertThrows(ForbiddenException.class, () -> inactivateEstablishmentUseCase.execute(id, ownerId));
-    verify(repository, never()).save(any());
-  }
+        assertThrows(ForbiddenException.class, () -> inactivateEstablishmentUseCase.execute(id, ownerId));
+        verify(repository, never()).save(any());
+    }
 }

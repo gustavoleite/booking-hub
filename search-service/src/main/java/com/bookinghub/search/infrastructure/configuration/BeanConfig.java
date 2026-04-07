@@ -14,37 +14,38 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-  @Bean
-  public IndexEstablishmentUseCase indexEstablishmentUseCase(
+    @Bean
+    public IndexEstablishmentUseCase indexEstablishmentUseCase(
       EstablishmentSearchRepository repository) {
-    return new IndexEstablishmentUseCase(repository);
-  }
+        return new IndexEstablishmentUseCase(repository);
+    }
 
-  @Bean
-  public UpdateEstablishmentUseCase updateEstablishmentUseCase(
+    @Bean
+    public UpdateEstablishmentUseCase updateEstablishmentUseCase(
       EstablishmentSearchRepository repository) {
-    return new UpdateEstablishmentUseCase(repository);
-  }
+        return new UpdateEstablishmentUseCase(repository);
+    }
 
-  @Bean
-  public IndexAffiliationUseCase indexAffiliationUseCase(EstablishmentSearchRepository repository) {
-    return new IndexAffiliationUseCase(repository);
-  }
+    @Bean
+    public IndexAffiliationUseCase indexAffiliationUseCase(
+            EstablishmentSearchRepository repository) {
+        return new IndexAffiliationUseCase(repository);
+    }
 
-  @Bean
-  public IndexReviewUseCase indexReviewUseCase(EstablishmentSearchRepository repository) {
-    return new IndexReviewUseCase(repository);
-  }
+    @Bean
+    public IndexReviewUseCase indexReviewUseCase(EstablishmentSearchRepository repository) {
+        return new IndexReviewUseCase(repository);
+    }
 
-  @Bean
-  public SearchEstablishmentsUseCase searchEstablishmentsUseCase(
+    @Bean
+    public SearchEstablishmentsUseCase searchEstablishmentsUseCase(
       EstablishmentSearchRepository repository) {
-    return new SearchEstablishmentsUseCase(repository);
-  }
+        return new SearchEstablishmentsUseCase(repository);
+    }
 
-  @Bean
-  public ReindexUseCase reindexUseCase(
+    @Bean
+    public ReindexUseCase reindexUseCase(
       CatalogClient catalogClient, EstablishmentSearchRepository repository) {
-    return new ReindexUseCase(catalogClient, repository);
-  }
+        return new ReindexUseCase(catalogClient, repository);
+    }
 }

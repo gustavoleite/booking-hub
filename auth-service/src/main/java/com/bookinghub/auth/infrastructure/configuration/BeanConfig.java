@@ -11,15 +11,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-  @Bean
-  public RegisterUserUseCase registerUserUseCase(
+    @Bean
+    public RegisterUserUseCase registerUserUseCase(
       UserRepository userRepository, PasswordEncoder passwordEncoder) {
-    return new RegisterUserUseCase(userRepository, passwordEncoder);
-  }
+        return new RegisterUserUseCase(userRepository, passwordEncoder);
+    }
 
-  @Bean
-  public AuthenticateUserUseCase authenticateUserUseCase(UserRepository userRepository,
-      PasswordEncoder passwordEncoder, TokenGenerator tokenGenerator) {
-    return new AuthenticateUserUseCase(userRepository, passwordEncoder, tokenGenerator);
-  }
+    @Bean
+    public AuthenticateUserUseCase authenticateUserUseCase(UserRepository userRepository,
+            PasswordEncoder passwordEncoder, TokenGenerator tokenGenerator) {
+        return new AuthenticateUserUseCase(userRepository, passwordEncoder, tokenGenerator);
+    }
 }

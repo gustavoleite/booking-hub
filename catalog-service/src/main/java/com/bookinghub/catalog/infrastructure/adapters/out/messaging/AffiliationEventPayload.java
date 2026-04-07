@@ -12,11 +12,11 @@ public record AffiliationEventPayload(
         boolean active,
         List<ServiceOfferingPayload> serviceOfferings
 ) {
-  public record ServiceOfferingPayload(
+    public record ServiceOfferingPayload(
             String providedServiceId,
             String serviceTitle,
             BigDecimal price,
             int durationMinutes
   ) {
-  }
+    }
 }

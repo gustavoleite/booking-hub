@@ -8,17 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BookingRepository {
-  Booking save(Booking booking);
+    Booking save(Booking booking);
 
-  Optional<Booking> findById(UUID id);
+    Optional<Booking> findById(UUID id);
 
-  boolean existsActiveSlot(UUID professionalId, LocalDateTime startDatetime);
+    boolean existsActiveSlot(UUID professionalId, LocalDateTime startDatetime);
 
-  List<Booking> findByClientId(String clientId);
+    List<Booking> findByClientId(String clientId);
 
-  List<Booking> findByProfessionalId(UUID professionalId);
+    List<Booking> findByProfessionalId(UUID professionalId);
 
-  List<Booking> findByEstablishmentId(UUID establishmentId);
+    List<Booking> findByEstablishmentId(UUID establishmentId);
 
-  List<Booking> findByProfessionalAndDate(UUID professionalId, LocalDate date);
+    List<Booking> findByProfessionalAndDate(UUID professionalId, LocalDate date);
 }

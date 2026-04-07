@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ListMyEstablishmentsUseCase {
-  private final EstablishmentRepository establishmentRepository;
+    private final EstablishmentRepository establishmentRepository;
 
-  public List<Establishment> execute(String ownerId) {
-    return establishmentRepository.findByOwnerId(ownerId);
-  }
+    public List<Establishment> execute(String ownerId) {
+        return establishmentRepository.findByOwnerId(ownerId);
+    }
 }

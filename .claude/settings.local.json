@@ -56,7 +56,13 @@
       "Bash(mvn checkstyle:check -pl booking-service,search-service --no-transfer-progress)",
       "Bash(mvn checkstyle:check -pl search-service --no-transfer-progress)",
       "Bash(mvn checkstyle:check -pl booking-service --no-transfer-progress)",
-      "Bash(mvn checkstyle:check pmd:check -pl api-gateway,auth-service,catalog-service,booking-service,search-service --no-transfer-progress)"
+      "Bash(mvn checkstyle:check pmd:check -pl api-gateway,auth-service,catalog-service,booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn rewrite:run -pl api-gateway,auth-service,catalog-service,booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl auth-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl catalog-service,booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl booking-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl search-service --no-transfer-progress)"
     ]
   }
 }

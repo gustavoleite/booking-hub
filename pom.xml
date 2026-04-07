@@ -141,10 +141,12 @@
                         <!-- Classes de exceção (value objects, sem lógica testável separadamente) -->
                         <exclude>**/exceptions/**</exclude>
 
-                        <!-- Adaptadores ES específicos do search-service
+                        <!-- Adaptadores de infraestrutura (ES, REST clients, etc.)
                              (cobertura garantida pelos testes de integração/BDD) -->
                         <exclude>**/*EsDocument*.class</exclude>
                         <exclude>**/*SearchRepository.class</exclude>
+                        <exclude>**/infrastructure/adapters/out/elasticsearch/ElasticsearchRepositoryAdapter*.class</exclude>
+                        <exclude>**/infrastructure/adapters/out/catalog/CatalogRestClient*.class</exclude>
 
                         <!-- Configurações Spring (@Configuration / @Bean glue code) -->
                         <exclude>**/configuration/**</exclude>

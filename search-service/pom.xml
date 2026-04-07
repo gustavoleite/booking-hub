@@ -143,7 +143,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- JaCoCo herdado do parent pom (prepare-agent, report, check) -->
         </plugins>
     </build>
 </project>

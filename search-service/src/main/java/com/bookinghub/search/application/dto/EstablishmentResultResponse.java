@@ -15,7 +15,7 @@ public record EstablishmentResultResponse(
         Double averageRating,
         int totalReviews,
         Double distanceKm,
-        Float score
+        Double score
 ) {
     public record ServiceSummaryResponse(String title, Double minPrice, Double maxPrice) {}
     public record ProfessionalSummaryResponse(String name, List<String> specialties) {}

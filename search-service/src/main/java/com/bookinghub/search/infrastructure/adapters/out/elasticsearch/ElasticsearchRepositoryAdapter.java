@@ -150,7 +150,7 @@ public class ElasticsearchRepositoryAdapter implements EstablishmentSearchReposi
                 results.add(SearchPage.EstablishmentResult.builder()
                         .document(doc)
                         .distanceKm(distanceKm)
-                        .score(hit.score() != null ? hit.score().floatValue() : null)
+                        .score(hit.score())
                         .build());
             }
 

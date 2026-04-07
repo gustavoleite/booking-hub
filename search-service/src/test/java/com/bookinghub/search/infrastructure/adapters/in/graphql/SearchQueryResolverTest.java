@@ -37,7 +37,7 @@ class SearchQueryResolverTest {
     private SearchPage pageWithOne(EstablishmentDocument doc, Double distanceKm) {
         return SearchPage.builder()
                 .results(List.of(SearchPage.EstablishmentResult.builder()
-                        .document(doc).distanceKm(distanceKm).score(0.9f).build()))
+                        .document(doc).distanceKm(distanceKm).score(0.9).build()))
                 .totalHits(1).page(0).size(10)
                 .build();
     }

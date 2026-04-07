@@ -14,6 +14,6 @@ public class SearchPage {
     public static class EstablishmentResult {
         private EstablishmentDocument document;
         private Double distanceKm;
-        private Float score;
+        private Double score;
     }
 }

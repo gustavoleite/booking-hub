@@ -1,5 +1,6 @@
 package com.bookinghub.search.infrastructure.adapters.out.elasticsearch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
@@ -8,6 +9,7 @@ import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import java.util.List;
 
 @Document(indexName = "establishments")
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class EstablishmentEsDocument {
 
@@ -55,6 +57,7 @@ public class EstablishmentEsDocument {
     @Field(type = FieldType.Integer)
     private Integer totalReviews;
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class ServiceEsEntry {
         @Field(type = FieldType.Keyword)
@@ -72,6 +75,7 @@ public class EstablishmentEsDocument {
         private Double maxPrice;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class ProfessionalEsEntry {
         @Field(type = FieldType.Keyword)

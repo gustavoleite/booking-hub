@@ -138,12 +138,20 @@ jobs:
             -pl ${{ matrix.module }} \
             --no-transfer-progress
 
-      - name: Upload SpotBugs report on failure
+      - name: PMD — ${{ matrix.module }}
+        run: |
+          mvn -B pmd:check \
+            -pl ${{ matrix.module }} \
+            --no-transfer-progress
+
+      - name: Upload static analysis reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: spotbugs-${{ matrix.module }}
-          path: "${{ matrix.module }}/target/spotbugsXml.xml"
+          name: static-analysis-${{ matrix.module }}
+          path: |
+            ${{ matrix.module }}/target/spotbugsXml.xml
+            ${{ matrix.module }}/target/pmd.xml
 
   # ============================================================
   # JOB 3 — TESTES UNITÁRIOS + COBERTURA (alínea a)

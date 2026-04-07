@@ -61,6 +61,8 @@
                     <configuration>
                         <configLocation>google_checks.xml</configLocation>
                         <failsOnError>true</failsOnError>
+                        <failOnViolation>true</failOnViolation>
+                        <violationSeverity>warning</violationSeverity>
                         <consoleOutput>true</consoleOutput>
                         <excludes>**/target/**</excludes>
                     </configuration>
@@ -74,6 +76,21 @@
                         <threshold>Medium</threshold>
                         <failOnError>true</failOnError>
                         <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.23.0</version>
+                    <configuration>
+                        <rulesets>
+                            <ruleset>/rulesets/java/quickstart.xml</ruleset>
+                        </rulesets>
+                        <failOnViolation>true</failOnViolation>
+                        <printFailingErrors>true</printFailingErrors>
+                        <excludeRoots>
+                            <excludeRoot>target/generated-sources</excludeRoot>
+                        </excludeRoots>
                     </configuration>
                 </plugin>
                 <plugin>

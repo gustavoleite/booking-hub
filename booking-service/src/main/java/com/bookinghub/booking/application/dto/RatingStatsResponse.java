@@ -6,4 +6,5 @@ public record RatingStatsResponse(
         UUID subjectId,
         Double averageRating,
         long totalReviews
-) {}
+) {
+}

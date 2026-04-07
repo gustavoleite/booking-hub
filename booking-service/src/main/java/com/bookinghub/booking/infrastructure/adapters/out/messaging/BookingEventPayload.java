@@ -16,4 +16,5 @@ public record BookingEventPayload(
         int durationMinutes,
         String status,
         LocalDateTime occurredAt
-) {}
+) {
+}

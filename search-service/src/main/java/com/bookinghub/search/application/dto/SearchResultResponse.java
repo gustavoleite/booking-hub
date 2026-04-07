@@ -7,4 +7,5 @@ public record SearchResultResponse(
         long totalHits,
         int page,
         int size
-) {}
+) {
+}

@@ -12,11 +12,13 @@ public record RegisterRequestDTO(
     @NotBlank @Email String email,
 
     @Schema(description = "User password", example = "SenhaForte123!", minLength = 8)
-    @NotBlank 
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[A-Z]).{8,}$", 
-             message = "A senha deve conter no mínimo 8 caracteres, uma letra maiúscula e um número.")
+    @NotBlank
+    @Pattern(
+        regexp = "^(?=.*[0-9])(?=.*[A-Z]).{8,}$",
+        message = "A senha deve conter no mínimo 8 caracteres, uma letra maiúscula e um número.")
     String password,
 
     @Schema(description = "User role", example = "ROLE_CLIENT")
     @NotNull Role role
-) {}
+) {
+}

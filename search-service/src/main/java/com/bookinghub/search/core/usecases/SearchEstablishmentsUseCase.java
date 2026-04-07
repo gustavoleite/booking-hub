@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SearchEstablishmentsUseCase {
 
-    private final EstablishmentSearchRepository repository;
+  private final EstablishmentSearchRepository repository;
 
-    public SearchPage execute(SearchFilter filter, int page, int size) {
-        return repository.search(filter, page, size);
-    }
+  public SearchPage execute(SearchFilter filter, int page, int size) {
+    return repository.search(filter, page, size);
+  }
 }

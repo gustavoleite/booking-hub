@@ -8,4 +8,5 @@ public record ScheduleInfo(
         BigDecimal price,
         int durationMinutes,
         List<DaySchedule> workSchedule
-) {}
+) {
+}

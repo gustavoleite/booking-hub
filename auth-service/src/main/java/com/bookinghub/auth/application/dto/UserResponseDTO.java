@@ -9,4 +9,5 @@ public record UserResponseDTO(
 
     @Schema(description = "User email address", example = "cliente@teste.com")
     String email
-) {}
+) {
+}

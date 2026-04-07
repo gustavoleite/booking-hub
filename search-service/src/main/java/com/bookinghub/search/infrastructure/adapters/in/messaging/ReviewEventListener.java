@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ReviewEventListener {
 
-    private final IndexReviewUseCase indexReviewUseCase;
+  private final IndexReviewUseCase indexReviewUseCase;
 
-    @RabbitListener(queues = "#{rabbitMQConfig.searchReviewCreatedQueueName}")
-    public void onReviewCreated(ReviewEvent event) {
-        if (log.isInfoEnabled()) {
-            log.info("Received review.created for establishment {}", event.establishmentId());
-        }
-        indexReviewUseCase.execute(event.establishmentId(), event.establishmentRating());
+  @RabbitListener(queues = "#{rabbitMQConfig.searchReviewCreatedQueueName}")
+  public void onReviewCreated(ReviewEvent event) {
+    if (log.isInfoEnabled()) {
+      log.info("Received review.created for establishment {}", event.establishmentId());
     }
+    indexReviewUseCase.execute(event.establishmentId(), event.establishmentRating());
+  }
 }

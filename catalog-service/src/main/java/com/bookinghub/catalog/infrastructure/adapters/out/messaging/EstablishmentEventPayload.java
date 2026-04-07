@@ -11,4 +11,5 @@ public record EstablishmentEventPayload(
         String zipCode,
         BigDecimal latitude,
         BigDecimal longitude
-) {}
+) {
+}

@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProfessionalRepository {
-    Professional save(Professional professional);
-    Optional<Professional> findById(UUID id);
+  Professional save(Professional professional);
+
+  Optional<Professional> findById(UUID id);
 }

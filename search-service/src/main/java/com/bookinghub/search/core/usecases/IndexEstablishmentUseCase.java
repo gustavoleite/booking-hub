@@ -9,12 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class IndexEstablishmentUseCase {
 
-    private final EstablishmentSearchRepository repository;
+  private final EstablishmentSearchRepository repository;
 
-    public void execute(EstablishmentDocument doc) {
-        if (log.isInfoEnabled()) {
-            log.info("Indexing establishment {}", doc.getId());
-        }
-        repository.upsert(doc);
+  public void execute(EstablishmentDocument doc) {
+    if (log.isInfoEnabled()) {
+      log.info("Indexing establishment {}", doc.getId());
     }
+    repository.upsert(doc);
+  }
 }

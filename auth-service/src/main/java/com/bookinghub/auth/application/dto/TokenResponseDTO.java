@@ -11,4 +11,5 @@ public record TokenResponseDTO(
 
     @Schema(description = "Type of the token", example = "Bearer")
     String tokenType
-) {}
+) {
+}

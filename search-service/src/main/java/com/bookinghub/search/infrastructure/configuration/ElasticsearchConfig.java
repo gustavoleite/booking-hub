@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.bookinghub.search.infrastructure.adapters.out.elasticsearch")
+@EnableElasticsearchRepositories(
+    basePackages = "com.bookinghub.search.infrastructure.adapters.out.elasticsearch")
 public class ElasticsearchConfig {
 }

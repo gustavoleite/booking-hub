@@ -61,6 +61,8 @@
                     <version>3.3.1</version>
                     <configuration>
                         <configLocation>google_checks.xml</configLocation>
+                        <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
+                        <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                         <failsOnError>true</failsOnError>
                         <failOnViolation>true</failOnViolation>
                         <violationSeverity>warning</violationSeverity>
@@ -84,13 +86,19 @@
                     <artifactId>rewrite-maven-plugin</artifactId>
                     <version>${rewrite.version}</version>
                     <configuration>
+                        <activeStyles>
+                            <style>com.bookinghub.GoogleStyle</style>
+                        </activeStyles>
                         <activeRecipes>
+                            <!-- Formatação (resolve Indentation + EmptyLineSeparator) -->
+                            <recipe>org.openrewrite.java.format.AutoFormat</recipe>
+                            <!-- Imports (resolve CustomImportOrder + AvoidStarImport) -->
+                            <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
+                            <recipe>org.openrewrite.java.OrderImports</recipe>
+                            <!-- Code smells -->
                             <recipe>org.openrewrite.staticanalysis.UnnecessaryParentheses</recipe>
                             <recipe>org.openrewrite.staticanalysis.SimplifyBooleanReturn</recipe>
-                            <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
                             <recipe>org.openrewrite.staticanalysis.UnnecessaryThrows</recipe>
-                            <recipe>org.openrewrite.staticanalysis.AddSerialVersionUidToSerializable</recipe>
-                            <recipe>org.openrewrite.staticanalysis.ExplicitInitialization</recipe>
                         </activeRecipes>
                     </configuration>
                     <dependencies>

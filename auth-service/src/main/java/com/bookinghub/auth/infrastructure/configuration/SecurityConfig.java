@@ -14,28 +14,29 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring()
-                .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**"))
-                .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**"))
-                .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html"))
-                .requestMatchers(new AntPathRequestMatcher("/webjars/**"))
-                .requestMatchers(new AntPathRequestMatcher("/v3/api-docs.yaml"))
-                .requestMatchers(new AntPathRequestMatcher("/swagger-resources/**"))
-                .requestMatchers(new AntPathRequestMatcher("/favicon.ico"));
-    }
+  @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return web -> web.ignoring()
+        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**"))
+        .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**"))
+        .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html"))
+        .requestMatchers(new AntPathRequestMatcher("/webjars/**"))
+        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs.yaml"))
+        .requestMatchers(new AntPathRequestMatcher("/swagger-resources/**"))
+        .requestMatchers(new AntPathRequestMatcher("/favicon.ico"));
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                        .anyRequest().authenticated()
-                );
-        return http.build();
-    }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+                .anyRequest().authenticated()
+        );
+    return http.build();
+  }
 }

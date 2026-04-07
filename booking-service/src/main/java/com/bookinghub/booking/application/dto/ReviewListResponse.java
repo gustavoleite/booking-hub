@@ -6,4 +6,5 @@ public record ReviewListResponse(
         List<ReviewSummary> reviews,
         Double averageRating,
         long totalReviews
-) {}
+) {
+}

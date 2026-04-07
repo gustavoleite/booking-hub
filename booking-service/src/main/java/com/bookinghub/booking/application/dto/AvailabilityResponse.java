@@ -12,4 +12,5 @@ public record AvailabilityResponse(
         int durationMinutes,
         BigDecimal price,
         List<LocalDateTime> availableSlots
-) {}
+) {
+}

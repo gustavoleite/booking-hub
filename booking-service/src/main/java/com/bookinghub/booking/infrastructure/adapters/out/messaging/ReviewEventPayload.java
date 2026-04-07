@@ -12,4 +12,5 @@ public record ReviewEventPayload(
         Integer professionalRating,
         Integer establishmentRating,
         LocalDateTime occurredAt
-) {}
+) {
+}

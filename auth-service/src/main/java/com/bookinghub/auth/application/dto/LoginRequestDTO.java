@@ -10,4 +10,5 @@ public record LoginRequestDTO(
 
     @Schema(description = "User password", example = "SenhaForte123!")
     @NotBlank String password
-) {}
+) {
+}

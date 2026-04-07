@@ -11,4 +11,5 @@ public record ReviewEvent(
         String establishmentId,
         Double professionalRating,
         Double establishmentRating
-) {}
+) {
+}

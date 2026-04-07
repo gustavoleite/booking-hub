@@ -1,0 +1,16 @@
+---
+type: specs.openrewrite.org/v1beta/style
+name: com.bookinghub.GoogleStyle
+styleConfigs:
+  - org.openrewrite.java.style.TabsAndIndentsStyle:
+      useTabCharacter: false
+      tabSize: 2
+      indentSize: 2
+      continuationIndent: 4
+  - org.openrewrite.java.style.ImportLayoutStyle:
+      classCountToUseStarImport: 9999
+      nameCountToUseStarImport: 9999
+      layout:
+        - import static all other imports
+        - <blank line>
+        - import all other imports

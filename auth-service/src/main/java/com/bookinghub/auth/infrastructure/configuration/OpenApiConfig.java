@@ -19,11 +19,11 @@ import org.springframework.context.annotation.Configuration;
 )
 public class OpenApiConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI(
+  @Bean
+  public OpenAPI customOpenApi(
             @Value("${app.openapi.server-url:http://localhost:8080/api/auth}") String serverUrl) {
-        return new OpenAPI()
-                .info(new Info().title("Auth Service API").version("v1"))
-                .addServersItem(new Server().url(serverUrl).description("API Gateway"));
-    }
+    return new OpenAPI()
+        .info(new Info().title("Auth Service API").version("v1"))
+        .addServersItem(new Server().url(serverUrl).description("API Gateway"));
+  }
 }

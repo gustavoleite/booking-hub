@@ -13,16 +13,16 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 @ActiveProfiles("test")
 public class SpringIntegrationConfig {
 
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.13.0")
-                    .withEnv("xpack.security.enabled", "false");
+  static ElasticsearchContainer elasticsearch =
+      new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.13.0")
+          .withEnv("xpack.security.enabled", "false");
 
-    static {
-        elasticsearch.start();
-    }
+  static {
+    elasticsearch.start();
+  }
 
-    @DynamicPropertySource
-    static void esProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
-    }
+  @DynamicPropertySource
+  static void esProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
+  }
 }

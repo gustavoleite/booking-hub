@@ -42,7 +42,21 @@
       "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=local -B)",
       "Bash(echo \"Deleted: $?\")",
       "Bash(mvn pmd:check --no-transfer-progress)",
-      "Bash(mvn rewrite:dryRun -pl api-gateway --no-transfer-progress)"
+      "Bash(mvn rewrite:dryRun -pl api-gateway --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl catalog-service --no-transfer-progress)",
+      "Bash(mvn rewrite:dryRun -pl catalog-service --no-transfer-progress)",
+      "Bash(mvn rewrite:run --no-transfer-progress)",
+      "Bash(mvn pmd:check -pl catalog-service --no-transfer-progress)",
+      "Bash(mvn pmd:pmd -pl catalog-service --no-transfer-progress -q)",
+      "Bash(mvn checkstyle:check pmd:check -pl catalog-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl api-gateway,auth-service,booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl api-gateway --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl auth-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl api-gateway,auth-service,booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl booking-service,search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl search-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check -pl booking-service --no-transfer-progress)",
+      "Bash(mvn checkstyle:check pmd:check -pl api-gateway,auth-service,catalog-service,booking-service,search-service --no-transfer-progress)"
     ]
   }
 }

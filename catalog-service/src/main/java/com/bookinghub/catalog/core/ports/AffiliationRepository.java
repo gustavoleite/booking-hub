@@ -5,7 +5,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AffiliationRepository {
-    Affiliation save(Affiliation affiliation);
-    Optional<Affiliation> findById(UUID id);
-    Optional<Affiliation> findByEstablishmentIdAndProfessionalId(UUID establishmentId, UUID professionalId);
+  Affiliation save(Affiliation affiliation);
+
+  Optional<Affiliation> findById(UUID id);
+
+  Optional<Affiliation> findByEstablishmentIdAndProfessionalId(
+      UUID establishmentId, UUID professionalId);
 }

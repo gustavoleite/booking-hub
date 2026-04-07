@@ -12,4 +12,5 @@ public record EstablishmentFilterInput(
         Double minPrice,
         Double maxPrice,
         String sortBy
-) {}
+) {
+}

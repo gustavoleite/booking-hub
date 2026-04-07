@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+  <!-- RabbitMQ is a product name acronym — renaming would break Spring SpEL bean references -->
+  <suppress checks="AbbreviationAsWordInName" files="RabbitMQConfig\.java"/>
+  <suppress checks="AbbreviationAsWordInName" files="RabbitMQEventPublisherAdapter\.java"/>
+
+  <!-- Javadoc is not required for internal application code (course project) -->
+  <suppress checks="MissingJavadocType" files=".*\.java"/>
+  <suppress checks="MissingJavadocMethod" files=".*\.java"/>
+</suppressions>

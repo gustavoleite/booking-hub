@@ -214,8 +214,8 @@ public class StepDefinitions {
     @Then("apenas o estabelecimento com rating {double} aparece nos resultados")
     public void apenasEstabelecimentoComRating(double rating) {
         lastResponse.then().statusCode(200);
-        List<Double> ratings = lastResponse.jsonPath().getList("data.searchEstablishments.results.averageRating");
-        assertThat(ratings).allMatch(r -> r >= rating);
+        List<Number> ratings = lastResponse.jsonPath().getList("data.searchEstablishments.results.averageRating");
+        assertThat(ratings).allMatch(r -> r.doubleValue() >= rating);
     }
 
     @Then("o {string} aparece nos resultados")
@@ -228,9 +228,9 @@ public class StepDefinitions {
     @Then("o resultado não inclui estabelecimentos com minPrice acima de {double}")
     public void resultadoNaoIncluiPrecosAcima(double maxAllowed) {
         lastResponse.then().statusCode(200);
-        List<Double> prices = lastResponse.jsonPath().getList("data.searchEstablishments.results.minPrice");
+        List<Number> prices = lastResponse.jsonPath().getList("data.searchEstablishments.results.minPrice");
         if (prices != null) {
-            assertThat(prices).allMatch(p -> p == null || p <= maxAllowed);
+            assertThat(prices).allMatch(p -> p == null || p.doubleValue() <= maxAllowed);
         }
     }
 

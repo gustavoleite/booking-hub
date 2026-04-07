@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusion filter — Booking Hub
+  Exclui classes que geram falsos positivos por convenção de framework
+  (DTOs, Entities, Application bootstraps, configurações Spring).
+-->
+<FindBugsFilter>
+
+    <!-- DTOs e payloads de API (campos não inicializados são normais com Jackson) -->
+    <Match>
+        <Class name="~.*\.dto\..*"/>
+    </Match>
+
+    <!-- Entidades JPA (campos nullable são necessários; equals/hashCode gerados pelo Lombok) -->
+    <Match>
+        <Class name="~.*Entity$"/>
+    </Match>
+
+    <!-- Classes de configuração Spring (beans são injetados pelo container) -->
+    <Match>
+        <Class name="~.*Configuration$"/>
+        <Bug category="STYLE"/>
+    </Match>
+
+    <!-- Classes main de inicialização do Spring Boot -->
+    <Match>
+        <Class name="~.*Application$"/>
+    </Match>
+
+</FindBugsFilter>

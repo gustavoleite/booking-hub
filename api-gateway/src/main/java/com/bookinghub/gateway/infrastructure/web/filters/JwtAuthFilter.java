@@ -70,6 +70,10 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 return chain.filter(exchange);
             }
 
+            if (path.equals("/api/search") && request.getMethod().name().equals("GET")) {
+                return chain.filter(exchange);
+            }
+
             try {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                     throw new MissingTokenException("Missing Authorization Header");

@@ -17,6 +17,8 @@ import java.util.Base64;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class JwtValidationServiceTest {
 
@@ -98,6 +100,43 @@ class JwtValidationServiceTest {
             jwtValidationService.validateTokenAndGetClaims("some-token")
         );
         assertTrue(exception.getMessage().contains("Could not initialize public key"));
+    }
+
+    @Test
+    void shouldThrowJwtConfigurationExceptionWhenResourceIsNullAndContentIsEmpty() {
+        // Given
+        ReflectionTestUtils.setField(jwtValidationService, "publicKeyResource", null);
+        ReflectionTestUtils.setField(jwtValidationService, "publicKeyContent", "");
+
+        // When & Then
+        JwtConfigurationException exception = assertThrows(JwtConfigurationException.class, () ->
+            jwtValidationService.validateTokenAndGetClaims("some-token")
+        );
+        assertEquals("JWT public key content or resource is missing", exception.getMessage());
+    }
+
+    @Test
+    void shouldFallbackToContentWhenResourceDoesNotExist() {
+        // Given
+        String publicKeyPem = "-----BEGIN PUBLIC KEY-----\n" +
+                Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()) +
+                "\n-----END PUBLIC KEY-----";
+        ReflectionTestUtils.setField(jwtValidationService, "publicKeyContent", publicKeyPem);
+
+        org.springframework.core.io.Resource nonExistentResource = mock(org.springframework.core.io.Resource.class);
+        when(nonExistentResource.exists()).thenReturn(false);
+        ReflectionTestUtils.setField(jwtValidationService, "publicKeyResource", nonExistentResource);
+
+        String token = Jwts.builder()
+                .setSubject("user789")
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .compact();
+
+        // When
+        Claims claims = jwtValidationService.validateTokenAndGetClaims(token);
+
+        // Then
+        assertEquals("user789", claims.getSubject());
     }
 
     @Test

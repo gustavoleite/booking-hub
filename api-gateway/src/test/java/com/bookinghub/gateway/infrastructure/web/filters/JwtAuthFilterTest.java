@@ -100,6 +100,185 @@ class JwtAuthFilterTest {
     }
 
     @Test
+    void shouldSkipAuthenticationForPublicSearchEndpoint() {
+        // Given
+        when(request.getURI()).thenReturn(URI.create("/api/search"));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicAuthEndpoints() {
+        // Given
+        when(request.getURI()).thenReturn(URI.create("/api/auth/login"));
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicBookingsAvailabilityEndpoint() {
+        // Given
+        when(request.getURI()).thenReturn(URI.create("/api/bookings/availability"));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicReviewEndpoints() {
+        // Given
+        String uuid = "00000000-0000-0000-0000-000000000001";
+        when(request.getURI()).thenReturn(URI.create("/api/reviews/professional/" + uuid + "/stats"));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicProfessionalReviewEndpoints() {
+        // Given
+        String uuid = "00000000-0000-0000-0000-000000000001";
+        when(request.getURI()).thenReturn(URI.create("/api/reviews/professional/" + uuid));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicEstablishmentReviewEndpoints() {
+        // Given
+        String uuid = "00000000-0000-0000-0000-000000000001";
+        when(request.getURI()).thenReturn(URI.create("/api/reviews/establishment/" + uuid));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicEstablishmentReviewStatsEndpoints() {
+        // Given
+        String uuid = "00000000-0000-0000-0000-000000000001";
+        when(request.getURI()).thenReturn(URI.create("/api/reviews/establishment/" + uuid + "/stats"));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicProfessionalEndpoints() {
+        // Given
+        String uuid = "00000000-0000-0000-0000-000000000001";
+        when(request.getURI()).thenReturn(URI.create("/api/catalog/professionals/" + uuid));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForPublicProfessionalScheduleEndpoints() {
+        // Given
+        String uuid1 = "00000000-0000-0000-0000-000000000001";
+        String uuid2 = "00000000-0000-0000-0000-000000000002";
+        String path = "/api/catalog/establishments/" + uuid1 + "/affiliations/professional/" + uuid2 + "/schedule";
+        when(request.getURI()).thenReturn(URI.create(path));
+        when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+        verifyNoInteractions(jwtValidationService);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForApiDocs() {
+        // Given
+        when(request.getURI()).thenReturn(URI.create("/api-docs"));
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+    }
+
+    @Test
+    void shouldSkipAuthenticationForWebjars() {
+        // Given
+        when(request.getURI()).thenReturn(URI.create("/webjars/some-resource"));
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+
+        // When
+        GatewayFilter filter = jwtAuthFilter.apply(new JwtAuthFilter.Config());
+        filter.filter(exchange, chain).block();
+
+        // Then
+        verify(chain).filter(exchange);
+    }
+
+    @Test
     void shouldReturnUnauthorizedWhenHeaderIsMissing() {
         // Given
         when(request.getURI()).thenReturn(URI.create("/api/orders"));

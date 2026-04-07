@@ -85,8 +85,8 @@ class JwtAuthFilterTest {
 
     @Test
     void shouldSkipAuthenticationForPublicGetEndpoints() {
-        // Given
-        when(request.getURI()).thenReturn(URI.create("/api/catalog/establishments/123"));
+        // Given — path must contain a valid UUID to match the filter's regex
+        when(request.getURI()).thenReturn(URI.create("/api/catalog/establishments/00000000-0000-0000-0000-000000000001"));
         when(request.getMethod()).thenReturn(org.springframework.http.HttpMethod.GET);
         when(chain.filter(exchange)).thenReturn(Mono.empty());
 

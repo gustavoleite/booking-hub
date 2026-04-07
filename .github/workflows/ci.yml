@@ -172,7 +172,7 @@ jobs:
         run: |
           mvn -B test \
             -pl ${{ matrix.module }} \
-            -Dexclude="**/*IT.java,**/CucumberTest.java" \
+            -Dexcludes="**/*IT.java,**/CucumberTest.java,**/StepDefinitions.java,**/SpringIntegrationConfig.java" \
             --no-transfer-progress
 
       - name: Generate JaCoCo report — ${{ matrix.module }}
@@ -190,7 +190,7 @@ jobs:
 
       - name: Enforce minimum coverage 80% — ${{ matrix.module }}
         run: |
-          mvn -B jacoco:check \
+          mvn -B jacoco:check@check \
             -pl ${{ matrix.module }} \
             --no-transfer-progress
 

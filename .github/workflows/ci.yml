@@ -265,7 +265,7 @@ jobs:
           mvn -B test \
             -pl ${{ matrix.module }} \
             -Dtest="**/*IT" \
-            -DfailIfNoTests=false \
+            -Dsurefire.failIfNoSpecifiedTests=false \
             --no-transfer-progress
         env:
           SPRING_PROFILES_ACTIVE: test

@@ -22,8 +22,8 @@ Feature: API Gateway Functionalities
     Then I should receive a response with status 401
 
   Scenario: Access Public Catalog Endpoint (No Token Required)
-    Given the "Catalog" Service is up and responding to "/establishments/123" with "GET"
-    When I request the Gateway at "/api/catalog/establishments/123" with "GET"
+    Given the "Catalog" Service is up and responding to "/establishments/00000000-0000-0000-0000-000000000001" with "GET"
+    When I request the Gateway at "/api/catalog/establishments/00000000-0000-0000-0000-000000000001" with "GET"
     Then I should receive a response with status 200
 
   Scenario: Propagate Correlation ID

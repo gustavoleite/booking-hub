@@ -11,6 +11,7 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -46,7 +47,8 @@ public class RabbitMQConsumerConfig {
   }
 
   @Bean
-  public Binding dlqBinding(Queue calendarDeadLetterQueue,
+  public Binding dlqBinding(
+      @Qualifier("calendarDeadLetterQueue") Queue calendarDeadLetterQueue,
       DirectExchange calendarDeadLetterExchange) {
     return BindingBuilder.bind(calendarDeadLetterQueue)
         .to(calendarDeadLetterExchange)
@@ -54,18 +56,24 @@ public class RabbitMQConsumerConfig {
   }
 
   @Bean
-  public Binding bindingCreated(Queue calendarSyncQueue, TopicExchange bookingEventsExchange) {
+  public Binding bindingCreated(
+      @Qualifier("calendarSyncQueue") Queue calendarSyncQueue,
+      TopicExchange bookingEventsExchange) {
     return BindingBuilder.bind(calendarSyncQueue).to(bookingEventsExchange).with("booking.created");
   }
 
   @Bean
-  public Binding bindingCancelled(Queue calendarSyncQueue, TopicExchange bookingEventsExchange) {
+  public Binding bindingCancelled(
+      @Qualifier("calendarSyncQueue") Queue calendarSyncQueue,
+      TopicExchange bookingEventsExchange) {
     return BindingBuilder.bind(calendarSyncQueue)
         .to(bookingEventsExchange).with("booking.cancelled");
   }
 
   @Bean
-  public Binding bindingCompleted(Queue calendarSyncQueue, TopicExchange bookingEventsExchange) {
+  public Binding bindingCompleted(
+      @Qualifier("calendarSyncQueue") Queue calendarSyncQueue,
+      TopicExchange bookingEventsExchange) {
     return BindingBuilder.bind(calendarSyncQueue)
         .to(bookingEventsExchange).with("booking.completed");
   }

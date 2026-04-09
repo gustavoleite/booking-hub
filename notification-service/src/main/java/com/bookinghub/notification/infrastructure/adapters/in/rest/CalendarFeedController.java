@@ -37,8 +37,8 @@ public class CalendarFeedController {
       produces = "text/calendar")
   @Operation(summary = "Download the ICS calendar feed (no auth required — token in URL)")
   public ResponseEntity<String> getCalendarFeed(
-      @PathVariable String userId,
-      @PathVariable String feedToken) {
+      @PathVariable("userId") String userId,
+      @PathVariable("feedToken") String feedToken) {
 
     String ics = generateCalendarFeed.execute(userId, feedToken);
     return ResponseEntity.ok()

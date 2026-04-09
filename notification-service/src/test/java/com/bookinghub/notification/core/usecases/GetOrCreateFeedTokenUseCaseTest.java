@@ -61,18 +61,18 @@ class GetOrCreateFeedTokenUseCaseTest {
 
     assertThat(url).contains(userId);
     assertThat(url).contains("bookings.ics");
-    assertThat(url).startsWith("webcal://");
+    assertThat(url).startsWith("http");
     verify(repository).save(any());
   }
 
   @Test
-  void shouldReplaceHttpWithWebcal() {
-    String userId = "user-webcal";
+  void shouldReturnHttpUrl() {
+    String userId = "user-http";
     when(repository.findByUserId(userId)).thenReturn(Optional.empty());
 
     String url = useCase.execute(userId);
 
-    assertThat(url).startsWith("webcal://");
-    assertThat(url).doesNotContain("http://");
+    assertThat(url).startsWith("http://");
+    assertThat(url).contains("bookings.ics");
   }
 }

@@ -71,19 +71,21 @@ spring:
           filters:
             - RewritePath=/api/search/(?<remaining>.*), /${remaining}
 
-        # Feed público — o feedToken na URL é a autenticação, sem JWT
+        # Feed público — GET, sem JWT (feedToken na URL é a autenticação)
         - id: notification-feed-route
           uri: ${NOTIFICATION_SERVICE_URI:http://notification-service:8086}
           predicates:
             - Path=/api/calendar/feed/**
+            - Method=GET
           filters:
-            - RewritePath=/api/calendar/(?<remaining>.*), /${remaining}
+            - RewritePath=/api/(?<remaining>.*), /${remaining}
 
-        # Geração de token — requer JWT
+        # Geração de token — POST, requer JWT
         - id: notification-token-route
           uri: ${NOTIFICATION_SERVICE_URI:http://notification-service:8086}
           predicates:
-            - Path=/api/calendar/**
+            - Path=/api/calendar/feed/token
+            - Method=POST
           filters:
             - JwtAuthFilter
-            - RewritePath=/api/calendar/(?<remaining>.*), /${remaining}
+            - RewritePath=/api/(?<remaining>.*), /${remaining}

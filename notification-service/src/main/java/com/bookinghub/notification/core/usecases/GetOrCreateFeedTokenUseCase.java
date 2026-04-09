@@ -25,7 +25,6 @@ public class GetOrCreateFeedTokenUseCase {
   }
 
   private String buildFeedUrl(CalendarFeed feed) {
-    String webcalUrl = baseUrl.replaceFirst("https?://", "webcal://");
-    return webcalUrl + "/feed/" + feed.getUserId() + "/" + feed.getFeedToken() + "/bookings.ics";
+    return baseUrl + "/feed/" + feed.getUserId() + "/" + feed.getFeedToken() + "/bookings.ics";
   }
 }

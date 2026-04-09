@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:5432/${DB_NAME:notification_db}
+    username: ${DB_USER:admin}
+    password: ${DB_PASS:admin123}
+  rabbitmq:
+    host: ${RABBIT_HOST:rabbitmq}
+    port: 5672
+    username: guest
+    password: guest
+
+notification:
+  base-url: ${NOTIFICATION_BASE_URL:http://localhost:8080/api/calendar}

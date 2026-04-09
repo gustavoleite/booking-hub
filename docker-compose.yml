@@ -111,6 +111,29 @@ services:
       catalog-service:
         condition: service_started
 
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: bw-notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=postgres
+      - DB_NAME=notification_db
+      - DB_USER=admin
+      - DB_PASS=admin123
+      - RABBIT_HOST=rabbitmq
+      - NOTIFICATION_BASE_URL=http://localhost:8080/api/calendar
+    networks:
+      - bw-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   api-gateway:
     build:
       context: .
@@ -124,6 +147,7 @@ services:
       - CATALOG_SERVICE_URI=http://catalog-service:8083
       - BOOKING_SERVICE_URI=http://booking-service:8082
       - SEARCH_SERVICE_URI=http://search-service:8085
+      - NOTIFICATION_SERVICE_URI=http://notification-service:8086
       - RSA_PUBLIC_KEY_PATH=file:/app/certs/public_key.pem
     volumes:
       - ./infra/certs:/app/certs:ro # Read-only para as chaves
@@ -133,6 +157,7 @@ services:
       - auth-service
       - catalog-service
       - booking-service
+      - notification-service
 
   auth-service:
     build: 

@@ -54,7 +54,7 @@ flowchart TB
         Catalog["Catalog Service\n(Estabelecimentos/Serviços)"]:::service
         Booking["Booking Service\n(Agendamentos + Avaliações)"]:::service
         Search["Search Service\n(Busca / CQRS)"]:::service
-        Notify["Notification Service\n(Alertas — planejado)"]:::service
+        Notify["Notification Service\n(Feed ICS / Calendários)"]:::service
     end
 
     %% Bancos de Dados
@@ -106,8 +106,8 @@ O "coração" do sistema. Aplica regras rígidas de concorrência no banco de da
 ### 5. Search Service (`search-service`)
 Motor de busca e descoberta altamente otimizado. Implementa o padrão **CQRS** escutando eventos do RabbitMQ (`catalog.events`, `review.events`) para construir um índice consolidado no **Elasticsearch**, permitindo buscas ultrarrápidas por geolocalização, serviços oferecidos e melhor avaliação. Expõe API GraphQL.
 
-### 6. Notification Service (`notification-service`) — planejado
-Microsserviço reativo/orientado a eventos. Escutará o barramento do RabbitMQ para disparar e-mails/SMS de confirmação. Ainda não implementado.
+### 6. Notification Service (`notification-service`)
+Microsserviço orientado a eventos responsável pela **integração com calendários externos** (Google Calendar, Outlook, Apple Calendar). Consome eventos do RabbitMQ (`booking.created`, `booking.cancelled`, `booking.completed`) e mantém um read model (snapshot) dos agendamentos. Expõe um feed no formato **iCalendar (RFC 5545)** acessível via URL estável por usuário — o mesmo padrão usado por Airbnb e Calendly. Roda na porta **8086**.
 
 ---
 
@@ -140,7 +140,7 @@ beauty-wellness-system/
  ├── catalog-service/         # Estabelecimentos, Profissionais, Serviços
  ├── booking-service/         # Agendamentos + Avaliações (domínios unificados)
  ├── search-service/          # Indexação Elasticsearch + GraphQL
- └── notification-service/    # Worker assíncrono (planejado)
+ └── notification-service/    # Feed ICS para integração com calendários externos
 ```
 
 ---
@@ -169,6 +169,7 @@ docker compose logs -f     # acompanhe os logs em tempo real
 | Booking Service (+ Reviews)      | http://localhost:8082 · Swagger: `/swagger-ui.html` |
 | Catalog Service                  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
 | Search Service                   | http://localhost:8085 · GraphiQL: `/graphiql`       |
+| Notification Service             | http://localhost:8086 · Swagger: `/swagger-ui.html` |
 | RabbitMQ UI                      | http://localhost:15672 (guest / guest)              |
 | Elasticsearch                    | http://localhost:9200                               |
 
@@ -180,15 +181,17 @@ Requer PostgreSQL e RabbitMQ rodando localmente. Crie os bancos manualmente ante
 CREATE DATABASE auth_db;
 CREATE DATABASE catalog_db;
 CREATE DATABASE booking_db;
+CREATE DATABASE notification_db;
 ```
 
 Execute cada serviço (perfil `default` usa localhost para todos os recursos):
 
 ```bash
-cd auth-service    && mvn spring-boot:run
-cd catalog-service && mvn spring-boot:run
-cd booking-service && mvn spring-boot:run
-cd api-gateway     && mvn spring-boot:run
+cd auth-service         && mvn spring-boot:run
+cd catalog-service      && mvn spring-boot:run
+cd booking-service      && mvn spring-boot:run
+cd notification-service && mvn spring-boot:run
+cd api-gateway          && mvn spring-boot:run
 ```
 
 ---
@@ -196,12 +199,29 @@ cd api-gateway     && mvn spring-boot:run
 ## 🧪 Testes
 
 ```bash
-mvn test                        # todos os módulos
-mvn test -pl booking-service    # módulo específico
-mvn verify                      # testes + relatório JaCoCo (target/site/jacoco/)
+mvn test                             # todos os módulos
+mvn test -pl booking-service         # módulo específico
+mvn test -pl notification-service    # apenas notification-service
+mvn verify                           # testes + relatório JaCoCo (target/site/jacoco/)
 ```
 
 Cobertura mínima exigida: **80% de linhas** (excluindo entidades JPA e DTOs).
+
+### Testes do Notification Service
+
+O `notification-service` tem dois tipos de teste:
+
+**Unitários (JUnit 5 + Mockito) — sem Spring, sem banco:**
+```bash
+mvn test -pl notification-service -Dtest="HandleBookingCreatedUseCaseTest,HandleBookingCancelledUseCaseTest,HandleBookingCompletedUseCaseTest,GetOrCreateFeedTokenUseCaseTest,GenerateCalendarFeedUseCaseTest,ICalendarGeneratorTest"
+```
+
+**BDD (Cucumber) — Spring Boot + H2 in-memory:**
+```bash
+mvn test -pl notification-service -Dtest="CucumberRunner"
+```
+
+O contexto de teste usa H2 in-memory com `ddl-auto=create-drop` e desabilita o RabbitMQ auto-configuration (os beans AMQP são mockados). Nenhuma infraestrutura externa é necessária para rodar os testes.
 
 ---
 
@@ -445,7 +465,45 @@ curl -s -X POST http://localhost:8080/api/search/graphql \
 
 ---
 
-### Passo 12 — Reindexar (caso o índice esteja vazio)
+### Passo 12 — Sincronizar com calendário externo (Cliente ou Profissional)
+
+Após criar pelo menos um agendamento (Passo 7), o `notification-service` já recebeu o evento `booking.created` e armazenou o snapshot. Agora gere a URL do feed:
+
+```bash
+# 1. Obter a URL do feed ICS (requer token do cliente ou profissional)
+curl -s -X POST http://localhost:8080/api/calendar/feed/token \
+  -H "Authorization: Bearer <CLIENT_TOKEN>"
+# → { "feedUrl": "webcal://localhost:8080/api/calendar/feed/<userId>/<feedToken>/bookings.ics" }
+```
+
+Cole a `feedUrl` retornada em:
+- **Google Calendar** → Outros calendários → "De URL" → trocar `webcal://` por `http://` se necessário
+- **Outlook** → Adicionar calendário → "Assinar pela internet"
+- **Apple Calendar** → Arquivo → Nova assinatura de calendário
+
+Para verificar o conteúdo do feed diretamente:
+
+```bash
+# 2. Download do .ics (sem JWT — o token na URL é a autenticação)
+curl -s "http://localhost:8080/api/calendar/feed/<userId>/<feedToken>/bookings.ics"
+# → BEGIN:VCALENDAR
+#   VERSION:2.0
+#   PRODID:-//BookingHub//BookingHub Calendar//PT
+#   BEGIN:VEVENT
+#   UID:<bookingId>@bookinghub
+#   DTSTART:20260407T100000Z
+#   DTEND:20260407T110000Z
+#   SUMMARY:Agendamento - BookingHub
+#   STATUS:CONFIRMED
+#   END:VEVENT
+#   END:VCALENDAR
+```
+
+O feed é **idempotente** — cancelamentos alteram `STATUS:CANCELLED` no mesmo `UID` sem duplicar o evento.
+
+---
+
+### Passo 13 — Reindexar (caso o índice esteja vazio)
 
 Se o search-service subiu antes dos outros ou o volume do ES foi perdido:
 
@@ -466,8 +524,12 @@ Professional registra → Professional cria perfil
 Owner afilia Professional com agenda + preços → evento affiliation.created/updated
 Client consulta disponibilidade (sem token)
 Client cria booking → status: CONFIRMED → evento booking.created publicado
+  → notification-service consome booking.created → salva snapshot (status: CONFIRMED)
 Professional finaliza → status: COMPLETED → evento booking.completed publicado
   → booking-service registra booking elegível (internamente, mesmo banco)
+  → notification-service consome booking.completed → atualiza snapshot (status: COMPLETED)
 Client avalia → review.created publicado → search-service atualiza averageRating
 Client busca via GraphQL → search-service retorna resultados ordenados por relevância/rating/distância
+Client/Professional gera URL do feed ICS → cola no Google Calendar / Outlook / Apple Calendar
+  → calendário externo faz polling do feed → exibe agendamentos como eventos
 ```

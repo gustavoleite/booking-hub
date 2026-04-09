@@ -22,15 +22,26 @@
           "name": "Registrar Owner",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_OWNER\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -38,15 +49,26 @@
           "name": "Registrar Profissional",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_PROFESSIONAL\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -54,15 +76,26 @@
           "name": "Registrar Cliente",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -85,15 +118,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -116,15 +160,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"profissional@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -147,15 +202,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -166,24 +232,54 @@
               "name": "[ERRO 409] E-mail Duplicado",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"owner@teste.com\",\n  \"password\": \"SenhaForte123!\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
-                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             },
             {
               "name": "[ERRO 400] Senha Fraca",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"email\": \"novo@teste.com\",\n  \"password\": \"12345\",\n  \"role\": \"ROLE_CLIENT\"\n}"
                 },
-                "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
+                "url": {
+                  "raw": "{{base_url}}/api/auth/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
               }
             }
           ]
@@ -212,15 +308,27 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"João Barbeiro\",\n  \"bio\": \"Especialista em cortes clássicos e barba.\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/professionals/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "professionals", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "professionals",
+                "me"
+              ]
             }
           }
         },
@@ -231,8 +339,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/professionals/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "professionals", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "professionals",
+                "me"
+              ]
             }
           }
         },
@@ -240,28 +355,49 @@
           "name": "Atualizar Meu Perfil Profissional",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"João Barbeiro Atualizado\",\n  \"bio\": \"Nova bio com mais detalhes.\",\n  \"avatarUrl\": \"https://example.com/avatar-novo.jpg\",\n  \"specialties\": [\"Corte Masculino\", \"Barba\", \"Corte com Navalha\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/professionals/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "professionals", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "professionals",
+                "me"
+              ]
             }
           }
         },
         {
           "name": "Obter Perfil por ID (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/professionals/{{professional_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "professionals", "{{professional_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "professionals",
+                "{{professional_id}}"
+              ]
             }
           }
         }
@@ -293,15 +429,26 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Barbearia Central\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"O melhor corte da cidade.\",\n  \"address\": {\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1000\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01310-100\",\n    \"latitude\": -23.5505,\n    \"longitude\": -46.6333\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments"
+              ]
             }
           }
         },
@@ -312,21 +459,37 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/my-salons",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "my-salons"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "my-salons"
+              ]
             }
           }
         },
         {
           "name": "Obter Detalhes do Estabelecimento (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}"
+              ]
             }
           }
         },
@@ -334,15 +497,27 @@
           "name": "Atualizar Estabelecimento",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Barbearia Central Atualizada\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Melhor barbearia da Av. Paulista, agora com nome atualizado.\",\n  \"address\": {\n    \"street\": \"Av. Paulista\",\n    \"number\": \"1000\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"zipCode\": \"01310-100\",\n    \"latitude\": -23.5505,\n    \"longitude\": -46.6333\n  },\n  \"businessHours\": [\n    { \"dayOfWeek\": 1, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"openTime\": \"09:00:00\", \"closeTime\": \"18:00:00\" }\n  ],\n  \"services\": [\n    { \"title\": \"Corte Simples\", \"description\": \"Corte de cabelo com máquina ou tesoura.\" },\n    { \"title\": \"Barba Completa\", \"description\": \"Barba com toalha quente e navalha.\" }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}"
+              ]
             }
           }
         },
@@ -365,15 +540,28 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Hidratação Capilar\",\n  \"description\": \"Hidratação profunda com máscara.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/services",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "services"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}",
+                "services"
+              ]
             }
           }
         },
@@ -384,8 +572,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}"
+              ]
             }
           }
         },
@@ -396,24 +591,54 @@
               "name": "[ERRO 400] CNPJ Inválido",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Salão Inválido\",\n  \"cnpj\": \"12345678000100\",\n  \"description\": \"CNPJ com dígitos verificadores errados.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"city\": \"São Paulo\", \"state\": \"SP\", \"zipCode\": \"01310-100\", \"latitude\": -23.5505, \"longitude\": -46.6333 },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }],\n  \"services\": [{ \"title\": \"Svc\", \"description\": \"Desc\" }]\n}"
                 },
-                "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
+                "url": {
+                  "raw": "{{base_url}}/api/catalog/establishments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "catalog",
+                    "establishments"
+                  ]
+                }
               }
             },
             {
               "name": "[ERRO 400] Sem Serviços",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Salão Sem Serviços\",\n  \"cnpj\": \"12345678000195\",\n  \"description\": \"Sem serviços.\",\n  \"address\": { \"street\": \"Rua A\", \"number\": \"1\", \"city\": \"São Paulo\", \"state\": \"SP\", \"zipCode\": \"01310-100\", \"latitude\": -23.5505, \"longitude\": -46.6333 },\n  \"businessHours\": [{ \"dayOfWeek\": 1, \"openTime\": \"08:00:00\", \"closeTime\": \"18:00:00\" }]\n}"
                 },
-                "url": { "raw": "{{base_url}}/api/catalog/establishments", "host": ["{{base_url}}"], "path": ["api", "catalog", "establishments"] }
+                "url": {
+                  "raw": "{{base_url}}/api/catalog/establishments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "catalog",
+                    "establishments"
+                  ]
+                }
               }
             }
           ]
@@ -427,30 +652,66 @@
           "name": "Vincular Profissional ao Estabelecimento (Upsert)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"active\": true,\n  \"workSchedules\": [\n    { \"dayOfWeek\": 1, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 2, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 3, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 4, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" },\n    { \"dayOfWeek\": 5, \"startTime\": \"09:00:00\", \"endTime\": \"18:00:00\" }\n  ],\n  \"serviceOfferings\": [\n    {\n      \"providedServiceId\": \"{{service_id}}\",\n      \"price\": 120.00,\n      \"durationMinutes\": 60\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations?professionalId={{professional_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations"],
-              "query": [{ "key": "professionalId", "value": "{{professional_id}}" }]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}",
+                "affiliations"
+              ],
+              "query": [
+                {
+                  "key": "professionalId",
+                  "value": "{{professional_id}}"
+                }
+              ]
             }
           }
         },
         {
           "name": "Consultar Agenda do Profissional (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/catalog/establishments/{{establishment_id}}/affiliations/professional/{{professional_id}}/schedule?serviceId={{service_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "catalog", "establishments", "{{establishment_id}}", "affiliations", "professional", "{{professional_id}}", "schedule"],
-              "query": [{ "key": "serviceId", "value": "{{service_id}}" }]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "catalog",
+                "establishments",
+                "{{establishment_id}}",
+                "affiliations",
+                "professional",
+                "{{professional_id}}",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}"
+                }
+              ]
             }
           }
         }
@@ -462,18 +723,38 @@
         {
           "name": "Consultar Slots Disponíveis (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/availability?establishmentId={{establishment_id}}&professionalId={{professional_id}}&serviceId={{service_id}}&date={{availability_date}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "availability"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "availability"
+              ],
               "query": [
-                { "key": "establishmentId", "value": "{{establishment_id}}" },
-                { "key": "professionalId", "value": "{{professional_id}}" },
-                { "key": "serviceId", "value": "{{service_id}}" },
-                { "key": "date", "value": "{{availability_date}}" }
+                {
+                  "key": "establishmentId",
+                  "value": "{{establishment_id}}"
+                },
+                {
+                  "key": "professionalId",
+                  "value": "{{professional_id}}"
+                },
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}"
+                },
+                {
+                  "key": "date",
+                  "value": "{{availability_date}}"
+                }
               ]
             }
           }
@@ -502,15 +783,25 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"professionalId\": \"{{professional_id}}\",\n  \"establishmentId\": \"{{establishment_id}}\",\n  \"providedServiceId\": \"{{service_id}}\",\n  \"startDatetime\": \"{{booking_datetime}}\",\n  \"notes\": \"Prefiro corte mais curto nas laterais\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/bookings",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
             }
           }
         },
@@ -521,8 +812,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "me"
+              ]
             }
           }
         },
@@ -533,8 +830,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}"
+              ]
             }
           }
         },
@@ -545,8 +848,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/professional",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "professional"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "professional"
+              ]
             }
           }
         },
@@ -557,8 +866,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/establishment/{{establishment_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "establishment", "{{establishment_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "establishment",
+                "{{establishment_id}}"
+              ]
             }
           }
         },
@@ -566,15 +882,27 @@
           "name": "Cancelar Agendamento (Cliente ou Owner)",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Compromisso surgiu de última hora\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/bookings/{{booking_id}}/cancel",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "{{booking_id}}", "cancel"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}",
+                "cancel"
+              ]
             }
           }
         },
@@ -585,8 +913,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/{{booking_id}}/complete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "{{booking_id}}", "complete"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}",
+                "complete"
+              ]
             }
           }
         },
@@ -597,8 +932,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/bookings/{{booking_id}}/no-show",
-              "host": ["{{base_url}}"],
-              "path": ["api", "bookings", "{{booking_id}}", "no-show"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{booking_id}}",
+                "no-show"
+              ]
             }
           }
         },
@@ -609,15 +951,25 @@
               "name": "[ERRO 409] Double Booking",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"professionalId\": \"{{professional_id}}\",\n  \"establishmentId\": \"{{establishment_id}}\",\n  \"providedServiceId\": \"{{service_id}}\",\n  \"startDatetime\": \"{{booking_datetime}}\",\n  \"notes\": \"Tentativa duplicada\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/bookings",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "bookings"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "bookings"
+                  ]
                 }
               }
             },
@@ -625,15 +977,27 @@
               "name": "[ERRO 422] Cancelar Agendamento Já Finalizado",
               "request": {
                 "method": "PATCH",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reason\": \"Tentativa após conclusão\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/bookings/{{booking_id}}/cancel",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "bookings", "{{booking_id}}", "cancel"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "bookings",
+                    "{{booking_id}}",
+                    "cancel"
+                  ]
                 }
               }
             },
@@ -644,8 +1008,14 @@
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/bookings/00000000-0000-0000-0000-000000000000",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "bookings", "00000000-0000-0000-0000-000000000000"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "bookings",
+                    "00000000-0000-0000-0000-000000000000"
+                  ]
                 }
               }
             }
@@ -676,67 +1046,115 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"professionalRating\": 5,\n  \"establishmentRating\": 4,\n  \"comment\": \"Atendimento excelente, ambiente muito agradável.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/reviews",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ]
             }
           }
         },
         {
           "name": "Reviews do Profissional (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/reviews/professional/{{professional_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "professional", "{{professional_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "professional",
+                "{{professional_id}}"
+              ]
             }
           }
         },
         {
           "name": "Estatísticas do Profissional (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/reviews/professional/{{professional_id}}/stats",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "professional", "{{professional_id}}", "stats"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "professional",
+                "{{professional_id}}",
+                "stats"
+              ]
             }
           }
         },
         {
           "name": "Reviews do Estabelecimento (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/reviews/establishment/{{establishment_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "establishment", "{{establishment_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "establishment",
+                "{{establishment_id}}"
+              ]
             }
           }
         },
         {
           "name": "Estatísticas do Estabelecimento (Público)",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/reviews/establishment/{{establishment_id}}/stats",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "establishment", "{{establishment_id}}", "stats"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "establishment",
+                "{{establishment_id}}",
+                "stats"
+              ]
             }
           }
         },
@@ -747,8 +1165,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/reviews/booking/{{booking_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "booking", "{{booking_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "booking",
+                "{{booking_id}}"
+              ]
             }
           }
         },
@@ -759,15 +1184,25 @@
               "name": "[ERRO 422] Booking Não Concluído",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"bookingId\": \"00000000-0000-0000-0000-000000000000\",\n  \"professionalRating\": 5\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/reviews",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "reviews"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reviews"
+                  ]
                 }
               }
             },
@@ -775,15 +1210,25 @@
               "name": "[ERRO 409] Booking Já Avaliado",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"professionalRating\": 3,\n  \"comment\": \"Segunda tentativa — deve falhar\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/reviews",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "reviews"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reviews"
+                  ]
                 }
               }
             },
@@ -791,15 +1236,25 @@
               "name": "[ERRO 400] Sem Nenhum Rating",
               "request": {
                 "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"comment\": \"Sem rating, apenas comentário\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/reviews",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "reviews"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reviews"
+                  ]
                 }
               }
             },
@@ -810,12 +1265,329 @@
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/reviews/booking/00000000-0000-0000-0000-000000000000",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "reviews", "booking", "00000000-0000-0000-0000-000000000000"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "reviews",
+                    "booking",
+                    "00000000-0000-0000-0000-000000000000"
+                  ]
                 }
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "8. Notification Service - Calendar Feed",
+      "item": [
+        {
+          "name": "Gerar URL do Feed ICS (Cliente ou Profissional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.feedUrl) {",
+                  "    pm.environment.set('feed_url', jsonData.feedUrl);",
+                  "    var parts = jsonData.feedUrl.split('/');",
+                  "    var feedIdx = parts.indexOf('feed');",
+                  "    if (feedIdx !== -1 && parts.length > feedIdx + 2) {",
+                  "        pm.environment.set('feed_user_id', parts[feedIdx + 1]);",
+                  "        pm.environment.set('feed_token', parts[feedIdx + 2]);",
+                  "        console.log('Feed URL salva:', jsonData.feedUrl);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/calendar/feed/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calendar",
+                "feed",
+                "token"
+              ]
+            },
+            "description": "Gera ou retorna a URL estavel do feed ICS do usuario autenticado. A URL usa o protocolo webcal:// e pode ser colada diretamente no Google Calendar, Outlook ou Apple Calendar. O token e opaco (UUID sem hifens) e funciona como autenticacao."
+          }
+        },
+        {
+          "name": "Download do Feed ICS (sem autenticacao JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', function() { pm.response.to.have.status(200); });",
+                  "pm.test('Content-Type e text/calendar', function() {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/calendar');",
+                  "});",
+                  "pm.test('ICS contem BEGIN:VCALENDAR', function() {",
+                  "    pm.expect(pm.response.text()).to.include('BEGIN:VCALENDAR');",
+                  "});",
+                  "pm.test('ICS contem END:VCALENDAR', function() {",
+                  "    pm.expect(pm.response.text()).to.include('END:VCALENDAR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/calendar/feed/{{feed_user_id}}/{{feed_token}}/bookings.ics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calendar",
+                "feed",
+                "{{feed_user_id}}",
+                "{{feed_token}}",
+                "bookings.ics"
+              ]
+            },
+            "description": "Baixa o calendario ICS do usuario. Nao requer JWT - o feedToken na URL e a autenticacao. Simula o polling que o Google Calendar / Outlook fazem automaticamente a cada ~1h-12h.\n\nIMPORTANTE: Execute 'Gerar URL do Feed ICS' antes para popular as variaveis {{feed_user_id}} e {{feed_token}}."
+          }
+        },
+        {
+          "name": "[FLUXO COMPLETO] Gerar feed apos booking",
+          "item": [
+            {
+              "name": "1. Login Cliente (salva token)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.accessToken) {",
+                      "    pm.environment.set('access_token', jsonData.accessToken);",
+                      "    console.log('Token do cliente salvo.');",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"cliente@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "2. Gerar URL do Feed ICS",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.feedUrl) {",
+                      "    pm.environment.set('feed_url', jsonData.feedUrl);",
+                      "    var parts = jsonData.feedUrl.split('/');",
+                      "    var feedIdx = parts.indexOf('feed');",
+                      "    if (feedIdx !== -1 && parts.length > feedIdx + 2) {",
+                      "        pm.environment.set('feed_user_id', parts[feedIdx + 1]);",
+                      "        pm.environment.set('feed_token', parts[feedIdx + 2]);",
+                      "    }",
+                      "    console.log('Copie no seu calendario:', jsonData.feedUrl);",
+                      "    pm.test('feedUrl presente na resposta', function() {",
+                      "        pm.expect(jsonData.feedUrl).to.include('bookings.ics');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/calendar/feed/token",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "calendar",
+                    "feed",
+                    "token"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "3. Baixar Feed ICS (valida conteudo)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status 200', function() { pm.response.to.have.status(200); });",
+                      "pm.test('Content-Type e text/calendar', function() {",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/calendar');",
+                      "});",
+                      "pm.test('ICS contem BEGIN:VCALENDAR', function() {",
+                      "    pm.expect(pm.response.text()).to.include('BEGIN:VCALENDAR');",
+                      "});",
+                      "pm.test('ICS contem PRODID BookingHub', function() {",
+                      "    pm.expect(pm.response.text()).to.include('BookingHub');",
+                      "});",
+                      "if (pm.response.text().includes('BEGIN:VEVENT')) {",
+                      "    pm.test('VEVENT possui UID @bookinghub', function() {",
+                      "        pm.expect(pm.response.text()).to.include('@bookinghub');",
+                      "    });",
+                      "    pm.test('VEVENT possui DTSTART', function() {",
+                      "        pm.expect(pm.response.text()).to.include('DTSTART:');",
+                      "    });",
+                      "    pm.test('VEVENT possui STATUS valido', function() {",
+                      "        pm.expect(pm.response.text()).to.match(/STATUS:(CONFIRMED|CANCELLED)/);",
+                      "    });",
+                      "} else {",
+                      "    console.log('Calendario vazio - crie um booking antes (passos 1-7 do happy path).');",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/calendar/feed/{{feed_user_id}}/{{feed_token}}/bookings.ics",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "calendar",
+                    "feed",
+                    "{{feed_user_id}}",
+                    "{{feed_token}}",
+                    "bookings.ics"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "[ERRO 401] Gerar Feed sem JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401 Unauthorized', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/calendar/feed/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calendar",
+                "feed",
+                "token"
+              ]
+            },
+            "description": "Deve retornar 401 - o endpoint de geracao de token exige JWT valido via Authorization header."
+          }
+        },
+        {
+          "name": "[ERRO 400] Feed com Token Invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 Bad Request', function() {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/calendar/feed/{{feed_user_id}}/tokeninvalido000000000000000000000/bookings.ics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "calendar",
+                "feed",
+                "{{feed_user_id}}",
+                "tokeninvalido000000000000000000000",
+                "bookings.ics"
+              ]
+            },
+            "description": "Deve retornar 400 - token nao corresponde ao userId informado na URL."
+          }
         }
       ]
     }

@@ -62,7 +62,13 @@
       "Bash(mvn checkstyle:check pmd:check -pl catalog-service,booking-service,search-service --no-transfer-progress)",
       "Bash(mvn checkstyle:check pmd:check -pl booking-service,search-service --no-transfer-progress)",
       "Bash(mvn checkstyle:check pmd:check -pl booking-service --no-transfer-progress)",
-      "Bash(mvn checkstyle:check pmd:check -pl search-service --no-transfer-progress)"
+      "Bash(mvn checkstyle:check pmd:check -pl search-service --no-transfer-progress)",
+      "Bash(cat /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/infra/init-scripts/*.sql)",
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/main/resources/db/migration)",
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/core/usecases)",
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/infrastructure/adapters/out/ical)",
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/bdd)",
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/resources/features)"
     ]
   }
 }

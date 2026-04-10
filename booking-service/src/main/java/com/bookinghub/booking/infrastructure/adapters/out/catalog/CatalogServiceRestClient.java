@@ -7,18 +7,21 @@ import com.bookinghub.booking.core.ports.CatalogServiceClient;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class CatalogServiceRestClient implements CatalogServiceClient {
 
     private final RestClient catalogRestClient;
+
+    public CatalogServiceRestClient(@Qualifier("catalogRestClient") RestClient catalogRestClient) {
+        this.catalogRestClient = catalogRestClient;
+    }
 
     @Override
     public ScheduleInfo getSchedule(UUID establishmentId, UUID professionalId, UUID serviceId) {

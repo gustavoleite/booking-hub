@@ -44,6 +44,8 @@ class HandleBookingCancelledUseCaseTest {
         .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
         .status("CONFIRMED")
         .updatedAt(LocalDateTime.now())
+        .clientEmail("client@example.com")
+        .professionalEmail("pro@example.com")
         .build();
 
     when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
@@ -52,6 +54,28 @@ class HandleBookingCancelledUseCaseTest {
 
     assertThat(snapshot.getStatus()).isEqualTo("CANCELLED");
     verify(repository).save(argThat(s -> "CANCELLED".equals(s.getStatus())));
+  }
+
+  @Test
+  void shouldDelegateToSendCancellationUseCase() {
+    UUID bookingId = UUID.randomUUID();
+    BookingSnapshot snapshot = BookingSnapshot.builder()
+        .bookingId(bookingId)
+        .clientId("client-1")
+        .professionalId(UUID.randomUUID())
+        .startDatetime(LocalDateTime.now().plusDays(1))
+        .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
+        .status("CONFIRMED")
+        .updatedAt(LocalDateTime.now())
+        .clientEmail("client@example.com")
+        .professionalEmail("pro@example.com")
+        .build();
+
+    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+
+    useCase.execute(bookingId);
+
+    verify(sendCancellation).execute(argThat(s -> "CANCELLED".equals(s.getStatus())));
   }
 
   @Test

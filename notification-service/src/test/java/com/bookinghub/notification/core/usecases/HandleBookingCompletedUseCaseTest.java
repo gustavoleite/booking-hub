@@ -44,6 +44,8 @@ class HandleBookingCompletedUseCaseTest {
         .endDatetime(LocalDateTime.now().minusHours(1))
         .status("CONFIRMED")
         .updatedAt(LocalDateTime.now())
+        .clientEmail("client@example.com")
+        .professionalEmail("pro@example.com")
         .build();
 
     when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
@@ -52,6 +54,28 @@ class HandleBookingCompletedUseCaseTest {
 
     assertThat(snapshot.getStatus()).isEqualTo("COMPLETED");
     verify(repository).save(argThat(s -> "COMPLETED".equals(s.getStatus())));
+  }
+
+  @Test
+  void shouldDelegateToSendCompletedUseCase() {
+    UUID bookingId = UUID.randomUUID();
+    BookingSnapshot snapshot = BookingSnapshot.builder()
+        .bookingId(bookingId)
+        .clientId("client-1")
+        .professionalId(UUID.randomUUID())
+        .startDatetime(LocalDateTime.now().minusHours(2))
+        .endDatetime(LocalDateTime.now().minusHours(1))
+        .status("CONFIRMED")
+        .updatedAt(LocalDateTime.now())
+        .clientEmail("client@example.com")
+        .professionalEmail("pro@example.com")
+        .build();
+
+    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+
+    useCase.execute(bookingId);
+
+    verify(sendCompleted).execute(argThat(s -> "COMPLETED".equals(s.getStatus())));
   }
 
   @Test

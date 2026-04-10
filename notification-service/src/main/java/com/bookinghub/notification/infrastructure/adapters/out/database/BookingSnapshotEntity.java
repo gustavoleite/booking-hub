@@ -42,4 +42,13 @@ public class BookingSnapshotEntity {
 
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  @Column(name = "client_email")
+  private String clientEmail;
+
+  @Column(name = "professional_email")
+  private String professionalEmail;
+
+  @Column(name = "reminder_sent", nullable = false)
+  private boolean reminderSent;
 }

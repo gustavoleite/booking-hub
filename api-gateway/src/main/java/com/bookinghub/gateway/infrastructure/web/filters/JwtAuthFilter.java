@@ -95,11 +95,15 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 String token = authHeader.substring(7);
                 Claims claims = jwtValidationService.validateTokenAndGetClaims(token);
 
+                String email = claims.get("email", String.class);
                 ServerWebExchange modifiedExchange = exchange.mutate()
-                        .request(r -> r
-                                        .header("X-User-Id", claims.getSubject())
-                                        .header("X-User-Role", claims.get("role", String.class))
-                        )
+                        .request(r -> {
+                            r.header("X-User-Id", claims.getSubject());
+                            r.header("X-User-Role", claims.get("role", String.class));
+                            if (email != null) {
+                                r.header("X-User-Email", email);
+                            }
+                        })
                         .build();
 
                 return chain.filter(modifiedExchange);

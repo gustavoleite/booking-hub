@@ -15,6 +15,8 @@ public record BookingEventPayload(
     BigDecimal price,
     int durationMinutes,
     String status,
-    LocalDateTime occurredAt) {
+    LocalDateTime occurredAt,
+    String clientEmail,
+    String professionalEmail) {
 
 }

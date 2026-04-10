@@ -23,11 +23,14 @@ class HandleBookingCompletedUseCaseTest {
   @Mock
   private BookingSnapshotRepository repository;
 
+  @Mock
+  private SendBookingCompletedUseCase sendCompleted;
+
   private HandleBookingCompletedUseCase useCase;
 
   @BeforeEach
   void setUp() {
-    useCase = new HandleBookingCompletedUseCase(repository);
+    useCase = new HandleBookingCompletedUseCase(repository, sendCompleted);
   }
 
   @Test

@@ -49,6 +49,7 @@ public class BookingController {
     @Operation(summary = "Create a booking")
     public BookingResponse create(
             @RequestHeader("X-User-Id") String userId,
+            @RequestHeader(value = "X-User-Email", required = false) String userEmail,
             @Valid @RequestBody CreateBookingRequest request) {
         Booking booking = createBookingUseCase.execute(
                 userId,
@@ -56,7 +57,8 @@ public class BookingController {
                 request.establishmentId(),
                 request.providedServiceId(),
                 request.startDatetime(),
-                request.notes()
+                request.notes(),
+                userEmail
         );
         return BookingResponse.from(booking);
     }

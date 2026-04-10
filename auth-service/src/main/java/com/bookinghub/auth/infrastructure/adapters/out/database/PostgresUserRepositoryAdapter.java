@@ -3,6 +3,7 @@ package com.bookinghub.auth.infrastructure.adapters.out.database;
 import com.bookinghub.auth.core.domain.User;
 import com.bookinghub.auth.core.ports.UserRepository;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +25,11 @@ public class PostgresUserRepositoryAdapter implements UserRepository {
     @Override
     public Optional<User> findByEmail(String email) {
         return jpaUserRepository.findByEmail(email).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return jpaUserRepository.findById(id).map(this::toDomain);
     }
 
     @Override

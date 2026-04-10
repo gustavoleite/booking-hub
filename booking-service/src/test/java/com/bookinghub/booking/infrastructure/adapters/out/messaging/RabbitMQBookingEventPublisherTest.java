@@ -44,7 +44,7 @@ class RabbitMQBookingEventPublisherTest {
     @Test
     void shouldPublishBookingCreated() {
         Booking booking = buildBooking();
-        publisher.publishBookingCreated(booking);
+        publisher.publishBookingCreated(booking, "client@test.com", "pro@test.com");
         verify(rabbitTemplate).convertAndSend(eq("booking.events"), eq("booking.created"), any(BookingEventPayload.class));
     }
 

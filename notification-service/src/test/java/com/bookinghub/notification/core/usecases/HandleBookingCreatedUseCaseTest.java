@@ -18,11 +18,14 @@ class HandleBookingCreatedUseCaseTest {
   @Mock
   private BookingSnapshotRepository repository;
 
+  @Mock
+  private SendBookingConfirmationUseCase sendConfirmation;
+
   private HandleBookingCreatedUseCase useCase;
 
   @BeforeEach
   void setUp() {
-    useCase = new HandleBookingCreatedUseCase(repository);
+    useCase = new HandleBookingCreatedUseCase(repository, sendConfirmation);
   }
 
   @Test
@@ -32,7 +35,7 @@ class HandleBookingCreatedUseCaseTest {
     LocalDateTime start = LocalDateTime.now().plusDays(1);
     LocalDateTime end = start.plusHours(1);
 
-    useCase.execute(bookingId, "client-123", professionalId, start, end);
+    useCase.execute(bookingId, "client-123", professionalId, start, end, null, null);
 
     verify(repository).save(argThat(snapshot ->
         snapshot.getBookingId().equals(bookingId)

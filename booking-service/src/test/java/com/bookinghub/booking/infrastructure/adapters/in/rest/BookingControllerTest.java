@@ -76,7 +76,7 @@ class BookingControllerTest {
     @Test
     void shouldCreateBooking() throws Exception {
         Booking booking = buildBooking();
-        when(createBookingUseCase.execute(any(), any(), any(), any(), any(), any())).thenReturn(booking);
+        when(createBookingUseCase.execute(any(), any(), any(), any(), any(), any(), any())).thenReturn(booking);
 
         String json = """
                 {

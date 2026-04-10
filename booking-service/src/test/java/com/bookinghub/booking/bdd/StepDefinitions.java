@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.bookinghub.booking.core.domain.DaySchedule;
 import com.bookinghub.booking.core.domain.ScheduleInfo;
+import com.bookinghub.booking.core.ports.AuthServiceClient;
 import com.bookinghub.booking.core.ports.BookingEventPublisher;
 import com.bookinghub.booking.core.ports.CatalogServiceClient;
 import com.bookinghub.booking.infrastructure.adapters.out.database.JpaBookingRepository;
@@ -48,6 +49,9 @@ public class StepDefinitions {
 
     @MockBean
     private CatalogServiceClient catalogServiceClient;
+
+    @MockBean
+    private AuthServiceClient authServiceClient;
 
     @Autowired
     private JpaBookingRepository jpaBookingRepository;

@@ -1,5 +1,6 @@
 package com.bookinghub.booking.infrastructure.configuration;
 
+import com.bookinghub.booking.core.ports.AuthServiceClient;
 import com.bookinghub.booking.core.ports.BookingEventPublisher;
 import com.bookinghub.booking.core.ports.BookingRepository;
 import com.bookinghub.booking.core.ports.CatalogServiceClient;
@@ -29,8 +30,10 @@ public class BeanConfig {
     @Bean
     public CreateBookingUseCase createBookingUseCase(BookingRepository bookingRepository,
                                                    CatalogServiceClient catalogServiceClient,
-                                                   BookingEventPublisher eventPublisher) {
-        return new CreateBookingUseCase(bookingRepository, catalogServiceClient, eventPublisher);
+                                                   BookingEventPublisher eventPublisher,
+                                                   AuthServiceClient authServiceClient) {
+        return new CreateBookingUseCase(bookingRepository, catalogServiceClient,
+                eventPublisher, authServiceClient);
     }
 
     @Bean

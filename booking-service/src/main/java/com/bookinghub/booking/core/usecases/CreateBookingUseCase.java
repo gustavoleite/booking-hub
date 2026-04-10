@@ -5,6 +5,7 @@ import com.bookinghub.booking.core.domain.DaySchedule;
 import com.bookinghub.booking.core.domain.ScheduleInfo;
 import com.bookinghub.booking.core.exceptions.CatalogServiceException;
 import com.bookinghub.booking.core.exceptions.SlotUnavailableException;
+import com.bookinghub.booking.core.ports.AuthServiceClient;
 import com.bookinghub.booking.core.ports.BookingEventPublisher;
 import com.bookinghub.booking.core.ports.BookingRepository;
 import com.bookinghub.booking.core.ports.CatalogServiceClient;
@@ -18,9 +19,11 @@ public class CreateBookingUseCase {
     private final BookingRepository bookingRepository;
     private final CatalogServiceClient catalogServiceClient;
     private final BookingEventPublisher eventPublisher;
+    private final AuthServiceClient authServiceClient;
 
     public Booking execute(String clientId, UUID professionalId, UUID establishmentId,
-                         UUID serviceId, LocalDateTime startDatetime, String notes) {
+                         UUID serviceId, LocalDateTime startDatetime, String notes,
+                         String clientEmail) {
 
         if (!startDatetime.isAfter(LocalDateTime.now())) {
             throw new SlotUnavailableException(
@@ -54,7 +57,8 @@ public class CreateBookingUseCase {
                 serviceId, startDatetime, schedule.price(), schedule.durationMinutes(), notes);
 
         Booking saved = bookingRepository.save(booking);
-        eventPublisher.publishBookingCreated(saved);
+        String professionalEmail = authServiceClient.getUserEmail(professionalId);
+        eventPublisher.publishBookingCreated(saved, clientEmail, professionalEmail);
         return saved;
     }
 }

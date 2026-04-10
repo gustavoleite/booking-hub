@@ -35,7 +35,9 @@ public class RabbitMQBookingEventConsumer {
           payload.clientId(),
           payload.professionalId(),
           payload.startDatetime(),
-          payload.endDatetime());
+          payload.endDatetime(),
+          payload.clientEmail(),
+          payload.professionalEmail());
       case BOOKING_CANCELLED -> handleCancelled.execute(payload.bookingId());
       case BOOKING_COMPLETED -> handleCompleted.execute(payload.bookingId());
       default -> log.warn("Unhandled routing key: {}", routingKey);

@@ -8,16 +8,21 @@ import java.util.UUID;
 public class HandleBookingCompletedUseCase {
 
   private final BookingSnapshotRepository repository;
+  private final SendBookingCompletedUseCase sendCompleted;
 
-  public HandleBookingCompletedUseCase(BookingSnapshotRepository repository) {
+  public HandleBookingCompletedUseCase(BookingSnapshotRepository repository,
+      SendBookingCompletedUseCase sendCompleted) {
     this.repository = repository;
+    this.sendCompleted = sendCompleted;
   }
 
   public void execute(UUID bookingId) {
     Optional<BookingSnapshot> existing = repository.findByBookingId(bookingId);
     if (existing.isPresent()) {
-      existing.get().updateStatus("COMPLETED");
-      repository.save(existing.get());
+      BookingSnapshot snapshot = existing.get();
+      snapshot.updateStatus("COMPLETED");
+      repository.save(snapshot);
+      sendCompleted.execute(snapshot);
     }
   }
 }

@@ -18,9 +18,16 @@ public class BookingSnapshot {
   private final LocalDateTime endDatetime;
   private String status;
   private LocalDateTime updatedAt;
+  private final String clientEmail;
+  private final String professionalEmail;
+  private boolean reminderSent;
 
   public void updateStatus(String newStatus) {
     this.status = newStatus;
     this.updatedAt = LocalDateTime.now();
+  }
+
+  public void markReminderSent() {
+    this.reminderSent = true;
   }
 }

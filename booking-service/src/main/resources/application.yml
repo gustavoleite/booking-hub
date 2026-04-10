@@ -32,6 +32,10 @@ catalog:
   service:
     uri: ${CATALOG_SERVICE_URI:http://localhost:8083}
 
+auth:
+  service:
+    uri: ${AUTH_SERVICE_URI:http://localhost:8081}
+
 app:
   openapi:
     server-url: ${OPENAPI_SERVER_URL:http://localhost:8080/api/bookings}

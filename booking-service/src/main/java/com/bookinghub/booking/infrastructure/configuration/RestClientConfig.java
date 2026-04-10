@@ -15,4 +15,12 @@ public class RestClientConfig {
                 .baseUrl(catalogBaseUrl)
                 .build();
     }
+
+    @Bean
+    public RestClient authRestClient(
+            @Value("${auth.service.uri}") String authBaseUrl) {
+        return RestClient.builder()
+                .baseUrl(authBaseUrl)
+                .build();
+    }
 }

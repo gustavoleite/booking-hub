@@ -4,6 +4,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 
 @CucumberContextConfiguration
@@ -13,4 +14,7 @@ public class CucumberSpringConfiguration {
 
   @MockBean
   ConnectionFactory connectionFactory;
+
+  @MockBean
+  JavaMailSender javaMailSender;
 }

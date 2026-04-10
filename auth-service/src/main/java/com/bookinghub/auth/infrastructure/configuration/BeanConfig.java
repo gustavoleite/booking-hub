@@ -4,6 +4,7 @@ import com.bookinghub.auth.core.ports.PasswordEncoder;
 import com.bookinghub.auth.core.ports.TokenGenerator;
 import com.bookinghub.auth.core.ports.UserRepository;
 import com.bookinghub.auth.core.usecases.AuthenticateUserUseCase;
+import com.bookinghub.auth.core.usecases.GetUserEmailUseCase;
 import com.bookinghub.auth.core.usecases.RegisterUserUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,5 +22,10 @@ public class BeanConfig {
     public AuthenticateUserUseCase authenticateUserUseCase(UserRepository userRepository,
             PasswordEncoder passwordEncoder, TokenGenerator tokenGenerator) {
         return new AuthenticateUserUseCase(userRepository, passwordEncoder, tokenGenerator);
+    }
+
+    @Bean
+    public GetUserEmailUseCase getUserEmailUseCase(UserRepository userRepository) {
+        return new GetUserEmailUseCase(userRepository);
     }
 }

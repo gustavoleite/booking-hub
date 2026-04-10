@@ -48,6 +48,7 @@ jobs:
             root:
               - 'pom.xml'
               - '.github/workflows/**'
+              - 'performance-tests/**'
 
       - name: Build dynamic module matrix
         id: build-matrix
@@ -63,6 +64,15 @@ jobs:
             [ "${{ steps.filter.outputs.catalog-service }}" == "true" ] && MODULES+=("catalog-service")
             [ "${{ steps.filter.outputs.booking-service }}" == "true" ] && MODULES+=("booking-service")
             [ "${{ steps.filter.outputs.search-service }}"  == "true" ] && MODULES+=("search-service")
+          fi
+
+          # Se apenas performance-tests mudou, marcamos any-changed=true para rodar o job de performance
+          if [ "${{ steps.filter.outputs.root }}" == "false" ] && [ "${{ steps.filter.outputs.api-gateway }}" == "false" ] && [ "${{ steps.filter.outputs.auth-service }}" == "false" ] && [ "${{ steps.filter.outputs.catalog-service }}" == "false" ] && [ "${{ steps.filter.outputs.booking-service }}" == "false" ] && [ "${{ steps.filter.outputs.search-service }}" == "false" ]; then
+             # Verifica se especificamente performance-tests mudou (faz parte do root no filtro acima, mas queremos ser explícitos se necessário)
+             # Na verdade, o root já cobre pom.xml e workflows.
+             # Se chegamos aqui e MODULES está vazio, any-changed será false.
+             # Mas se performance-tests mudou, ele cai no root.
+             :
           fi
 
           if [ ${#MODULES[@]} -gt 0 ]; then
@@ -335,3 +345,35 @@ jobs:
             -f ${{ matrix.module }}/Dockerfile \
             -t bookinghub/${{ matrix.module }}:ci-check \
             .
+
+  # ============================================================
+  # JOB 6 — TESTES DE PERFORMANCE (alínea d)
+  # Roda apenas na branch main ou via PR para main
+  # ============================================================
+  performance-tests:
+    name: "6. Performance Tests (k6)"
+    runs-on: ubuntu-latest
+    needs: [detect-changes, bdd-integration]
+    if: |
+      needs.detect-changes.outputs.any-changed == 'true' &&
+      (github.ref == 'refs/heads/main' || github.base_ref == 'main')
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Start Services
+        run: |
+          docker-compose up -d --build
+          echo "Aguardando serviços (60s)..."
+          sleep 60
+          docker ps
+
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: performance-tests/k6/booking-load-test.js
+          flags: --env BASE_URL=http://localhost:8080
+
+      - name: Stop Services
+        if: always()
+        run: docker-compose down

@@ -41,6 +41,15 @@ services:
       timeout: 10s
       retries: 10
 
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: bw-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - bw-network
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: bw-rabbitmq
@@ -77,6 +86,7 @@ services:
       - DB_PASS=admin123
       - RABBIT_HOST=rabbitmq
       - CATALOG_SERVICE_URI=http://catalog-service:8083
+      - AUTH_SERVICE_URI=http://auth-service:8081
       - OPENAPI_SERVER_URL=http://localhost:8080/api/bookings
     networks:
       - bw-network
@@ -126,6 +136,8 @@ services:
       - DB_PASS=admin123
       - RABBIT_HOST=rabbitmq
       - NOTIFICATION_BASE_URL=http://localhost:8080/api/calendar
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
     networks:
       - bw-network
     depends_on:
@@ -133,6 +145,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mailhog:
+        condition: service_started
 
   api-gateway:
     build:

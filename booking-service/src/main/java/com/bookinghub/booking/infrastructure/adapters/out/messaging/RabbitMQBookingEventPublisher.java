@@ -18,8 +18,27 @@ public class RabbitMQBookingEventPublisher implements BookingEventPublisher {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public void publishBookingCreated(Booking booking) {
-        publish("booking.created", booking);
+    public void publishBookingCreated(Booking booking, String clientEmail,
+            String professionalEmail) {
+        BookingEventPayload payload = new BookingEventPayload(
+                booking.getId(),
+                booking.getClientId(),
+                booking.getProfessionalId(),
+                booking.getEstablishmentId(),
+                booking.getProvidedServiceId(),
+                booking.getStartDatetime(),
+                booking.getEndDatetime(),
+                booking.getPrice(),
+                booking.getDurationMinutes(),
+                booking.getStatus().name(),
+                LocalDateTime.now(),
+                clientEmail,
+                professionalEmail
+        );
+        if (log.isInfoEnabled()) {
+            log.info("Publishing event [booking.created] for booking {}", booking.getId());
+        }
+        rabbitTemplate.convertAndSend(EXCHANGE, "booking.created", payload);
     }
 
     @Override
@@ -44,7 +63,9 @@ public class RabbitMQBookingEventPublisher implements BookingEventPublisher {
                 booking.getPrice(),
                 booking.getDurationMinutes(),
                 booking.getStatus().name(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null,
+                null
         );
         if (log.isInfoEnabled()) {
             log.info("Publishing event [{}] for booking {}", routingKey, booking.getId());

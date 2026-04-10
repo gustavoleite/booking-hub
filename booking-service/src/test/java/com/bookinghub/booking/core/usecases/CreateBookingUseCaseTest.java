@@ -3,6 +3,7 @@ package com.bookinghub.booking.core.usecases;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -12,6 +13,7 @@ import com.bookinghub.booking.core.domain.Booking;
 import com.bookinghub.booking.core.domain.DaySchedule;
 import com.bookinghub.booking.core.domain.ScheduleInfo;
 import com.bookinghub.booking.core.exceptions.SlotUnavailableException;
+import com.bookinghub.booking.core.ports.AuthServiceClient;
 import com.bookinghub.booking.core.ports.BookingEventPublisher;
 import com.bookinghub.booking.core.ports.BookingRepository;
 import com.bookinghub.booking.core.ports.CatalogServiceClient;
@@ -23,7 +25,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,8 +37,9 @@ class CreateBookingUseCaseTest {
     private CatalogServiceClient catalogServiceClient;
     @Mock
     private BookingEventPublisher eventPublisher;
+    @Mock
+    private AuthServiceClient authServiceClient;
 
-    @InjectMocks
     private CreateBookingUseCase useCase;
 
     private UUID professionalId;
@@ -50,6 +52,8 @@ class CreateBookingUseCaseTest {
         professionalId = UUID.randomUUID();
         establishmentId = UUID.randomUUID();
         serviceId = UUID.randomUUID();
+        useCase = new CreateBookingUseCase(bookingRepository, catalogServiceClient,
+                eventPublisher, authServiceClient);
 
         // Monday (dayOfWeek=1), 09:00-18:00
         DaySchedule monday = new DaySchedule(1, LocalTime.of(9, 0), LocalTime.of(18, 0));
@@ -64,13 +68,14 @@ class CreateBookingUseCaseTest {
         when(bookingRepository.existsActiveSlot(professionalId, nextMonday)).thenReturn(false);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Booking result = useCase.execute("user1", professionalId, establishmentId, serviceId, nextMonday, "test notes");
+        Booking result = useCase.execute("user1", professionalId, establishmentId, serviceId,
+                nextMonday, "test notes", "user1@test.com");
 
         assertThat(result).isNotNull();
         assertThat(result.getClientId()).isEqualTo("user1");
         assertThat(result.getPrice()).isEqualByComparingTo("50.00");
         assertThat(result.getDurationMinutes()).isEqualTo(60);
-        verify(eventPublisher).publishBookingCreated(result);
+        verify(eventPublisher).publishBookingCreated(eq(result), any(), any());
     }
 
     @Test
@@ -79,19 +84,21 @@ class CreateBookingUseCaseTest {
         when(catalogServiceClient.getSchedule(establishmentId, professionalId, serviceId)).thenReturn(scheduleInfo);
         when(bookingRepository.existsActiveSlot(professionalId, nextMonday)).thenReturn(true);
 
-        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId, nextMonday, null))
+        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId,
+                nextMonday, null, null))
                 .isInstanceOf(SlotUnavailableException.class)
                 .hasMessageContaining("already booked");
 
         verify(bookingRepository, never()).save(any());
-        verify(eventPublisher, never()).publishBookingCreated(any());
+        verify(eventPublisher, never()).publishBookingCreated(any(), any(), any());
     }
 
     @Test
     void shouldThrowWhenDateIsInThePast() {
         LocalDateTime past = LocalDateTime.now().minusDays(1);
 
-        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId, past, null))
+        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId,
+                past, null, null))
                 .isInstanceOf(SlotUnavailableException.class)
                 .hasMessageContaining("future");
 
@@ -104,7 +111,8 @@ class CreateBookingUseCaseTest {
         LocalDateTime sunday = nextSunday().withHour(10).withMinute(0).withSecond(0).withNano(0);
         when(catalogServiceClient.getSchedule(establishmentId, professionalId, serviceId)).thenReturn(scheduleInfo);
 
-        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId, sunday, null))
+        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId,
+                sunday, null, null))
                 .isInstanceOf(SlotUnavailableException.class)
                 .hasMessageContaining("does not work on day");
     }
@@ -114,7 +122,8 @@ class CreateBookingUseCaseTest {
         LocalDateTime nextMonday = nextMonday().withHour(20).withMinute(0).withSecond(0).withNano(0);
         when(catalogServiceClient.getSchedule(establishmentId, professionalId, serviceId)).thenReturn(scheduleInfo);
 
-        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId, nextMonday, null))
+        assertThatThrownBy(() -> useCase.execute("user1", professionalId, establishmentId, serviceId,
+                nextMonday, null, null))
                 .isInstanceOf(SlotUnavailableException.class)
                 .hasMessageContaining("outside the professional's working hours");
     }

@@ -32,6 +32,15 @@ spring:
           max-attempts: 5
           multiplier: 2.0
           max-interval: 30000
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
 notification:
   base-url: http://localhost:8080/api/calendar

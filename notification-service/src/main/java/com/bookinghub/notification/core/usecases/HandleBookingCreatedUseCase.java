@@ -8,9 +8,12 @@ import java.util.UUID;
 public class HandleBookingCreatedUseCase {
 
   private final BookingSnapshotRepository repository;
+  private final SendBookingConfirmationUseCase sendConfirmation;
 
-  public HandleBookingCreatedUseCase(BookingSnapshotRepository repository) {
+  public HandleBookingCreatedUseCase(BookingSnapshotRepository repository,
+      SendBookingConfirmationUseCase sendConfirmation) {
     this.repository = repository;
+    this.sendConfirmation = sendConfirmation;
   }
 
   public void execute(
@@ -18,7 +21,9 @@ public class HandleBookingCreatedUseCase {
       String clientId,
       UUID professionalId,
       LocalDateTime startDatetime,
-      LocalDateTime endDatetime) {
+      LocalDateTime endDatetime,
+      String clientEmail,
+      String professionalEmail) {
 
     BookingSnapshot snapshot = BookingSnapshot.builder()
         .bookingId(bookingId)
@@ -28,8 +33,12 @@ public class HandleBookingCreatedUseCase {
         .endDatetime(endDatetime)
         .status("CONFIRMED")
         .updatedAt(LocalDateTime.now())
+        .clientEmail(clientEmail)
+        .professionalEmail(professionalEmail)
+        .reminderSent(false)
         .build();
 
     repository.save(snapshot);
+    sendConfirmation.execute(snapshot);
   }
 }

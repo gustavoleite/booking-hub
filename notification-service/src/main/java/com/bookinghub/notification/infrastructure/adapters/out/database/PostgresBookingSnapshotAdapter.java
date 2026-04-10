@@ -2,6 +2,7 @@ package com.bookinghub.notification.infrastructure.adapters.out.database;
 
 import com.bookinghub.notification.core.domain.BookingSnapshot;
 import com.bookinghub.notification.core.ports.BookingSnapshotRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,12 @@ public class PostgresBookingSnapshotAdapter implements BookingSnapshotRepository
     return jpa.findByProfessionalId(professionalId).stream().map(this::toDomain).toList();
   }
 
+  @Override
+  public List<BookingSnapshot> findConfirmedWithReminderPending(
+      LocalDateTime from, LocalDateTime to) {
+    return jpa.findConfirmedWithReminderPending(from, to).stream().map(this::toDomain).toList();
+  }
+
   private BookingSnapshotEntity toEntity(BookingSnapshot s) {
     return BookingSnapshotEntity.builder()
         .bookingId(s.getBookingId())
@@ -43,6 +50,9 @@ public class PostgresBookingSnapshotAdapter implements BookingSnapshotRepository
         .endDatetime(s.getEndDatetime())
         .status(s.getStatus())
         .updatedAt(s.getUpdatedAt())
+        .clientEmail(s.getClientEmail())
+        .professionalEmail(s.getProfessionalEmail())
+        .reminderSent(s.isReminderSent())
         .build();
   }
 
@@ -55,6 +65,9 @@ public class PostgresBookingSnapshotAdapter implements BookingSnapshotRepository
         .endDatetime(e.getEndDatetime())
         .status(e.getStatus())
         .updatedAt(e.getUpdatedAt())
+        .clientEmail(e.getClientEmail())
+        .professionalEmail(e.getProfessionalEmail())
+        .reminderSent(e.isReminderSent())
         .build();
   }
 }

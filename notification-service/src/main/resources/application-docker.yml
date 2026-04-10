@@ -8,6 +8,15 @@ spring:
     port: 5672
     username: guest
     password: guest
+  mail:
+    host: ${MAIL_HOST:mailhog}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
 notification:
   base-url: ${NOTIFICATION_BASE_URL:http://localhost:8080/api/calendar}

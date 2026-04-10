@@ -1,6 +1,11 @@
 # Notification Service
 
-Microsserviço responsável pela **integração com calendários externos** via feed iCalendar (RFC 5545). Consome eventos de agendamento do RabbitMQ, mantém um read model dos agendamentos e expõe um endpoint público que retorna um arquivo `.ics` compatível com Google Calendar, Microsoft Outlook e Apple Calendar.
+Microsserviço orientado a eventos responsável por duas funcionalidades complementares:
+
+1. **Notificações por e-mail** — envia confirmações, cancelamentos, conclusões e lembretes automáticos (24h antes) para clientes e profissionais via SMTP (MailHog em dev, SendGrid/SES em produção).
+2. **Integração com calendários externos** — expõe um feed iCalendar (RFC 5545) compatível com Google Calendar, Microsoft Outlook e Apple Calendar.
+
+Consome eventos do RabbitMQ (`booking.created`, `booking.cancelled`, `booking.completed`), mantém um read model dos agendamentos (`booking_snapshots`) e dispara as ações correspondentes.
 
 ---
 
@@ -26,6 +31,7 @@ Google Calendar / Outlook / Apple Calendar
 | Framework | Spring Boot 3.2.3 |
 | Web | Spring Web MVC |
 | Mensageria | Spring AMQP (RabbitMQ) |
+| E-mail | Spring Mail (JavaMailSender) + MailHog (dev) |
 | Persistência | Spring Data JPA + PostgreSQL |
 | Migração de schema | Flyway |
 | Documentação | SpringDoc OpenAPI 3 (Swagger UI) |
@@ -51,10 +57,18 @@ notification-service/src/main/java/com/bookinghub/notification/
 │   ├── ports/
 │   │   ├── BookingSnapshotRepository.java
 │   │   └── CalendarFeedRepository.java
+│   ├── ports/
+│   │   ├── BookingSnapshotRepository.java
+│   │   ├── CalendarFeedRepository.java
+│   │   └── EmailPort.java                     ← Porta de saída para envio de e-mail
 │   └── usecases/
-│       ├── HandleBookingCreatedUseCase.java    ← Cria snapshot com status CONFIRMED
-│       ├── HandleBookingCancelledUseCase.java  ← Atualiza snapshot para CANCELLED
-│       ├── HandleBookingCompletedUseCase.java  ← Atualiza snapshot para COMPLETED
+│       ├── HandleBookingCreatedUseCase.java    ← Persiste snapshot CONFIRMED + dispara confirmação
+│       ├── HandleBookingCancelledUseCase.java  ← Atualiza snapshot CANCELLED + dispara cancelamento
+│       ├── HandleBookingCompletedUseCase.java  ← Atualiza snapshot COMPLETED + dispara e-mail de conclusão
+│       ├── SendBookingConfirmationUseCase.java ← E-mail de confirmação para cliente e profissional
+│       ├── SendBookingCancellationUseCase.java ← E-mail de cancelamento para cliente e profissional
+│       ├── SendBookingCompletedUseCase.java    ← E-mail de conclusão (link para avaliação) apenas para cliente
+│       ├── SendBookingReminderUseCase.java     ← E-mail de lembrete 24h antes (acionado pelo scheduler)
 │       ├── GenerateCalendarFeedUseCase.java    ← Valida token e gera conteúdo ICS
 │       └── GetOrCreateFeedTokenUseCase.java    ← Cria ou retorna URL do feed
 │
@@ -79,8 +93,12 @@ notification-service/src/main/java/com/bookinghub/notification/
     │       │   ├── JpaCalendarFeedRepository.java
     │       │   ├── PostgresBookingSnapshotAdapter.java
     │       │   └── PostgresCalendarFeedAdapter.java
+    │       ├── email/
+    │       │   └── JavaMailEmailAdapter.java    ← Implementa EmailPort via JavaMailSender
     │       └── ical/
     │           └── ICalendarGenerator.java
+    ├── scheduling/
+    │   └── ScheduledReminderJob.java            ← Cron horário → SendBookingReminderUseCase
     └── configuration/
         ├── BeanConfig.java
         ├── RabbitMQConsumerConfig.java
@@ -99,7 +117,40 @@ Os use cases recebem interfaces (`BookingSnapshotRepository`, `CalendarFeedRepos
 
 ## Como funciona
 
-### Fluxo de eventos (write side)
+### Fluxo de eventos — e-mail + snapshot
+
+O `booking-service` publica um `BookingEventPayload` enriquecido com os e-mails do cliente e do profissional (além dos IDs). Esse enriquecimento acontece no momento da criação do booking: o e-mail do cliente vem do header `X-User-Email` (injetado pelo gateway a partir do claim do JWT) e o e-mail do profissional é buscado via `GET /internal/users/{id}/email` no `auth-service`.
+
+```
+booking-service (ao criar booking)
+    │  clientEmail  ← header X-User-Email (JWT claim)
+    │  professionalEmail ← GET auth-service:8081/internal/users/{professionalId}/email
+    ▼
+BookingEventPayload { bookingId, clientId, clientEmail, professionalId,
+                      professionalEmail, establishmentName, serviceName, ... }
+    ▼
+RabbitMQ — exchange: booking.events (TopicExchange, durable)
+    │
+    ├── booking.created   → HandleBookingCreatedUseCase
+    │       │  1. Persiste BookingSnapshot (status: CONFIRMED, emails salvos)
+    │       └  2. SendBookingConfirmationUseCase → e-mail para cliente + profissional
+    │
+    ├── booking.cancelled → HandleBookingCancelledUseCase
+    │       │  1. Atualiza snapshot para CANCELLED
+    │       └  2. SendBookingCancellationUseCase → e-mail para cliente + profissional
+    │
+    └── booking.completed → HandleBookingCompletedUseCase
+            │  1. Atualiza snapshot para COMPLETED
+            └  2. SendBookingCompletedUseCase → e-mail de conclusão/avaliação apenas para cliente
+
+[Scheduler — cron horário]
+ScheduledReminderJob → SendBookingReminderUseCase
+    │  Busca snapshots CONFIRMED com reminderSent=false e startDatetime ∈ [now+23h, now+25h]
+    │  Envia e-mail de lembrete para cliente e profissional
+    └  Marca reminderSent=true no snapshot
+```
+
+### Fluxo do feed ICS (read side)
 
 ```
 booking-service
@@ -201,7 +252,7 @@ O campo `UID` usa o `bookingId` como identificador único — o calendário atua
 ## Modelo de dados
 
 ```sql
--- Snapshot dos agendamentos (read model — alimentado via RabbitMQ)
+-- V1: Snapshot dos agendamentos (read model — alimentado via RabbitMQ)
 CREATE TABLE booking_snapshots (
     booking_id      UUID         PRIMARY KEY,
     client_id       VARCHAR(255) NOT NULL,
@@ -211,6 +262,12 @@ CREATE TABLE booking_snapshots (
     status          VARCHAR(20)  NOT NULL,   -- CONFIRMED | CANCELLED | COMPLETED
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
+
+-- V2: campos adicionados para notificações por e-mail (migration V2__add_email_fields_to_snapshots.sql)
+ALTER TABLE booking_snapshots
+    ADD COLUMN client_email       VARCHAR(255),        -- e-mail do cliente (do evento enriquecido)
+    ADD COLUMN professional_email VARCHAR(255),        -- e-mail do profissional
+    ADD COLUMN reminder_sent      BOOLEAN NOT NULL DEFAULT FALSE; -- flag de idempotência do lembrete
 
 -- Feed token por usuário (associação userId ↔ URL segura)
 CREATE TABLE calendar_feeds (
@@ -300,6 +357,34 @@ O serviço ficará disponível em:
 | `DB_PASS` | `admin123` | Senha do banco |
 | `RABBIT_HOST` | `rabbitmq` | Host do RabbitMQ |
 | `NOTIFICATION_BASE_URL` | `http://localhost:8080/api/calendar` | Base para construção da feedUrl |
+| `MAIL_HOST` | `mailhog` (Docker) / `localhost` (local) | Host do servidor SMTP |
+| `MAIL_PORT` | `1025` | Porta SMTP (MailHog) |
+
+Em produção, substitua `MAIL_HOST` e `MAIL_PORT` pelas configurações do SendGrid, AWS SES ou outro provedor SMTP real. Nenhuma autenticação SMTP é necessária para o MailHog.
+
+---
+
+## MailHog — SMTP fake para desenvolvimento
+
+O `docker-compose.yml` inclui o [MailHog](https://github.com/mailhog/MailHog), um servidor SMTP que captura todos os e-mails sem entregá-los de verdade. Ele expõe uma interface web para inspecionar os e-mails enviados.
+
+| URL | Descrição |
+|---|---|
+| `http://localhost:8025` | Interface web — lista todos os e-mails capturados |
+| `localhost:1025` | Porta SMTP — usada pelo `notification-service` |
+| `http://localhost:8025/api/v2/messages` | API REST — retorna e-mails em JSON |
+
+**Para verificar e-mails após criar um booking:**
+
+```bash
+# 1. Criar um booking (fluxo completo — ver README raiz)
+
+# 2. Verificar a caixa de entrada do MailHog
+curl -s http://localhost:8025/api/v2/messages | python3 -m json.tool | grep -E '"Subject"|"To"'
+
+# 3. Ou abrir no browser
+open http://localhost:8025
+```
 
 ---
 
@@ -317,12 +402,23 @@ Cobertura dos use cases:
 
 | Classe testada | Cenários |
 |---|---|
-| `HandleBookingCreatedUseCase` | Salva snapshot com status CONFIRMED |
-| `HandleBookingCancelledUseCase` | Atualiza para CANCELLED; ignora se não encontrado |
-| `HandleBookingCompletedUseCase` | Atualiza para COMPLETED; ignora se não encontrado |
+| `HandleBookingCreatedUseCase` | Salva snapshot CONFIRMED; delega a `SendBookingConfirmationUseCase` |
+| `HandleBookingCancelledUseCase` | Atualiza para CANCELLED; ignora se não encontrado; delega a `SendBookingCancellationUseCase` |
+| `HandleBookingCompletedUseCase` | Atualiza para COMPLETED; ignora se não encontrado; delega a `SendBookingCompletedUseCase` |
+| `SendBookingConfirmationUseCase` | Envia e-mail para cliente e profissional; sem exceção para e-mail nulo |
+| `SendBookingCancellationUseCase` | Envia e-mail de cancelamento para ambos; sem exceção para e-mails nulos |
+| `SendBookingCompletedUseCase` | Envia apenas para o cliente (sem cópia ao profissional); corpo contém link de avaliação |
+| `SendBookingReminderUseCase` | Janela 23-25h correta; envia para todos os pendentes; marca `reminderSent=true`; sem envio quando lista vazia |
 | `GetOrCreateFeedTokenUseCase` | Retorna URL existente; cria nova; URL começa com `webcal://` |
-| `GenerateCalendarFeedUseCase` | Gera ICS válido; lança exceção para token inválido; inclui bookings do profissional quando userId é UUID |
+| `GenerateCalendarFeedUseCase` | Gera ICS válido; lança exceção para token inválido; inclui bookings do profissional |
 | `ICalendarGenerator` | Estrutura VCALENDAR; VEVENT por snapshot; STATUS CANCELLED e CONFIRMED corretos |
+
+### Rodar apenas os testes dos use cases de e-mail
+
+```bash
+mvn test -pl notification-service \
+  -Dtest="SendBookingConfirmationUseCaseTest,SendBookingCancellationUseCaseTest,SendBookingCompletedUseCaseTest,SendBookingReminderUseCaseTest"
+```
 
 ### BDD (Cucumber + Spring Boot + H2)
 
@@ -332,18 +428,30 @@ Testes de comportamento escritos em linguagem natural. O contexto Spring sobe co
 mvn test -pl notification-service -Dtest=CucumberRunner
 ```
 
-Cenários cobertos (`src/test/resources/features/calendar_feed.feature`):
+Cenários cobertos:
 
+`src/test/resources/features/calendar_feed.feature`:
 ```gherkin
 Scenario: User with bookings receives a valid ICS feed
 Scenario: User with a cancelled booking sees it reflected in the feed
 Scenario: Invalid token returns error
 ```
 
+`src/test/resources/features/email_notifications.feature`:
+```gherkin
+Scenario: Client and professional receive confirmation email when booking is created
+Scenario: Client and professional receive cancellation email when booking is cancelled
+Scenario: Only the client receives an email when booking is completed
+Scenario: No reminder emails are sent when there are no bookings in the upcoming window
+```
+
 ### Rodar apenas os testes unitários (sem BDD)
 
 ```bash
-mvn test -pl notification-service -Dtest="HandleBookingCreatedUseCaseTest,HandleBookingCancelledUseCaseTest,HandleBookingCompletedUseCaseTest,GetOrCreateFeedTokenUseCaseTest,GenerateCalendarFeedUseCaseTest,ICalendarGeneratorTest"
+mvn test -pl notification-service \
+  -Dtest="HandleBookingCreatedUseCaseTest,HandleBookingCancelledUseCaseTest,HandleBookingCompletedUseCaseTest,\
+SendBookingConfirmationUseCaseTest,SendBookingCancellationUseCaseTest,SendBookingCompletedUseCaseTest,\
+SendBookingReminderUseCaseTest,GetOrCreateFeedTokenUseCaseTest,GenerateCalendarFeedUseCaseTest,ICalendarGeneratorTest"
 ```
 
 ---
@@ -422,4 +530,8 @@ O Google fará polling automático a cada ~12h. Para testar imediatamente, use a
 | Sincronização unidirecional (BookingHub → calendário externo) | Webhooks de retorno do Google/Microsoft requerem aprovação e endpoints públicos — fora do escopo |
 | Atualização não é em tempo real | Google Calendar faz polling a cada ~12h, Outlook ~1h. Aceitável para confirmações de agendamento |
 | Um feed por usuário (cliente + profissional combinados) | Simplifica a URL; separação por papel é escopo futuro |
-| `SUMMARY` genérico ("Agendamento - BookingHub") | `BookingEventPayload` não inclui nome do serviço/estabelecimento; enriquecimento via chamada ao catalog-service é escopo futuro |
+| `SUMMARY` genérico no ICS ("Agendamento - BookingHub") | O `BookingEventPayload` já inclui `serviceName` e `establishmentName` no snapshot — enriquecer o `SUMMARY` do ICS com esses valores é evolução futura simples |
+| Template de e-mail em string simples | Sem dependência de Thymeleaf; suficiente para o escopo acadêmico; fácil de substituir por templates HTML depois |
+| MailHog em dev, SMTP real em produção | Configurado via variáveis de ambiente (`MAIL_HOST`, `MAIL_PORT`) — trocar de MailHog para SendGrid/SES não requer mudança de código |
+| Scheduler `@Scheduled` para lembretes | Mais simples que RabbitMQ com TTL; mensagem com TTL seria mais precisa mas exige infraestrutura adicional |
+| Um lembrete por booking (`reminderSent` flag) | Garante idempotência — sem duplicatas mesmo se o scheduler reiniciar durante a janela de 23-25h |

@@ -10,6 +10,7 @@ import com.bookinghub.booking.core.exceptions.InvalidReviewException;
 import com.bookinghub.booking.core.exceptions.ReviewAlreadyExistsException;
 import com.bookinghub.booking.core.exceptions.ReviewNotFoundException;
 import com.bookinghub.booking.core.exceptions.SlotUnavailableException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,6 +33,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SlotUnavailableException.class)
     public ProblemDetail handleSlotUnavailable(SlotUnavailableException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "This slot is already booked");
     }
 
     @ExceptionHandler(BookingStatusException.class)

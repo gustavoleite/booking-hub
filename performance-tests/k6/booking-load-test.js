@@ -1,210 +1,234 @@
-import http from 'k6/http';
 import { check, sleep } from 'k6';
+import exec from 'k6/execution';
+import http from 'k6/http';
+import { Counter } from 'k6/metrics';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
+// ─── Métricas customizadas ────────────────────────────────────────────────────
+const status201 = new Counter('status_201_created');
+const status409 = new Counter('status_409_conflict');
+const status500 = new Counter('status_500_error');
+
+// ─── Slot fixo gerado dinamicamente (now + 60 dias, 10h) ─────────────────────
+// Garante idempotência entre execuções de CI: cada run usa uma data diferente.
+function buildFixedSlot() {
+  const d = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T10:00:00`;
+}
+
+// ─── Slot aleatório para o cenário de carga normal ───────────────────────────
+// Janela: 1–30 dias a partir de hoje, horário comercial em slots de 1h.
+function randomSlot() {
+  const d = new Date(Date.now() + (Math.floor(Math.random() * 30) + 1) * 24 * 60 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, '0');
+  const hour = Math.floor(Math.random() * 9) + 9; // 09h–17h
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(hour)}:00:00`;
+}
+
+// ─── Opções e cenários ────────────────────────────────────────────────────────
 export const options = {
-  stages: [
-    { duration: '30s', target: 10 }, // Ramp-up
-    { duration: '1m', target: 20 },  // Carga constante
-    { duration: '30s', target: 50 }, // Stress
-    { duration: '1m', target: 50 },  // Manter Stress
-    { duration: '30s', target: 0 },  // Ramp-down
-  ],
+  setupTimeout: '3m', // Pool de 20 clientes + infra: ~40 requests no setup
+  scenarios: {
+
+    // Cenário 1 — Thundering Herd
+    // 500 VUs atacam o mesmo slot para validar a prevenção de double-booking.
+    thundering_herd: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '30s', target: 100 }, // Sobe rápido
+        { duration: '1m',  target: 500 }, // Pico: 500 VUs simultâneos
+        { duration: '30s', target: 0 },   // Desce
+      ],
+      tags: { scenario: 'thundering_herd' },
+    },
+
+    // Cenário 2 — Carga Normal
+    // Clientes diferentes, slots diferentes — valida throughput sem degradação.
+    normal_load: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      startTime: '2m10s', // Começa após o thundering_herd terminar
+      stages: [
+        { duration: '30s', target: 50  }, // Warm-up
+        { duration: '2m',  target: 200 }, // Carga nominal
+        { duration: '30s', target: 0   }, // Ramp-down
+      ],
+      tags: { scenario: 'normal_load' },
+    },
+  },
+
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% das requisições devem ser < 500ms
-    http_req_failed: ['rate<0.05'],   // Taxa de erro deve ser < 5% (tolerando concorrência de horários)
+    // Thundering Herd: provar que o banco não travou e que pelo menos 1 booking passou
+    'status_500_error':                            ['count==0'],  // Proibido erro 500
+    'status_201_created':                          ['count>0'],   // Pelo menos 1 criado
+    // Latência geral: 95% das requisições em < 500ms
+    'http_req_duration':                           ['p(95)<500'],
+    // Carga normal: latência sob tráfego real também deve ser aceitável
+    'http_req_duration{scenario:normal_load}':     ['p(95)<500'],
   },
 };
 
-function getRandomFutureDate() {
-  const date = new Date();
-  date.setDate(date.getDate() + Math.floor(Math.random() * 30) + 1); // 30 dias de janela
-  date.setHours(Math.floor(Math.random() * 8) + 9); // Entre 09:00 e 17:00
-  date.setMinutes(Math.floor(Math.random() * 4) * 15); // Em slots de 15 min: 00, 15, 30, 45
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-  return date.toISOString().replace('Z', '');
-}
-
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function generateValidCnpj() {
-  const n = Array.from({length: 8}, () => Math.floor(Math.random() * 10));
-  const n9 = 0, n10 = 0, n11 = 0, n12 = 1; // 0001
-  
-  const initial = [...n, n9, n10, n11, n12];
-  
+  const n = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10));
+  const initial = [...n, 0, 0, 0, 1];
   const calcDigit = (base, weights) => {
-    const sum = base.reduce((acc, val, i) => acc + (val * weights[i]), 0);
+    const sum = base.reduce((acc, val, i) => acc + val * weights[i], 0);
     const mod = sum % 11;
     return mod < 2 ? 0 : 11 - mod;
   };
-
   const d1 = calcDigit(initial, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
   const d2 = calcDigit([...initial, d1], [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-
   return [...initial, d1, d2].join('');
 }
 
+function register(email, password, role) {
+  http.post(`${BASE_URL}/api/auth/register`,
+    JSON.stringify({ email, password, role }),
+    { headers: { 'Content-Type': 'application/json' } });
+}
+
+function login(email, password) {
+  const res = http.post(`${BASE_URL}/api/auth/login`,
+    JSON.stringify({ email, password }),
+    { headers: { 'Content-Type': 'application/json' } });
+  return { token: res.json('accessToken'), id: res.json('id') };
+}
+
+function authHeader(token) {
+  return { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } };
+}
+
+// ─── Setup (executado 1x antes de todos os VUs) ───────────────────────────────
 export function setup() {
-  const timestamp = Date.now();
-  const adminEmail = `admin_${timestamp}@test.com`;
-  const profEmail = `prof_${timestamp}@test.com`;
-  const clientEmail = `client_${timestamp}@test.com`;
+  const ts       = Date.now();
   const password = 'Password123!';
-  const cnpj = generateValidCnpj();
+  const cnpj     = generateValidCnpj();
 
-  console.log(`Iniciando Setup com: Admin=${adminEmail}, Prof=${profEmail}, CNPJ=${cnpj}`);
+  // 1. Owner
+  const adminEmail = `admin_${ts}@test.com`;
+  register(adminEmail, password, 'ROLE_OWNER');
+  const owner = login(adminEmail, password);
+  if (!owner.token) { console.error('Falha no login do Owner'); }
 
-  // 1. Registrar e Logar Owner
-  http.post(`${BASE_URL}/api/auth/register`, JSON.stringify({
-    email: adminEmail,
-    password: password,
-    role: 'ROLE_OWNER'
-  }), { headers: { 'Content-Type': 'application/json' } });
-
-  const loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
-    email: adminEmail,
-    password: password
-  }), { headers: { 'Content-Type': 'application/json' } });
-
-  const ownerToken = loginRes.json('accessToken');
-  if (!ownerToken) console.error(`Falha no login do Owner: ${loginRes.status} ${loginRes.body}`);
-
-  // 2. Criar Estabelecimento
-  const estRes = http.post(`${BASE_URL}/api/catalog/establishments`, JSON.stringify({
-    name: 'Performance Test Salon',
-    cnpj: cnpj,
-    description: 'Salon for load testing',
-    address: {
-      street: 'Test St',
-      number: '123',
-      city: 'Test City',
-      state: 'TS',
-      zipCode: '12345-678',
-      latitude: -23.5505,
-      longitude: -46.6333
-    },
-    businessHours: [
-      { dayOfWeek: 1, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 2, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 3, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 4, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 5, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 6, openTime: '08:00:00', closeTime: '18:00:00' },
-      { dayOfWeek: 7, openTime: '08:00:00', closeTime: '18:00:00' }
-    ],
-    services: [
-      { title: 'Corte de Cabelo', description: 'Corte padrão' }
-    ]
-  }), { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` } });
+  // 2. Estabelecimento
+  const estRes = http.post(`${BASE_URL}/api/catalog/establishments`,
+    JSON.stringify({
+      name: 'Thundering Herd Salon', cnpj,
+      description: 'Salão para teste de concorrência e carga',
+      address: {
+        street: 'Test St', number: '123', city: 'Test City',
+        state: 'TS', zipCode: '12345-678', latitude: -23.5505, longitude: -46.6333,
+      },
+      businessHours: [1, 2, 3, 4, 5, 6, 7].map(day => ({
+        dayOfWeek: day, openTime: '08:00:00', closeTime: '20:00:00',
+      })),
+      services: [{ title: 'Corte de Cabelo', description: 'Corte padrão' }],
+    }),
+    authHeader(owner.token));
 
   const establishmentId = estRes.json('id');
-  const services = estRes.json('providedServices');
-  const serviceId = (services && services.length > 0) ? services[0].id : undefined;
+  const services        = estRes.json('providedServices');
+  const serviceId       = services && services.length > 0 ? services[0].id : undefined;
+  if (!establishmentId) { console.error(`Falha ao criar estabelecimento: ${estRes.status} ${estRes.body}`); }
 
-  if (!establishmentId) console.error(`Falha ao criar estabelecimento: ${estRes.status} ${estRes.body}`);
+  // 3. Profissional
+  const profEmail = `prof_${ts}@test.com`;
+  register(profEmail, password, 'ROLE_PROFESSIONAL');
+  const prof = login(profEmail, password);
 
-  // 4. Registrar e Logar Profissional
-  http.post(`${BASE_URL}/api/auth/register`, JSON.stringify({
-    email: profEmail,
-    password: password,
-    role: 'ROLE_PROFESSIONAL'
-  }), { headers: { 'Content-Type': 'application/json' } });
-
-  const profLoginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
-    email: profEmail,
-    password: password
-  }), { headers: { 'Content-Type': 'application/json' } });
-
-  const profToken = profLoginRes.json('accessToken');
-  const profUserId = profLoginRes.json('id');
-
-  // Criar perfil do profissional
-  const profRes = http.post(`${BASE_URL}/api/catalog/professionals/me`, JSON.stringify({
-    name: 'Professional Test',
-    bio: 'Professional for load testing',
-    specialties: ['Corte']
-  }), { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${profToken}` } });
+  const profRes = http.post(`${BASE_URL}/api/catalog/professionals/me`,
+    JSON.stringify({ name: 'Professional Test', bio: 'Para teste de carga', specialties: ['Corte'] }),
+    authHeader(prof.token));
 
   const professionalId = profRes.json('id');
-  if (!professionalId) console.error(`Falha ao criar perfil profissional: ${profRes.status} ${profRes.body}`);
+  if (!professionalId) { console.error(`Falha ao criar profissional: ${profRes.status} ${profRes.body}`); }
 
-  // 5. Vincular Profissional ao Estabelecimento
-  const affRes = http.post(`${BASE_URL}/api/catalog/establishments/${establishmentId}/affiliations?professionalId=${professionalId}`, JSON.stringify({
-    active: true,
-    workSchedules: [
-      { dayOfWeek: 1, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 2, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 3, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 4, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 5, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 6, startTime: '08:00:00', endTime: '18:00:00' },
-      { dayOfWeek: 7, startTime: '08:00:00', endTime: '18:00:00' }
-    ],
-    serviceOfferings: [
-      { providedServiceId: serviceId, price: 50.0, durationMinutes: 30 }
-    ]
-  }), { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` } });
+  // 4. Afiliação
+  const affRes = http.post(
+    `${BASE_URL}/api/catalog/establishments/${establishmentId}/affiliations?professionalId=${professionalId}`,
+    JSON.stringify({
+      active: true,
+      workSchedules: [1, 2, 3, 4, 5, 6, 7].map(day => ({
+        dayOfWeek: day, startTime: '08:00:00', endTime: '20:00:00',
+      })),
+      serviceOfferings: [{ providedServiceId: serviceId, price: 50.0, durationMinutes: 30 }],
+    }),
+    authHeader(owner.token));
 
   if (affRes.status !== 200 && affRes.status !== 201) {
     console.error(`Falha na afiliação: ${affRes.status} ${affRes.body}`);
   }
 
-  // 6. Registrar e Logar Cliente
-  http.post(`${BASE_URL}/api/auth/register`, JSON.stringify({
-    email: clientEmail,
-    password: password,
-    role: 'ROLE_CLIENT'
-  }), { headers: { 'Content-Type': 'application/json' } });
+  // 5. Pool de clientes — distribui tokens entre VUs para simular usuários distintos
+  // Pool maior que os VUs do normal_load para evitar reutilização excessiva.
+  const CLIENT_POOL_SIZE = 20; // Reduzido para caber no setupTimeout em CI
+  const clientTokens = [];
+  for (let i = 0; i < CLIENT_POOL_SIZE; i++) {
+    const email = `client_${ts}_${i}@test.com`;
+    register(email, password, 'ROLE_CLIENT');
+    const c = login(email, password);
+    if (c.token) { clientTokens.push(c.token); }
+  }
 
-  const clientLoginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify({
-    email: clientEmail,
-    password: password
-  }), { headers: { 'Content-Type': 'application/json' } });
+  const fixedSlot = buildFixedSlot();
+  console.log(
+    `Setup completo — Est=${establishmentId}, Prof=${professionalId}, ` +
+    `Svc=${serviceId}, FixedSlot=${fixedSlot}, Pool=${clientTokens.length} clientes`
+  );
 
-  const clientToken = clientLoginRes.json('accessToken');
-
-  console.log(`Setup completo: Est=${establishmentId}, Prof=${professionalId}, Svc=${serviceId}`);
-
-  return {
-    clientToken,
-    establishmentId,
-    professionalId,
-    serviceId
-  };
+  return { clientTokens, establishmentId, professionalId, serviceId, fixedSlot };
 }
 
+// ─── Função default (executada por cada VU em cada iteração) ──────────────────
 export default function (data) {
-  // Fail-safe: Se o setup falhou, não adianta rodar o teste
   if (!data.establishmentId || !data.professionalId || !data.serviceId) {
-    console.error('ERRO: Setup falhou ao obter IDs. Verifique se os serviços estão UP e se os logs mostram erros de negócio.');
+    console.error('Setup falhou — abortando VU.');
     sleep(1);
     return;
   }
 
-  const payload = JSON.stringify({
-    professionalId: data.professionalId,
-    establishmentId: data.establishmentId,
-    providedServiceId: data.serviceId,
-    startDatetime: getRandomFutureDate(),
-    notes: 'K6 Performance Test Booking'
-  });
+  // Seleciona token do pool de forma distribuída pelo ID do VU
+  const token = data.clientTokens[__VU % data.clientTokens.length];
 
-  const params = {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${data.clientToken}`,
-    },
-  };
+  // Thundering Herd → slot fixo | Normal Load → slot aleatório
+  const isHerd = __ITER === 0 &&
+    (typeof __ENV.K6_SCENARIO === 'undefined' || __ENV.K6_SCENARIO !== 'normal_load');
+  const slot = (exec.scenario.name === 'thundering_herd') ? data.fixedSlot : randomSlot();
 
-  const res = http.post(`${BASE_URL}/api/bookings`, payload, params);
+  const res = http.post(
+    `${BASE_URL}/api/bookings`,
+    JSON.stringify({
+      professionalId:    data.professionalId,
+      establishmentId:   data.establishmentId,
+      providedServiceId: data.serviceId,
+      startDatetime:     slot,
+      notes:             `k6 — ${exec.scenario.name}`,
+    }),
+    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } },
+  );
 
-  check(res, {
-    'is status 201': (r) => r.status === 201,
-    'has booking id': (r) => r.json('id') !== undefined,
-  });
+  // Contadores por status
+  if (res.status === 201) status201.add(1);
+  if (res.status === 409) status409.add(1);
+  if (res.status >= 500) status500.add(1);
 
-  // Aguarda um pouco entre as requisições para simular comportamento humano real
-  // mas curto o suficiente para gerar carga.
-  sleep(1);
+  if (exec.scenario.name === 'thundering_herd') {
+    // Thundering Herd: 201 ou 409 são ambos sucesso — 500 é falha
+    check(res, {
+      'Concorrência tratada corretamente (201 ou 409)': (r) => r.status === 201 || r.status === 409,
+      'Sem erro interno do servidor (sem 500)':         (r) => r.status < 500,
+    });
+    sleep(Math.random() * 0.5); // Mínimo para maximizar colisões
+  } else {
+    // Normal Load: apenas 201 é sucesso
+    check(res, {
+      'Booking criado com sucesso (201)': (r) => r.status === 201,
+      'Sem erro interno do servidor':     (r) => r.status < 500,
+    });
+    sleep(1 + Math.random()); // Simula comportamento humano real
+  }
 }

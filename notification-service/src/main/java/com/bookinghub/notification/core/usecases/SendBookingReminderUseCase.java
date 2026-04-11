@@ -23,7 +23,9 @@ public class SendBookingReminderUseCase {
         LocalDateTime to = LocalDateTime.now().plusHours(25);
 
         List<BookingSnapshot> pending = repository.findConfirmedWithReminderPending(from, to);
-        log.info("Reminder job: {} bookings to remind", pending.size());
+        if (log.isInfoEnabled()) {
+            log.info("Reminder job: {} bookings to remind", pending.size());
+        }
 
         for (BookingSnapshot snapshot : pending) {
             String when = snapshot.getStartDatetime().format(FMT);

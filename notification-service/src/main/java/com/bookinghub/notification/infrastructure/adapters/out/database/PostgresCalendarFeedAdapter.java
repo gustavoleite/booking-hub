@@ -36,6 +36,7 @@ public class PostgresCalendarFeedAdapter implements CalendarFeedRepository {
                 .build();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod") // used via this::toDomain method reference
     private CalendarFeed toDomain(CalendarFeedEntity e) {
         return CalendarFeed.builder()
                 .id(e.getId())

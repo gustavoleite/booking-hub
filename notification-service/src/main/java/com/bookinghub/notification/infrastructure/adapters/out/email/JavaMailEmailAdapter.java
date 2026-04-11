@@ -28,7 +28,9 @@ public class JavaMailEmailAdapter implements EmailPort {
             mailSender.send(message);
             log.info("Email sent to {} — subject: {}", to, subject);
         } catch (Exception e) {
-            log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
+            if (log.isErrorEnabled()) {
+                log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
+            }
         }
     }
 }

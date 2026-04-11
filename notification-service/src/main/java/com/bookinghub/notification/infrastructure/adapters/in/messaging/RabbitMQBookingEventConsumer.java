@@ -27,7 +27,9 @@ public class RabbitMQBookingEventConsumer {
       BookingEventPayload payload,
       @Header("amqp_receivedRoutingKey") String routingKey) {
 
-        log.info("Received event [{}] for booking {}", routingKey, payload.bookingId());
+        if (log.isInfoEnabled()) {
+            log.info("Received event [{}] for booking {}", routingKey, payload.bookingId());
+        }
 
         switch (routingKey) {
             case BOOKING_CREATED -> handleCreated.execute(

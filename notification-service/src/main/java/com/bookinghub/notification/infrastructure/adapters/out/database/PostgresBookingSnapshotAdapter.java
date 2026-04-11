@@ -56,6 +56,7 @@ public class PostgresBookingSnapshotAdapter implements BookingSnapshotRepository
                 .build();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod") // used via this::toDomain method reference
     private BookingSnapshot toDomain(BookingSnapshotEntity e) {
         return BookingSnapshot.builder()
                 .bookingId(e.getBookingId())

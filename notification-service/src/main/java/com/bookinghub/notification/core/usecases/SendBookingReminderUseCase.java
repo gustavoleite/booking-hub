@@ -31,8 +31,8 @@ public class SendBookingReminderUseCase {
             emailPort.send(
                     snapshot.getClientEmail(),
                     "Lembrete: seu agendamento é amanhã às " + when,
-                    "Olá!\n\nEste é um lembrete de que você tem um agendamento amanhã às " + when + "."
-                            + "\n\nNos vemos em breve!"
+                    "Olá!\n\nEste é um lembrete de que você tem um agendamento amanhã às " + when
+                            + ".\n\nNos vemos em breve!"
             );
 
             emailPort.send(

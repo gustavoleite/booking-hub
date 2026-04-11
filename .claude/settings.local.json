@@ -73,7 +73,9 @@
       "Bash(mvn -B org.openrewrite.maven:rewrite-maven-plugin:run -pl notification-service --no-transfer-progress)",
       "Bash(mvn -B test -pl notification-service --no-transfer-progress)",
       "Bash(mvn -B test jacoco:report -pl notification-service --no-transfer-progress)",
-      "Bash(mvn -B test jacoco:report jacoco:check -pl notification-service --no-transfer-progress)"
+      "Bash(mvn -B test jacoco:report jacoco:check -pl notification-service --no-transfer-progress)",
+      "Bash(mvn -B test -pl notification-service -Dtest=\"**/CucumberTest\" -DfailIfNoTests=false --no-transfer-progress)",
+      "Bash(mvn -B test -pl notification-service -Dtest=\"**/CucumberRunner\" -Dsurefire.failIfNoSpecifiedTests=false --no-transfer-progress)"
     ]
   }
 }

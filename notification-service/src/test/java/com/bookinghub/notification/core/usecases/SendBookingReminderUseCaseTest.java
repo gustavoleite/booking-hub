@@ -59,8 +59,8 @@ class SendBookingReminderUseCaseTest {
         useCase.execute();
 
         // Two emails: one for client, one for professional
-        verify(emailPort).send(eq("client@example.com"), contains("Reminder"), anyString());
-        verify(emailPort).send(eq("pro@example.com"), contains("Reminder"), anyString());
+        verify(emailPort).send(eq("client@example.com"), contains("Lembrete"), anyString());
+        verify(emailPort).send(eq("pro@example.com"), contains("Lembrete"), anyString());
 
         // Snapshot must be saved with reminderSent=true
         assertThat(snapshot.isReminderSent()).isTrue();

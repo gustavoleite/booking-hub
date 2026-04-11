@@ -75,7 +75,7 @@ class SendBookingCompletedUseCaseTest {
         verify(emailPort).send(
                 eq("client@example.com"),
                 anyString(),
-                contains("review")
+                contains("opini")
         );
     }
 }

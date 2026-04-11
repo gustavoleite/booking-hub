@@ -47,12 +47,12 @@ class SendBookingCancellationUseCaseTest {
 
         verify(emailPort).send(
                 eq("client@example.com"),
-                contains("cancelled"),
+                contains("cancelado"),
                 anyString()
         );
         verify(emailPort).send(
                 eq("pro@example.com"),
-                contains("cancelled"),
+                contains("cancelado"),
                 anyString()
         );
     }

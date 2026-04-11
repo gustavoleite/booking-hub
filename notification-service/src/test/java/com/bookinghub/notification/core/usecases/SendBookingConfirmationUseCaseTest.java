@@ -44,12 +44,12 @@ class SendBookingConfirmationUseCaseTest {
 
         verify(emailPort).send(
                 org.mockito.ArgumentMatchers.eq("client@example.com"),
-                org.mockito.ArgumentMatchers.contains("confirmed"),
+                org.mockito.ArgumentMatchers.contains("confirmado"),
                 org.mockito.ArgumentMatchers.anyString()
         );
         verify(emailPort).send(
                 org.mockito.ArgumentMatchers.eq("pro@example.com"),
-                org.mockito.ArgumentMatchers.contains("booking"),
+                org.mockito.ArgumentMatchers.contains("agendamento"),
                 org.mockito.ArgumentMatchers.anyString()
         );
     }

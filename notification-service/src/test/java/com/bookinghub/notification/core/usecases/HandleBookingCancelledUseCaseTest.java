@@ -20,71 +20,71 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HandleBookingCancelledUseCaseTest {
 
-  @Mock
-  private BookingSnapshotRepository repository;
+    @Mock
+    private BookingSnapshotRepository repository;
 
-  @Mock
-  private SendBookingCancellationUseCase sendCancellation;
+    @Mock
+    private SendBookingCancellationUseCase sendCancellation;
 
-  private HandleBookingCancelledUseCase useCase;
+    private HandleBookingCancelledUseCase useCase;
 
-  @BeforeEach
-  void setUp() {
-    useCase = new HandleBookingCancelledUseCase(repository, sendCancellation);
-  }
+    @BeforeEach
+    void setUp() {
+        useCase = new HandleBookingCancelledUseCase(repository, sendCancellation);
+    }
 
-  @Test
-  void shouldUpdateStatusToCancelledWhenSnapshotExists() {
-    UUID bookingId = UUID.randomUUID();
-    BookingSnapshot snapshot = BookingSnapshot.builder()
-        .bookingId(bookingId)
-        .clientId("client-1")
-        .professionalId(UUID.randomUUID())
-        .startDatetime(LocalDateTime.now().plusDays(1))
-        .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
-        .status("CONFIRMED")
-        .updatedAt(LocalDateTime.now())
-        .clientEmail("client@example.com")
-        .professionalEmail("pro@example.com")
-        .build();
+    @Test
+    void shouldUpdateStatusToCancelledWhenSnapshotExists() {
+        UUID bookingId = UUID.randomUUID();
+        BookingSnapshot snapshot = BookingSnapshot.builder()
+                .bookingId(bookingId)
+                .clientId("client-1")
+                .professionalId(UUID.randomUUID())
+                .startDatetime(LocalDateTime.now().plusDays(1))
+                .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
+                .status("CONFIRMED")
+                .updatedAt(LocalDateTime.now())
+                .clientEmail("client@example.com")
+                .professionalEmail("pro@example.com")
+                .build();
 
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    assertThat(snapshot.getStatus()).isEqualTo("CANCELLED");
-    verify(repository).save(argThat(s -> "CANCELLED".equals(s.getStatus())));
-  }
+        assertThat(snapshot.getStatus()).isEqualTo("CANCELLED");
+        verify(repository).save(argThat(s -> "CANCELLED".equals(s.getStatus())));
+    }
 
-  @Test
-  void shouldDelegateToSendCancellationUseCase() {
-    UUID bookingId = UUID.randomUUID();
-    BookingSnapshot snapshot = BookingSnapshot.builder()
-        .bookingId(bookingId)
-        .clientId("client-1")
-        .professionalId(UUID.randomUUID())
-        .startDatetime(LocalDateTime.now().plusDays(1))
-        .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
-        .status("CONFIRMED")
-        .updatedAt(LocalDateTime.now())
-        .clientEmail("client@example.com")
-        .professionalEmail("pro@example.com")
-        .build();
+    @Test
+    void shouldDelegateToSendCancellationUseCase() {
+        UUID bookingId = UUID.randomUUID();
+        BookingSnapshot snapshot = BookingSnapshot.builder()
+                .bookingId(bookingId)
+                .clientId("client-1")
+                .professionalId(UUID.randomUUID())
+                .startDatetime(LocalDateTime.now().plusDays(1))
+                .endDatetime(LocalDateTime.now().plusDays(1).plusHours(1))
+                .status("CONFIRMED")
+                .updatedAt(LocalDateTime.now())
+                .clientEmail("client@example.com")
+                .professionalEmail("pro@example.com")
+                .build();
 
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    verify(sendCancellation).execute(argThat(s -> "CANCELLED".equals(s.getStatus())));
-  }
+        verify(sendCancellation).execute(argThat(s -> "CANCELLED".equals(s.getStatus())));
+    }
 
-  @Test
-  void shouldDoNothingWhenSnapshotNotFound() {
-    UUID bookingId = UUID.randomUUID();
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.empty());
+    @Test
+    void shouldDoNothingWhenSnapshotNotFound() {
+        UUID bookingId = UUID.randomUUID();
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.empty());
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
-  }
+        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
 }

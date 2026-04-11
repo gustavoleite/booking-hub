@@ -10,33 +10,33 @@ import java.util.UUID;
 
 public class GenerateCalendarFeedUseCase {
 
-  private final CalendarFeedRepository feedRepository;
-  private final BookingSnapshotRepository snapshotRepository;
-  private final ICalendarGenerator generator;
+    private final CalendarFeedRepository feedRepository;
+    private final BookingSnapshotRepository snapshotRepository;
+    private final ICalendarGenerator generator;
 
-  public GenerateCalendarFeedUseCase(
+    public GenerateCalendarFeedUseCase(
       CalendarFeedRepository feedRepository,
       BookingSnapshotRepository snapshotRepository,
       ICalendarGenerator generator) {
-    this.feedRepository = feedRepository;
-    this.snapshotRepository = snapshotRepository;
-    this.generator = generator;
-  }
-
-  public String execute(String userId, String feedToken) {
-    feedRepository.findByUserIdAndFeedToken(userId, feedToken)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid feed token"));
-
-    List<BookingSnapshot> snapshots = new ArrayList<>();
-    snapshots.addAll(snapshotRepository.findByClientId(userId));
-
-    try {
-      UUID professionalId = UUID.fromString(userId);
-      snapshots.addAll(snapshotRepository.findByProfessionalId(professionalId));
-    } catch (IllegalArgumentException ignored) {
-      // userId is not a UUID — user is a client only, no professional bookings to add
+        this.feedRepository = feedRepository;
+        this.snapshotRepository = snapshotRepository;
+        this.generator = generator;
     }
 
-    return generator.generate(snapshots);
-  }
+    public String execute(String userId, String feedToken) {
+        feedRepository.findByUserIdAndFeedToken(userId, feedToken)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid feed token"));
+
+        List<BookingSnapshot> snapshots = new ArrayList<>();
+        snapshots.addAll(snapshotRepository.findByClientId(userId));
+
+        try {
+            UUID professionalId = UUID.fromString(userId);
+            snapshots.addAll(snapshotRepository.findByProfessionalId(professionalId));
+        } catch (IllegalArgumentException ignored) {
+            // userId is not a UUID — user is a client only, no professional bookings to add
+        }
+
+        return generator.generate(snapshots);
+    }
 }

@@ -19,15 +19,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CalendarFeedEntity {
 
-  @Id
-  private UUID id;
+    @Id
+    private UUID id;
 
-  @Column(name = "user_id", nullable = false, unique = true)
-  private String userId;
+    @Column(name = "user_id", nullable = false, unique = true)
+    private String userId;
 
-  @Column(name = "feed_token", nullable = false, unique = true)
-  private String feedToken;
+    @Column(name = "feed_token", nullable = false, unique = true)
+    private String feedToken;
 
-  @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 }

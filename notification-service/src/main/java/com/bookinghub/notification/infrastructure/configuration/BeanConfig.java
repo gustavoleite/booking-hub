@@ -20,62 +20,62 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-  @Value("${notification.base-url}")
-  private String baseUrl;
+    @Value("${notification.base-url}")
+    private String baseUrl;
 
-  @Bean
-  public SendBookingConfirmationUseCase sendBookingConfirmationUseCase(EmailPort emailPort) {
-    return new SendBookingConfirmationUseCase(emailPort);
-  }
+    @Bean
+    public SendBookingConfirmationUseCase sendBookingConfirmationUseCase(EmailPort emailPort) {
+        return new SendBookingConfirmationUseCase(emailPort);
+    }
 
-  @Bean
-  public SendBookingCancellationUseCase sendBookingCancellationUseCase(EmailPort emailPort) {
-    return new SendBookingCancellationUseCase(emailPort);
-  }
+    @Bean
+    public SendBookingCancellationUseCase sendBookingCancellationUseCase(EmailPort emailPort) {
+        return new SendBookingCancellationUseCase(emailPort);
+    }
 
-  @Bean
-  public SendBookingCompletedUseCase sendBookingCompletedUseCase(EmailPort emailPort) {
-    return new SendBookingCompletedUseCase(emailPort);
-  }
+    @Bean
+    public SendBookingCompletedUseCase sendBookingCompletedUseCase(EmailPort emailPort) {
+        return new SendBookingCompletedUseCase(emailPort);
+    }
 
-  @Bean
-  public SendBookingReminderUseCase sendBookingReminderUseCase(
+    @Bean
+    public SendBookingReminderUseCase sendBookingReminderUseCase(
       BookingSnapshotRepository repository, EmailPort emailPort) {
-    return new SendBookingReminderUseCase(repository, emailPort);
-  }
+        return new SendBookingReminderUseCase(repository, emailPort);
+    }
 
-  @Bean
-  public HandleBookingCreatedUseCase handleBookingCreatedUseCase(
+    @Bean
+    public HandleBookingCreatedUseCase handleBookingCreatedUseCase(
       BookingSnapshotRepository repository,
       SendBookingConfirmationUseCase sendConfirmation) {
-    return new HandleBookingCreatedUseCase(repository, sendConfirmation);
-  }
+        return new HandleBookingCreatedUseCase(repository, sendConfirmation);
+    }
 
-  @Bean
-  public HandleBookingCancelledUseCase handleBookingCancelledUseCase(
+    @Bean
+    public HandleBookingCancelledUseCase handleBookingCancelledUseCase(
       BookingSnapshotRepository repository,
       SendBookingCancellationUseCase sendCancellation) {
-    return new HandleBookingCancelledUseCase(repository, sendCancellation);
-  }
+        return new HandleBookingCancelledUseCase(repository, sendCancellation);
+    }
 
-  @Bean
-  public HandleBookingCompletedUseCase handleBookingCompletedUseCase(
+    @Bean
+    public HandleBookingCompletedUseCase handleBookingCompletedUseCase(
       BookingSnapshotRepository repository,
       SendBookingCompletedUseCase sendCompleted) {
-    return new HandleBookingCompletedUseCase(repository, sendCompleted);
-  }
+        return new HandleBookingCompletedUseCase(repository, sendCompleted);
+    }
 
-  @Bean
-  public GetOrCreateFeedTokenUseCase getOrCreateFeedTokenUseCase(
+    @Bean
+    public GetOrCreateFeedTokenUseCase getOrCreateFeedTokenUseCase(
       CalendarFeedRepository repository) {
-    return new GetOrCreateFeedTokenUseCase(repository, baseUrl);
-  }
+        return new GetOrCreateFeedTokenUseCase(repository, baseUrl);
+    }
 
-  @Bean
-  public GenerateCalendarFeedUseCase generateCalendarFeedUseCase(
+    @Bean
+    public GenerateCalendarFeedUseCase generateCalendarFeedUseCase(
       CalendarFeedRepository feedRepository,
       BookingSnapshotRepository snapshotRepository,
       ICalendarGenerator generator) {
-    return new GenerateCalendarFeedUseCase(feedRepository, snapshotRepository, generator);
-  }
+        return new GenerateCalendarFeedUseCase(feedRepository, snapshotRepository, generator);
+    }
 }

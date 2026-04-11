@@ -21,34 +21,34 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookingSnapshotEntity {
 
-  @Id
-  @Column(name = "booking_id")
-  private UUID bookingId;
+    @Id
+    @Column(name = "booking_id")
+    private UUID bookingId;
 
-  @Column(name = "client_id", nullable = false)
-  private String clientId;
+    @Column(name = "client_id", nullable = false)
+    private String clientId;
 
-  @Column(name = "professional_id", nullable = false)
-  private UUID professionalId;
+    @Column(name = "professional_id", nullable = false)
+    private UUID professionalId;
 
-  @Column(name = "start_datetime", nullable = false)
-  private LocalDateTime startDatetime;
+    @Column(name = "start_datetime", nullable = false)
+    private LocalDateTime startDatetime;
 
-  @Column(name = "end_datetime", nullable = false)
-  private LocalDateTime endDatetime;
+    @Column(name = "end_datetime", nullable = false)
+    private LocalDateTime endDatetime;
 
-  @Column(nullable = false)
-  private String status;
+    @Column(nullable = false)
+    private String status;
 
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-  @Column(name = "client_email")
-  private String clientEmail;
+    @Column(name = "client_email")
+    private String clientEmail;
 
-  @Column(name = "professional_email")
-  private String professionalEmail;
+    @Column(name = "professional_email")
+    private String professionalEmail;
 
-  @Column(name = "reminder_sent", nullable = false)
-  private boolean reminderSent;
+    @Column(name = "reminder_sent", nullable = false)
+    private boolean reminderSent;
 }

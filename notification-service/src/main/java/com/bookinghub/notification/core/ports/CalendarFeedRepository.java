@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public interface CalendarFeedRepository {
 
-  void save(CalendarFeed feed);
+    void save(CalendarFeed feed);
 
-  Optional<CalendarFeed> findByUserId(String userId);
+    Optional<CalendarFeed> findByUserId(String userId);
 
-  Optional<CalendarFeed> findByUserIdAndFeedToken(String userId, String feedToken);
+    Optional<CalendarFeed> findByUserIdAndFeedToken(String userId, String feedToken);
 }

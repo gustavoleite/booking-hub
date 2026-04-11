@@ -20,71 +20,71 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HandleBookingCompletedUseCaseTest {
 
-  @Mock
-  private BookingSnapshotRepository repository;
+    @Mock
+    private BookingSnapshotRepository repository;
 
-  @Mock
-  private SendBookingCompletedUseCase sendCompleted;
+    @Mock
+    private SendBookingCompletedUseCase sendCompleted;
 
-  private HandleBookingCompletedUseCase useCase;
+    private HandleBookingCompletedUseCase useCase;
 
-  @BeforeEach
-  void setUp() {
-    useCase = new HandleBookingCompletedUseCase(repository, sendCompleted);
-  }
+    @BeforeEach
+    void setUp() {
+        useCase = new HandleBookingCompletedUseCase(repository, sendCompleted);
+    }
 
-  @Test
-  void shouldUpdateStatusToCompletedWhenSnapshotExists() {
-    UUID bookingId = UUID.randomUUID();
-    BookingSnapshot snapshot = BookingSnapshot.builder()
-        .bookingId(bookingId)
-        .clientId("client-1")
-        .professionalId(UUID.randomUUID())
-        .startDatetime(LocalDateTime.now().minusHours(2))
-        .endDatetime(LocalDateTime.now().minusHours(1))
-        .status("CONFIRMED")
-        .updatedAt(LocalDateTime.now())
-        .clientEmail("client@example.com")
-        .professionalEmail("pro@example.com")
-        .build();
+    @Test
+    void shouldUpdateStatusToCompletedWhenSnapshotExists() {
+        UUID bookingId = UUID.randomUUID();
+        BookingSnapshot snapshot = BookingSnapshot.builder()
+                .bookingId(bookingId)
+                .clientId("client-1")
+                .professionalId(UUID.randomUUID())
+                .startDatetime(LocalDateTime.now().minusHours(2))
+                .endDatetime(LocalDateTime.now().minusHours(1))
+                .status("CONFIRMED")
+                .updatedAt(LocalDateTime.now())
+                .clientEmail("client@example.com")
+                .professionalEmail("pro@example.com")
+                .build();
 
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    assertThat(snapshot.getStatus()).isEqualTo("COMPLETED");
-    verify(repository).save(argThat(s -> "COMPLETED".equals(s.getStatus())));
-  }
+        assertThat(snapshot.getStatus()).isEqualTo("COMPLETED");
+        verify(repository).save(argThat(s -> "COMPLETED".equals(s.getStatus())));
+    }
 
-  @Test
-  void shouldDelegateToSendCompletedUseCase() {
-    UUID bookingId = UUID.randomUUID();
-    BookingSnapshot snapshot = BookingSnapshot.builder()
-        .bookingId(bookingId)
-        .clientId("client-1")
-        .professionalId(UUID.randomUUID())
-        .startDatetime(LocalDateTime.now().minusHours(2))
-        .endDatetime(LocalDateTime.now().minusHours(1))
-        .status("CONFIRMED")
-        .updatedAt(LocalDateTime.now())
-        .clientEmail("client@example.com")
-        .professionalEmail("pro@example.com")
-        .build();
+    @Test
+    void shouldDelegateToSendCompletedUseCase() {
+        UUID bookingId = UUID.randomUUID();
+        BookingSnapshot snapshot = BookingSnapshot.builder()
+                .bookingId(bookingId)
+                .clientId("client-1")
+                .professionalId(UUID.randomUUID())
+                .startDatetime(LocalDateTime.now().minusHours(2))
+                .endDatetime(LocalDateTime.now().minusHours(1))
+                .status("CONFIRMED")
+                .updatedAt(LocalDateTime.now())
+                .clientEmail("client@example.com")
+                .professionalEmail("pro@example.com")
+                .build();
 
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.of(snapshot));
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    verify(sendCompleted).execute(argThat(s -> "COMPLETED".equals(s.getStatus())));
-  }
+        verify(sendCompleted).execute(argThat(s -> "COMPLETED".equals(s.getStatus())));
+    }
 
-  @Test
-  void shouldDoNothingWhenSnapshotNotFound() {
-    UUID bookingId = UUID.randomUUID();
-    when(repository.findByBookingId(bookingId)).thenReturn(Optional.empty());
+    @Test
+    void shouldDoNothingWhenSnapshotNotFound() {
+        UUID bookingId = UUID.randomUUID();
+        when(repository.findByBookingId(bookingId)).thenReturn(Optional.empty());
 
-    useCase.execute(bookingId);
+        useCase.execute(bookingId);
 
-    verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
-  }
+        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
 }

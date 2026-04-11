@@ -45,6 +45,8 @@ jobs:
               - 'booking-service/**'
             search-service:
               - 'search-service/**'
+            notification-service:
+              - 'notification-service/**'
             root:
               - 'pom.xml'
               - '.github/workflows/**'
@@ -57,13 +59,14 @@ jobs:
 
           # Mudança global (pom raiz ou workflow) → todos os módulos
           if [ "${{ steps.filter.outputs.root }}" == "true" ]; then
-            MODULES=("api-gateway" "auth-service" "catalog-service" "booking-service" "search-service")
+            MODULES=("api-gateway" "auth-service" "catalog-service" "booking-service" "search-service" "notification-service")
           else
             [ "${{ steps.filter.outputs.api-gateway }}"     == "true" ] && MODULES+=("api-gateway")
             [ "${{ steps.filter.outputs.auth-service }}"    == "true" ] && MODULES+=("auth-service")
             [ "${{ steps.filter.outputs.catalog-service }}" == "true" ] && MODULES+=("catalog-service")
             [ "${{ steps.filter.outputs.booking-service }}" == "true" ] && MODULES+=("booking-service")
-            [ "${{ steps.filter.outputs.search-service }}"  == "true" ] && MODULES+=("search-service")
+            [ "${{ steps.filter.outputs.search-service }}"        == "true" ] && MODULES+=("search-service")
+            [ "${{ steps.filter.outputs.notification-service }}" == "true" ] && MODULES+=("notification-service")
           fi
 
           # Se apenas performance-tests mudou, marcamos any-changed=true para rodar o job de performance

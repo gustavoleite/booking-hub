@@ -8,16 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface JpaBookingSnapshotRepository
-    extends JpaRepository<BookingSnapshotEntity, UUID> {
+        extends JpaRepository<BookingSnapshotEntity, UUID> {
 
-  List<BookingSnapshotEntity> findByClientId(String clientId);
+    List<BookingSnapshotEntity> findByClientId(String clientId);
 
-  List<BookingSnapshotEntity> findByProfessionalId(UUID professionalId);
+    List<BookingSnapshotEntity> findByProfessionalId(UUID professionalId);
 
-  @Query("SELECT s FROM BookingSnapshotEntity s WHERE s.status = 'CONFIRMED' "
-      + "AND s.reminderSent = false "
-      + "AND s.startDatetime >= :from AND s.startDatetime <= :to")
-  List<BookingSnapshotEntity> findConfirmedWithReminderPending(
+    @Query("SELECT s FROM BookingSnapshotEntity s WHERE s.status = 'CONFIRMED' "
+            + "AND s.reminderSent = false "
+            + "AND s.startDatetime >= :from AND s.startDatetime <= :to")
+    List<BookingSnapshotEntity> findConfirmedWithReminderPending(
       @Param("from") LocalDateTime from,
       @Param("to") LocalDateTime to);
 }

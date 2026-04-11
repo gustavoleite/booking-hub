@@ -1,6 +1,5 @@
 package com.bookinghub.notification.core.usecases;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.bookinghub.notification.core.domain.BookingSnapshot;

@@ -11,7 +11,6 @@ import com.bookinghub.notification.core.usecases.HandleBookingCancelledUseCase;
 import com.bookinghub.notification.core.usecases.HandleBookingCompletedUseCase;
 import com.bookinghub.notification.core.usecases.HandleBookingCreatedUseCase;
 import com.bookinghub.notification.core.usecases.SendBookingReminderUseCase;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

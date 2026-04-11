@@ -68,7 +68,9 @@
       "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/core/usecases)",
       "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/infrastructure/adapters/out/ical)",
       "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/java/com/bookinghub/notification/bdd)",
-      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/resources/features)"
+      "Bash(mkdir -p /c/Users/gusta/OneDrive/Documentos/fiap/booking-hub/notification-service/src/test/resources/features)",
+      "Bash(xargs cat:*)",
+      "Bash(mvn -B org.openrewrite.maven:rewrite-maven-plugin:run -pl notification-service --no-transfer-progress)"
     ]
   }
 }

@@ -12,9 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CucumberSpringConfiguration {
 
-  @MockBean
-  ConnectionFactory connectionFactory;
+    @MockBean
+    ConnectionFactory connectionFactory;
 
-  @MockBean
-  JavaMailSender javaMailSender;
+    @MockBean
+    JavaMailSender javaMailSender;
 }

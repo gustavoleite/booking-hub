@@ -8,13 +8,13 @@ import java.util.UUID;
 
 public interface BookingSnapshotRepository {
 
-  void save(BookingSnapshot snapshot);
+    void save(BookingSnapshot snapshot);
 
-  Optional<BookingSnapshot> findByBookingId(UUID bookingId);
+    Optional<BookingSnapshot> findByBookingId(UUID bookingId);
 
-  List<BookingSnapshot> findByClientId(String clientId);
+    List<BookingSnapshot> findByClientId(String clientId);
 
-  List<BookingSnapshot> findByProfessionalId(UUID professionalId);
+    List<BookingSnapshot> findByProfessionalId(UUID professionalId);
 
-  List<BookingSnapshot> findConfirmedWithReminderPending(LocalDateTime from, LocalDateTime to);
+    List<BookingSnapshot> findConfirmedWithReminderPending(LocalDateTime from, LocalDateTime to);
 }

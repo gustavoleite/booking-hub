@@ -7,16 +7,16 @@ import java.util.UUID;
 
 public class HandleBookingCreatedUseCase {
 
-  private final BookingSnapshotRepository repository;
-  private final SendBookingConfirmationUseCase sendConfirmation;
+    private final BookingSnapshotRepository repository;
+    private final SendBookingConfirmationUseCase sendConfirmation;
 
-  public HandleBookingCreatedUseCase(BookingSnapshotRepository repository,
-      SendBookingConfirmationUseCase sendConfirmation) {
-    this.repository = repository;
-    this.sendConfirmation = sendConfirmation;
-  }
+    public HandleBookingCreatedUseCase(BookingSnapshotRepository repository,
+                                     SendBookingConfirmationUseCase sendConfirmation) {
+        this.repository = repository;
+        this.sendConfirmation = sendConfirmation;
+    }
 
-  public void execute(
+    public void execute(
       UUID bookingId,
       String clientId,
       UUID professionalId,
@@ -25,20 +25,20 @@ public class HandleBookingCreatedUseCase {
       String clientEmail,
       String professionalEmail) {
 
-    BookingSnapshot snapshot = BookingSnapshot.builder()
-        .bookingId(bookingId)
-        .clientId(clientId)
-        .professionalId(professionalId)
-        .startDatetime(startDatetime)
-        .endDatetime(endDatetime)
-        .status("CONFIRMED")
-        .updatedAt(LocalDateTime.now())
-        .clientEmail(clientEmail)
-        .professionalEmail(professionalEmail)
-        .reminderSent(false)
-        .build();
+        BookingSnapshot snapshot = BookingSnapshot.builder()
+                .bookingId(bookingId)
+                .clientId(clientId)
+                .professionalId(professionalId)
+                .startDatetime(startDatetime)
+                .endDatetime(endDatetime)
+                .status("CONFIRMED")
+                .updatedAt(LocalDateTime.now())
+                .clientEmail(clientEmail)
+                .professionalEmail(professionalEmail)
+                .reminderSent(false)
+                .build();
 
-    repository.save(snapshot);
-    sendConfirmation.execute(snapshot);
-  }
+        repository.save(snapshot);
+        sendConfirmation.execute(snapshot);
+    }
 }

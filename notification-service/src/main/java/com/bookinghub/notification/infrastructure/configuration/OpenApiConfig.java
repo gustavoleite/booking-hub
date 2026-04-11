@@ -11,17 +11,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-  @Value("${app.openapi.server-url:http://localhost:8080/api/calendar}")
-  private String serverUrl;
+    @Value("${app.openapi.server-url:http://localhost:8080/api/calendar}")
+    private String serverUrl;
 
-  @Bean
-  public OpenAPI openApi() {
-    return new OpenAPI()
-        .info(new Info()
-            .title("Notification Service API")
-            .description("ICS calendar feed for syncing BookingHub appointments with"
-                + " Google Calendar, Outlook and Apple Calendar")
-            .version("1.0.0"))
-        .servers(List.of(new Server().url(serverUrl)));
-  }
+    @Bean
+    public OpenAPI openApi() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Notification Service API")
+                        .description("ICS calendar feed for syncing BookingHub appointments with"
+                                + " Google Calendar, Outlook and Apple Calendar")
+                        .version("1.0.0"))
+                .servers(List.of(new Server().url(serverUrl)));
+    }
 }

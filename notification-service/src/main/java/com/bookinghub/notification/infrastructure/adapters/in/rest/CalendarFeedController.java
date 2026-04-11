@@ -21,29 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Calendar Feed", description = "ICS calendar feed for external calendar sync")
 public class CalendarFeedController {
 
-  private final GetOrCreateFeedTokenUseCase getOrCreateFeedToken;
-  private final GenerateCalendarFeedUseCase generateCalendarFeed;
+    private final GetOrCreateFeedTokenUseCase getOrCreateFeedToken;
+    private final GenerateCalendarFeedUseCase generateCalendarFeed;
 
-  @PostMapping("/feed/token")
-  @Operation(summary = "Get or generate the personal calendar feed URL")
-  public ResponseEntity<FeedUrlResponse> getOrCreateToken(
+    @PostMapping("/feed/token")
+    @Operation(summary = "Get or generate the personal calendar feed URL")
+    public ResponseEntity<FeedUrlResponse> getOrCreateToken(
       @RequestHeader("X-User-Id") String userId) {
 
-    String feedUrl = getOrCreateFeedToken.execute(userId);
-    return ResponseEntity.ok(new FeedUrlResponse(feedUrl));
-  }
+        String feedUrl = getOrCreateFeedToken.execute(userId);
+        return ResponseEntity.ok(new FeedUrlResponse(feedUrl));
+    }
 
-  @GetMapping(value = "/feed/{userId}/{feedToken}/bookings.ics",
-      produces = "text/calendar")
-  @Operation(summary = "Download the ICS calendar feed (no auth required — token in URL)")
-  public ResponseEntity<String> getCalendarFeed(
+    @GetMapping(value = "/feed/{userId}/{feedToken}/bookings.ics",
+            produces = "text/calendar")
+    @Operation(summary = "Download the ICS calendar feed (no auth required — token in URL)")
+    public ResponseEntity<String> getCalendarFeed(
       @PathVariable("userId") String userId,
       @PathVariable("feedToken") String feedToken) {
 
-    String ics = generateCalendarFeed.execute(userId, feedToken);
-    return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType("text/calendar; charset=utf-8"))
-        .header("Content-Disposition", "inline; filename=\"bookings.ics\"")
-        .body(ics);
-  }
+        String ics = generateCalendarFeed.execute(userId, feedToken);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/calendar; charset=utf-8"))
+                .header("Content-Disposition", "inline; filename=\"bookings.ics\"")
+                .body(ics);
+    }
 }

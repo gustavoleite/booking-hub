@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ScheduledReminderJob {
 
-  private final SendBookingReminderUseCase sendBookingReminderUseCase;
+    private final SendBookingReminderUseCase sendBookingReminderUseCase;
 
-  @Scheduled(cron = "0 0 * * * *")
-  public void runHourly() {
-    log.info("Running scheduled booking reminder job");
-    sendBookingReminderUseCase.execute();
-  }
+    @Scheduled(cron = "0 0 * * * *")
+    public void runHourly() {
+        log.info("Running scheduled booking reminder job");
+        sendBookingReminderUseCase.execute();
+    }
 }

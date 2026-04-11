@@ -17,14 +17,16 @@ public class SendBookingConfirmationUseCase {
 
         emailPort.send(
                 snapshot.getClientEmail(),
-                "Booking confirmed — " + when,
-                "Hello!\n\nYour booking on " + when + " has been confirmed.\n\nSee you soon!"
+                "Agendamento confirmado — " + when,
+                "Olá!\n\nSeu agendamento para o dia " + when + " foi confirmado com sucesso."
+                        + "\n\nEstamos te esperando. Até breve!"
         );
 
         emailPort.send(
                 snapshot.getProfessionalEmail(),
-                "New booking — " + when,
-                "Hello!\n\nA new booking has been scheduled for " + when + ".\n\nCheck your agenda."
+                "Novo agendamento — " + when,
+                "Olá!\n\nVocê tem um novo agendamento marcado para o dia " + when + "."
+                        + "\n\nConsulte sua agenda para mais detalhes."
         );
     }
 }

@@ -10,6 +10,12 @@
   <!-- DTO is a standard Java acronym — renaming would break API contracts -->
   <suppress checks="AbbreviationAsWordInName" files=".*DTO\.java"/>
 
+  <!-- RabbitMQ is a product name acronym — renaming would misrepresent the technology -->
+  <suppress checks="AbbreviationAsWordInName" files=".*RabbitMQ.*\.java"/>
+
+  <!-- ICalendar (ICal) is an RFC 5545 standard name — abbreviation is intentional -->
+  <suppress checks="AbbreviationAsWordInName" files="ICalendarGenerator\.java"/>
+
   <!-- Code uses 4-space indentation (OpenRewrite style); google_checks expects 2-space -->
   <suppress checks="Indentation" files=".*\.java"/>
 </suppressions>

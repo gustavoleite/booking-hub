@@ -24,9 +24,9 @@ public class ICalendarGenerator {
         for (BookingSnapshot s : snapshots) {
             String dtStamp = ICS_FORMAT.format(
                     s.getUpdatedAt().toInstant(ZoneOffset.UTC).atZone(ZoneOffset.UTC));
-            String dtStart = ICS_FORMAT.format(
+            final String dtStart = ICS_FORMAT.format(
                     s.getStartDatetime().toInstant(ZoneOffset.UTC).atZone(ZoneOffset.UTC));
-            String dtEnd = ICS_FORMAT.format(
+            final String dtEnd = ICS_FORMAT.format(
                     s.getEndDatetime().toInstant(ZoneOffset.UTC).atZone(ZoneOffset.UTC));
 
             sb.append("BEGIN:VEVENT\r\n");

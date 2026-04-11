@@ -59,7 +59,8 @@ public class RabbitMQConsumerConfig {
     public Binding bindingCreated(
       @Qualifier("calendarSyncQueue") Queue calendarSyncQueue,
       TopicExchange bookingEventsExchange) {
-        return BindingBuilder.bind(calendarSyncQueue).to(bookingEventsExchange).with("booking.created");
+        return BindingBuilder.bind(calendarSyncQueue)
+                .to(bookingEventsExchange).with("booking.created");
     }
 
     @Bean

@@ -17,14 +17,16 @@ public class SendBookingCancellationUseCase {
 
         emailPort.send(
                 snapshot.getClientEmail(),
-                "Booking cancelled — " + when,
-                "Hello!\n\nYour booking scheduled for " + when + " has been cancelled."
+                "Agendamento cancelado — " + when,
+                "Olá!\n\nSeu agendamento do dia " + when + " foi cancelado."
+                        + "\n\nSe precisar remarcar, estamos à disposição!"
         );
 
         emailPort.send(
                 snapshot.getProfessionalEmail(),
-                "Booking cancelled — " + when,
-                "Hello!\n\nThe booking scheduled for " + when + " has been cancelled by the client."
+                "Agendamento cancelado — " + when,
+                "Olá!\n\nO agendamento do dia " + when + " foi cancelado pelo cliente."
+                        + "\n\nConsulte sua agenda para verificar sua disponibilidade."
         );
     }
 }

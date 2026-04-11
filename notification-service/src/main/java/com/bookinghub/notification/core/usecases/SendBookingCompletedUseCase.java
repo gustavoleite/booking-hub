@@ -17,9 +17,10 @@ public class SendBookingCompletedUseCase {
 
         emailPort.send(
                 snapshot.getClientEmail(),
-                "How was your experience? — " + when,
-                "Hello!\n\nThank you for your visit on " + when
-                        + ".\n\nWe hope you had a great experience. Feel free to leave a review!"
+                "Como foi sua experiência? — " + when,
+                "Olá!\n\nObrigado pela sua visita no dia " + when + "!"
+                        + "\n\nEsperamos que tenha tido uma ótima experiência."
+                        + " Sua opinião é muito importante para nós!"
         );
     }
 }

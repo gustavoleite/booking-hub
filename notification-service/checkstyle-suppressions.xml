@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+  <!-- Javadoc is not required for internal application code (course project) -->
+  <suppress checks="MissingJavadocType" files=".*\.java"/>
+  <suppress checks="MissingJavadocMethod" files=".*\.java"/>
+
+  <!-- DTO is a standard Java acronym — renaming would break API contracts -->
+  <suppress checks="AbbreviationAsWordInName" files=".*DTO\.java"/>
+
+  <!-- Code uses 4-space indentation (OpenRewrite style); google_checks expects 2-space -->
+  <suppress checks="Indentation" files=".*\.java"/>
+</suppressions>

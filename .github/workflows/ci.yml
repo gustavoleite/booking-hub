@@ -371,11 +371,22 @@ jobs:
           sleep 60
           docker ps
 
+      - name: Install k6
+        run: |
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] \
+            https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update --quiet
+          sudo apt-get install --quiet -y k6
+
       - name: Run k6 Load Test
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: performance-tests/k6/booking-load-test.js
-          flags: --env BASE_URL=http://localhost:8080
+        run: |
+          k6 run performance-tests/k6/booking-load-test.js \
+            --env BASE_URL=http://localhost:8080
 
       - name: Stop Services
         if: always()

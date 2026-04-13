@@ -8,7 +8,7 @@ Microsserviço de busca e descoberta do **Booking Hub**. Implementa o padrão **
 
 - Consumir eventos do RabbitMQ para construir e manter o índice ES de estabelecimentos
 - Expor busca por texto livre, cidade/estado, raio geográfico, serviço, rating e faixa de preço via GraphQL
-- Calcular e manter `averageRating` de forma incremental (running average local — sem chamar o review-service)
+- Calcular e manter `averageRating` de forma incremental (running average local — sem chamadas síncronas ao booking-service)
 - Expor endpoint administrativo `POST /admin/reindex` para reconstrução do índice sob demanda
 
 ---
@@ -132,7 +132,7 @@ Todos os listeners são **idempotentes**: reentregas do mesmo evento produzem o 
 
 ## Atualização de Rating
 
-O search-service **não chama o review-service em runtime**. Mantém `ratingSum` e `totalReviews` no documento ES e recalcula localmente:
+O search-service **não faz chamadas síncronas em runtime**. Mantém `ratingSum` e `totalReviews` no documento ES e recalcula localmente ao consumir o evento `review.created` do booking-service:
 
 ```
 doc.ratingSum     += establishmentRating

@@ -82,14 +82,14 @@ flowchart TB
 
 ## Microsserviços
 
-| Serviço | Porta | Função | README |
-|---|---|---|---|
-| **api-gateway** | 8080 | Ponto único de entrada. Roteamento dinâmico, validação de JWT RS256 e injeção de identidade nos headers. | [→](api-gateway/README.md) |
-| **auth-service** | 8081 | Provedor de identidade (IdP). Registro de usuários, autenticação com BCrypt e emissão de JWT RS256. | [→](auth-service/README.md) |
-| **catalog-service** | 8083 | Domínio estrutural. CRUD de estabelecimentos, profissionais, catálogo de serviços e grades de horários. Publica eventos de domínio no RabbitMQ. | [→](catalog-service/README.md) |
-| **booking-service** | 8082 | Núcleo de negócio. Agendamentos com controle de concorrência (double-booking via índice único no PostgreSQL), ciclo de vida dos status e domínio de avaliações. | [→](booking-service/README.md) |
-| **search-service** | 8085 | CQRS read model. Consome eventos do RabbitMQ para manter índice no Elasticsearch. Expõe API GraphQL com busca por texto, geo, preço e rating. | [→](search-service/README.md) |
-| **notification-service** | 8086 | Event-driven. Consome eventos de booking para enviar e-mails e manter snapshots. Gera feed iCalendar (RFC 5545) compatível com Google Calendar, Outlook e Apple Calendar. | [→](notification-service/README.md) |
+| Serviço | Porta | Função |
+|---|---|---|
+| [**api-gateway**](api-gateway/README.md) | 8080 | Ponto único de entrada. Roteamento dinâmico, validação de JWT RS256 e injeção de identidade nos headers. |
+| [**auth-service**](auth-service/README.md) | 8081 | Provedor de identidade (IdP). Registro de usuários, autenticação com BCrypt e emissão de JWT RS256. |
+| [**catalog-service**](catalog-service/README.md) | 8083 | Domínio estrutural. CRUD de estabelecimentos, profissionais, catálogo de serviços e grades de horários. Publica eventos de domínio no RabbitMQ. |
+| [**booking-service**](booking-service/README.md) | 8082 | Núcleo de negócio. Agendamentos com controle de concorrência (double-booking via índice único no PostgreSQL), ciclo de vida dos status e domínio de avaliações. |
+| [**search-service**](search-service/README.md) | 8085 | CQRS read model. Consome eventos do RabbitMQ para manter índice no Elasticsearch. Expõe API GraphQL com busca por texto, geo, preço e rating. |
+| [**notification-service**](notification-service/README.md) | 8086 | Event-driven. Consome eventos de booking para enviar e-mails e manter snapshots. Gera feed iCalendar (RFC 5545) compatível com Google Calendar, Outlook e Apple Calendar. |
 
 ---
 

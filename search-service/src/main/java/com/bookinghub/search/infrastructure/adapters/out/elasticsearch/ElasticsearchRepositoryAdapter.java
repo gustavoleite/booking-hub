@@ -169,8 +169,8 @@ public class ElasticsearchRepositoryAdapter implements EstablishmentSearchReposi
                 }
 
                 Double rawScore = hit.score();
-                Double score = (rawScore != null && !Double.isNaN(rawScore) && !Double.isInfinite(rawScore))
-                        ? rawScore : null;
+                Double score = (rawScore != null && !Double.isNaN(rawScore)
+                        && !Double.isInfinite(rawScore)) ? rawScore : null;
 
                 results.add(SearchPage.EstablishmentResult.builder()
                         .document(doc)

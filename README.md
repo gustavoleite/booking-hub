@@ -1,535 +1,173 @@
-# 💇‍♀️ Booking HUB - Sistema de Agendamento distribuído
+# Booking Hub — Sistema de Agendamento Distribuído
 
-Bem-vindo ao repositório central do **Beauty & Wellness**, um sistema robusto, escalável e de alta disponibilidade para agendamento e gerenciamento de serviços de beleza e bem-estar.
+Sistema robusto e escalável de agendamento para serviços de beleza e bem-estar, desenvolvido como **Tech Challenge (Fase 3)** do curso de Arquitetura de Software da FIAP.
 
-Este projeto foi desenvolvido como requisito do Tech Challenge (Fase 3), aplicando conceitos avançados de Arquitetura de Software, Clean Architecture, Microsserviços e Cloud Native.
-
----
-
-## 🏗️ Visão Geral da Arquitetura
-
-O sistema foi desenhado sob uma arquitetura de **Microsserviços Event-Driven**, garantindo escalabilidade independente, tolerância a falhas e separação clara de domínios (Bounded Contexts).
-
-Toda a comunicação com clientes externos é centralizada por um **API Gateway**, que atua como *Edge Service* e validador de segurança (Stateless JWT). A persistência é distribuída por banco de dados especializado por domínio (PostgreSQL + Elasticsearch).
-
-### Padrões de Comunicação
-- **Externa (Cliente ↔ Gateway):** RESTful (JSON) sobre HTTPS.
-- **Interna Síncrona (Serviço ↔ Serviço):** RESTful (JSON) para chamadas entre serviços (ex: validação de disponibilidade no momento do agendamento).
-- **Interna Assíncrona (Event-Driven):** Mensageria com `RabbitMQ` para desacoplamento, Coreografia de Sagas e atualização de bases de leitura (Padrão CQRS).
+O projeto aplica na prática conceitos de microsserviços, Clean Architecture, comunicação event-driven, CQRS e integração com calendários externos, usando Java 21 e Spring Boot 3.
 
 ---
 
-## 🗺️ Diagrama de Arquitetura
+## Documentação
 
-Abaixo está o fluxo macro de comunicação, segurança e dados do ecossistema:
+| Documento | Descrição |
+|---|---|
+| [Subindo a infraestrutura](docs/local-setup.md) | Docker Compose e execução local passo a passo |
+| [Happy path via cURL](docs/happy-path-curl.md) | Fluxo completo de ponta a ponta para validação manual |
+| [Collection + Environment Postman](docs/postman/) | Cobre todas as APIs do sistema em sequência — importe os dois arquivos no Postman e execute o fluxo completo sem precisar montar as requisições manualmente |
+| [Swagger — API Gateway](http://localhost:8080/swagger-ui.html) | Documentação interativa de todos os serviços REST agregada pelo gateway. Permite inspecionar contratos e disparar requisições diretamente pelo browser. Não inclui a API GraphQL do search-service |
+| [GraphiQL — Search Service](http://localhost:8085/graphiql) | IDE GraphQL interativa do search-service. Oferece autocompletar, documentação inline do schema e execução de queries flexíveis com qualquer combinação de filtros (texto, cidade, geolocalização, preço, rating) sem precisar construir o JSON da query à mão |
+
+---
+
+## Arquitetura
+
+O sistema segue o padrão de **microsserviços event-driven** com bounded contexts isolados. O API Gateway é o único ponto de entrada externo e valida a assinatura dos JWTs (RS256) antes de rotear as requisições. A comunicação interna usa REST para operações síncronas e RabbitMQ para propagação assíncrona de eventos entre domínios.
 
 ```mermaid
 flowchart TB
-    %% Estilos visuais
-    classDef user fill:#08427b,stroke:#052e56,color:#fff,stroke-width:2px
-    classDef gateway fill:#1168bd,stroke:#0b4884,color:#fff,stroke-width:2px
-    classDef service fill:#23a2d9,stroke:#18739b,color:#fff,stroke-width:2px,rx:10,ry:10
-    classDef db fill:#438dd5,stroke:#2f6395,color:#fff,stroke-width:2px
-    classDef broker fill:#f2a900,stroke:#b37d00,color:#fff,stroke-width:2px
-    classDef external fill:#7f8c8d,stroke:#2c3e50,color:#fff,stroke-width:2px
+    classDef user fill:#08427b,stroke:#052e56,color:#fff
+    classDef gateway fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef service fill:#23a2d9,stroke:#18739b,color:#fff
+    classDef db fill:#438dd5,stroke:#2f6395,color:#fff
+    classDef broker fill:#f2a900,stroke:#b37d00,color:#fff
 
-    %% Atores
-    Client["Postman / API Client\n(REST / JSON)"]:::user
+    Client["API Client (REST)"]:::user
 
-    %% Camada de Borda
-    subgraph Edge["Camada de Borda / Entrada"]
-        direction TB
+    subgraph Edge["Borda"]
         GW["API Gateway\n(Spring Cloud Gateway)"]:::gateway
     end
 
-    %% Barramento de Eventos
-    subgraph EventBus["Mensageria / Event-Driven"]
-        RabbitMQ{{"RabbitMQ\n(Event Bus)"}}:::broker
+    subgraph Bus["Mensageria"]
+        RabbitMQ{{"RabbitMQ"}}:::broker
     end
 
-    %% Microsserviços
-    subgraph Services ["Microsserviços (Spring Boot + Clean Architecture)"]
-        direction TB
-        Auth["Auth Service\n(IAM / Segurança)"]:::service
-        Catalog["Catalog Service\n(Estabelecimentos/Serviços)"]:::service
-        Booking["Booking Service\n(Agendamentos + Avaliações)"]:::service
-        Search["Search Service\n(Busca / CQRS)"]:::service
-        Notify["Notification Service\n(Feed ICS / Calendários)"]:::service
+    subgraph Services["Microsserviços"]
+        Auth["Auth Service"]:::service
+        Catalog["Catalog Service"]:::service
+        Booking["Booking Service"]:::service
+        Search["Search Service"]:::service
+        Notify["Notification Service"]:::service
     end
 
-    %% Bancos de Dados
-    subgraph Data["Databases"]
-        direction TB
-        DB_Auth[("PostgreSQL\n(Users/Roles)")]:::db
-        DB_Catalog[("PostgreSQL\n(Salões/Profs)")]:::db
-        DB_Booking[("PostgreSQL\n(Bookings + Reviews)")]:::db
-        DB_Search[("Elasticsearch\n(Índices/Geo)")]:::db
+    subgraph Data["Dados"]
+        DB_Auth[("PostgreSQL\nauth_db")]:::db
+        DB_Catalog[("PostgreSQL\ncatalog_db")]:::db
+        DB_Booking[("PostgreSQL\nbooking_db")]:::db
+        DB_Search[("Elasticsearch")]:::db
+        DB_Notify[("PostgreSQL\nnotification_db")]:::db
     end
 
-    %% --- CONEXÕES ---
-    Client ===|"HTTPS / REST"| GW
-    GW -->|"Roteamento REST\n(Valida JWT RS256)"| Auth
-    GW -->|"REST"| Catalog
-    GW -->|"REST"| Booking
-    GW -->|"REST"| Search
+    Client -->|HTTPS / REST| GW
+    GW -->|valida JWT RS256| Auth
+    GW --> Catalog
+    GW --> Booking
+    GW --> Search
+    GW --> Notify
 
-    Booking -.->|"REST\n(Valida Profissional/Serviço)"| Catalog
+    Booking -.->|REST — valida agenda| Catalog
 
-    Catalog -.->|"Publica Evento\n(establishment/affiliation)"| RabbitMQ
-    Booking -.->|"Publica Evento\n(booking.completed\nreview.created)"| RabbitMQ
+    Catalog -.->|establishment.created/updated\naffiliation.created/updated| RabbitMQ
+    Booking -.->|booking.created/cancelled/completed\nreview.created| RabbitMQ
 
-    RabbitMQ ==>|"Consome\n(Atualiza Índice/CQRS)"| Search
-    RabbitMQ ==>|"Consome\n(Dispara Notificações)"| Notify
+    RabbitMQ ==>|atualiza índice CQRS| Search
+    RabbitMQ ==>|dispara emails + feed ICS| Notify
 
     Auth --- DB_Auth
     Catalog --- DB_Catalog
     Booking --- DB_Booking
     Search --- DB_Search
+    Notify --- DB_Notify
 ```
 
 ---
 
-## 🧩 Ecossistema de Componentes
+## Microsserviços
 
-### 1. API Gateway (`api-gateway`)
-Ponto único de entrada (Spring Cloud Gateway). Responsável pelo roteamento dinâmico e pela **validação de segurança** (verificação da assinatura matemática da chave pública RS256 do JWT), repassando a identidade do usuário para os serviços de *backend* via *Headers* sem sobrecarregá-los com regras de IAM.
-
-### 2. Auth Service (`auth-service`)
-Provedor de Identidade (IdP). Responsável por registrar usuários, validar credenciais (e-mail/senha com BCrypt) e emitir os *JSON Web Tokens* (JWT) usando uma chave privada RSA. Protege rigorosamente os dados de acesso no seu próprio PostgreSQL.
-
-### 3. Catalog Service (`catalog-service`)
-Gerencia o domínio de negócios estruturais: cadastro de Estabelecimentos, Profissionais associados, Horários de Funcionamento e Serviços (com preço e duração).
-
-### 4. Booking Service (`booking-service`)
-O "coração" do sistema. Aplica regras rígidas de concorrência no banco de dados relacional (PostgreSQL) para evitar *double-booking*. Comunica-se via REST com o catálogo para consultas de disponibilidade. **Incorpora também o domínio de avaliações**: ao finalizar um booking, registra diretamente o elegível para review no mesmo banco (sem RabbitMQ intermediário), e expõe os endpoints `POST /reviews` e `GET /reviews/**` para criação e consulta de avaliações.
-
-### 5. Search Service (`search-service`)
-Motor de busca e descoberta altamente otimizado. Implementa o padrão **CQRS** escutando eventos do RabbitMQ (`catalog.events`, `review.events`) para construir um índice consolidado no **Elasticsearch**, permitindo buscas ultrarrápidas por geolocalização, serviços oferecidos e melhor avaliação. Expõe API GraphQL.
-
-### 6. Notification Service (`notification-service`)
-Microsserviço orientado a eventos responsável pela **integração com calendários externos** (Google Calendar, Outlook, Apple Calendar). Consome eventos do RabbitMQ (`booking.created`, `booking.cancelled`, `booking.completed`) e mantém um read model (snapshot) dos agendamentos. Expõe um feed no formato **iCalendar (RFC 5545)** acessível via URL estável por usuário — o mesmo padrão usado por Airbnb e Calendly. Roda na porta **8086**.
+| Serviço | Porta | Função | README |
+|---|---|---|---|
+| **api-gateway** | 8080 | Ponto único de entrada. Roteamento dinâmico, validação de JWT RS256 e injeção de identidade nos headers. | [→](api-gateway/README.md) |
+| **auth-service** | 8081 | Provedor de identidade (IdP). Registro de usuários, autenticação com BCrypt e emissão de JWT RS256. | [→](auth-service/README.md) |
+| **catalog-service** | 8083 | Domínio estrutural. CRUD de estabelecimentos, profissionais, catálogo de serviços e grades de horários. Publica eventos de domínio no RabbitMQ. | [→](catalog-service/README.md) |
+| **booking-service** | 8082 | Núcleo de negócio. Agendamentos com controle de concorrência (double-booking via índice único no PostgreSQL), ciclo de vida dos status e domínio de avaliações. | [→](booking-service/README.md) |
+| **search-service** | 8085 | CQRS read model. Consome eventos do RabbitMQ para manter índice no Elasticsearch. Expõe API GraphQL com busca por texto, geo, preço e rating. | [→](search-service/README.md) |
+| **notification-service** | 8086 | Event-driven. Consome eventos de booking para enviar e-mails e manter snapshots. Gera feed iCalendar (RFC 5545) compatível com Google Calendar, Outlook e Apple Calendar. | [→](notification-service/README.md) |
 
 ---
 
-## 🛠️ Stack Tecnológica Base
+## Stack
 
-* **Linguagem:** Java 21
-* **Framework Principal:** Spring Boot 3.x / Spring Cloud
-* **Arquitetura de Código:** Clean Architecture (Domain, Application, Infrastructure)
-* **Comunicação:** RESTful (Spring Web), RabbitMQ (Spring AMQP)
-* **Bancos de Dados:** PostgreSQL (Relacional — auth, catalog, booking+reviews), Elasticsearch (Busca)
-* **Segurança:** Spring Security, OAuth2 / JWT (RS256 Criptografia Assimétrica), BCrypt
-* **Qualidade e Testes:** JUnit 5, Mockito, Testcontainers, Cucumber (BDD), k6 (Performance)
-* **Infraestrutura/DevOps:** Docker, Docker Compose, GitHub Actions (CI/CD), AWS ECS (Deploy)
-
----
-
-## 📁 Estrutura do Monorepo
-
-O projeto segue a estrutura de monorepo multi-módulo (via Maven ou Gradle), centralizando a infraestrutura, mas mantendo o isolamento de código de cada serviço:
-
-```text
-beauty-wellness-system/
- ├── .github/workflows/       # Pipelines de CI/CD
- ├── infra/                   # Arquivos globais de infra
- │    ├── docker-compose.yml  # Sobe BDs, RabbitMQ e Gateway locais
- │    └── grafana/            # Dashboards de observabilidade
- │
- ├── api-gateway/             # Roteamento e Filtro JWT
- ├── auth-service/            # Emissão de Tokens e IAM
- ├── catalog-service/         # Estabelecimentos, Profissionais, Serviços
- ├── booking-service/         # Agendamentos + Avaliações (domínios unificados)
- ├── search-service/          # Indexação Elasticsearch + GraphQL
- └── notification-service/    # Feed ICS para integração com calendários externos
-```
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | Java 21 |
+| Framework | Spring Boot 3.2.3, Spring Cloud 2023.0.0 |
+| Arquitetura de código | Clean Architecture (domain / application / infrastructure) |
+| API externa | Spring Web MVC (REST + JSON) |
+| API de busca | Spring for GraphQL (GraphQL sobre HTTP) |
+| Gateway | Spring Cloud Gateway (reactive / WebFlux) |
+| Mensageria | RabbitMQ 3 via Spring AMQP |
+| Banco relacional | PostgreSQL 16 via Spring Data JPA + Flyway |
+| Banco de busca | Elasticsearch 8.13 via Spring Data Elasticsearch |
+| Segurança | Spring Security, JWT RS256 (Nimbus JOSE), BCrypt |
+| E-mail (dev) | MailHog (SMTP fake) |
+| Testes unitários | JUnit 5, Mockito, Testcontainers |
+| Testes BDD | Cucumber 7, REST Assured |
+| Testes de performance | k6 |
+| Qualidade estática | Checkstyle (Google style), SpotBugs, PMD |
+| Cobertura | JaCoCo (mínimo 80% de linhas) |
+| Containerização | Docker, Docker Compose |
+| CI/CD | GitHub Actions (matriz por módulo alterado) |
 
 ---
 
-## 🚀 Como Executar
+## Padrões e Convenções
 
-### Opção 1 — Docker Compose (recomendado)
+### Arquitetura
+- **Clean Architecture** em todos os serviços: camada de domínio sem dependências externas, casos de uso na camada de aplicação, adaptadores na infraestrutura.
+- **Database per service**: cada microsserviço possui seu próprio schema PostgreSQL (`auth_db`, `catalog_db`, `booking_db`, `notification_db`) ou store dedicado (Elasticsearch para o search-service). Nenhum serviço acessa o banco do outro.
+- **Event-Driven / Coreografia**: serviços reagem a eventos publicados no RabbitMQ sem acoplamento direto. Troca de mensagens assíncrona para atualização de read models (CQRS) e notificações.
+- **CQRS** no search-service: writes chegam via eventos do RabbitMQ (catalog + review); reads são servidos pelo Elasticsearch via GraphQL.
+- **Stateless JWT**: o API Gateway valida a assinatura RS256 do token sem consultar banco ou auth-service em cada requisição. A identidade é propagada via headers `X-User-Id` e `X-User-Role`.
 
-Sobe toda a stack (infra + serviços) com um único comando. As imagens são construídas via **multi-stage build** — não é necessário ter Maven instalado localmente.
+### Código
+- Migrações de schema versionadas com **Flyway** (`V1__`, `V2__`, …).
+- Mensagens RabbitMQ serializadas em **JSON** via `Jackson2JsonMessageConverter`.
+- Datas e horas em **ISO 8601** (`LocalDateTime` / `ZonedDateTime`), sem timestamps numéricos.
+- Spring Profiles separados para `local` (localhost), `docker` (DNS dos containers) e `test` (H2 in-memory, AMQP mockado).
+- Variáveis de ambiente com fallback seguro: `${DB_HOST:localhost}`.
 
-```bash
-docker compose up -d --build
-```
+### Testes
+- Testes unitários excluem `*IT.java` e `CucumberTest.java` — rodados separadamente no CI.
+- BDD com Cucumber: features em `src/test/resources/features/`, step definitions em `src/test/java/.../steps/`.
+- Cobertura mínima de **80% de linhas** (exclui entidades JPA, DTOs, classes de configuração e Application).
+- Testes de performance com **k6** em `performance-tests/k6/` — executados apenas em push/PR para `main`.
 
-Aguarde todos os containers estarem saudáveis (≈ 60 s na primeira execução):
-
-```bash
-docker compose ps          # verifique o estado dos containers
-docker compose logs -f     # acompanhe os logs em tempo real
-```
-
-| Serviço                          | URL local                                           |
-|----------------------------------|-----------------------------------------------------|
-| API Gateway                      | http://localhost:8080 · Swagger: `/swagger-ui.html` |
-| Auth Service                     | http://localhost:8081 · Swagger: `/swagger-ui.html` |
-| Booking Service (+ Reviews)      | http://localhost:8082 · Swagger: `/swagger-ui.html` |
-| Catalog Service                  | http://localhost:8083 · Swagger: `/swagger-ui.html` |
-| Search Service                   | http://localhost:8085 · GraphiQL: `/graphiql`       |
-| Notification Service             | http://localhost:8086 · Swagger: `/swagger-ui.html` |
-| RabbitMQ UI                      | http://localhost:15672 (guest / guest)              |
-| Elasticsearch                    | http://localhost:9200                               |
-
-### Opção 2 — Execução local (IntelliJ / linha de comando)
-
-Requer PostgreSQL e RabbitMQ rodando localmente. Crie os bancos manualmente antes de iniciar:
-
-```sql
-CREATE DATABASE auth_db;
-CREATE DATABASE catalog_db;
-CREATE DATABASE booking_db;
-CREATE DATABASE notification_db;
-```
-
-Execute cada serviço (perfil `default` usa localhost para todos os recursos):
-
-```bash
-cd auth-service         && mvn spring-boot:run
-cd catalog-service      && mvn spring-boot:run
-cd booking-service      && mvn spring-boot:run
-cd notification-service && mvn spring-boot:run
-cd api-gateway          && mvn spring-boot:run
-```
+### Qualidade
+- Google Java Style Guide via Checkstyle.
+- SpotBugs (esforço máximo, limiar médio) + PMD (`java/quickstart.xml`) no CI.
+- Pipeline com detecção inteligente de módulos alterados — apenas os serviços modificados passam pela matriz de build, análise estática, testes e BDD.
 
 ---
 
-## 🧪 Testes
+## Pipeline de CI
 
-```bash
-mvn test                             # todos os módulos
-mvn test -pl booking-service         # módulo específico
-mvn test -pl notification-service    # apenas notification-service
-mvn verify                           # testes + relatório JaCoCo (target/site/jacoco/)
-```
+Definida em `.github/workflows/ci.yml`. Dispara em push para `main`, `develop` e `feature/**`, e em pull requests para `main` e `develop`.
 
-Cobertura mínima exigida: **80% de linhas** (excluindo entidades JPA e DTOs).
+### Estratégia: matriz dinâmica por módulo
 
-### Testes do Notification Service
+Antes de qualquer job de validação, o pipeline detecta quais módulos foram alterados no commit/PR. Cada job subsequente recebe uma matriz e roda **em paralelo, apenas para os módulos afetados**. Mudanças exclusivas em `docs/` encerram o pipeline após a detecção — sem consumir minutos de CI desnecessariamente. Mudanças em `pom.xml` ou nos próprios workflows disparam todos os módulos.
 
-O `notification-service` tem dois tipos de teste:
-
-**Unitários (JUnit 5 + Mockito) — sem Spring, sem banco:**
-```bash
-mvn test -pl notification-service -Dtest="HandleBookingCreatedUseCaseTest,HandleBookingCancelledUseCaseTest,HandleBookingCompletedUseCaseTest,GetOrCreateFeedTokenUseCaseTest,GenerateCalendarFeedUseCaseTest,ICalendarGeneratorTest"
-```
-
-**BDD (Cucumber) — Spring Boot + H2 in-memory:**
-```bash
-mvn test -pl notification-service -Dtest="CucumberRunner"
-```
-
-O contexto de teste usa H2 in-memory com `ddl-auto=create-drop` e desabilita o RabbitMQ auto-configuration (os beans AMQP são mockados). Nenhuma infraestrutura externa é necessária para rodar os testes.
-
----
-
-## 🔄 Happy Path — Fluxo Completo de Agendamento
-
-O fluxo completo envolve três atores: **Owner** (dono do salão), **Professional** (profissional) e **Client** (cliente). Todos os exemplos abaixo usam a API Gateway em `http://localhost:8080`.
-
-> Substitua os valores de `id` retornados por cada request nas variáveis indicadas.
-
----
-
-### Passo 1 — Registrar os usuários
-
-```bash
-# Owner
-curl -s -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"owner@salon.com","password":"Senha123!","role":"ROLE_OWNER"}'
-
-# Professional
-curl -s -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"prof@salon.com","password":"Senha123!","role":"ROLE_PROFESSIONAL"}'
-
-# Client
-curl -s -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"cliente@email.com","password":"Senha123!","role":"ROLE_CLIENT"}'
-```
-
----
-
-### Passo 2 — Obter tokens JWT
-
-```bash
-# Owner → salve o token em OWNER_TOKEN
-curl -s -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"owner@salon.com","password":"Senha123!"}'
-# → { "token": "<OWNER_TOKEN>" }
-
-# Professional → PROF_TOKEN
-curl -s -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"prof@salon.com","password":"Senha123!"}'
-
-# Client → CLIENT_TOKEN
-curl -s -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"cliente@email.com","password":"Senha123!"}'
-```
-
----
-
-### Passo 3 — Criar estabelecimento (Owner)
-
-```bash
-curl -s -X POST http://localhost:8080/api/catalog/establishments \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <OWNER_TOKEN>" \
-  -d '{
-    "name": "Salão da Maria",
-    "cnpj": "12.345.678/0001-99",
-    "description": "Salão completo de beleza",
-    "address": {
-      "street": "Rua das Flores", "number": "100",
-      "city": "São Paulo", "state": "SP", "zipCode": "01310-100",
-      "latitude": -23.5616, "longitude": -46.6565
-    },
-    "businessHours": [
-      {"dayOfWeek": 1, "openTime": "09:00:00", "closeTime": "18:00:00"},
-      {"dayOfWeek": 2, "openTime": "09:00:00", "closeTime": "18:00:00"},
-      {"dayOfWeek": 3, "openTime": "09:00:00", "closeTime": "18:00:00"},
-      {"dayOfWeek": 4, "openTime": "09:00:00", "closeTime": "18:00:00"},
-      {"dayOfWeek": 5, "openTime": "09:00:00", "closeTime": "18:00:00"}
-    ],
-    "services": [
-      {"title": "Corte Feminino", "description": "Corte e escova"},
-      {"title": "Coloração", "description": "Coloração completa"}
-    ]
-  }'
-# → { "id": "<EST_ID>", "providedServices": [{ "id": "<SVC_ID>", ... }], ... }
-```
-
-Anote o `id` do estabelecimento (`EST_ID`) e o `id` de um dos serviços (`SVC_ID`).
-
----
-
-### Passo 4 — Criar perfil do profissional (Professional)
-
-```bash
-curl -s -X POST http://localhost:8080/api/catalog/professionals/me \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <PROF_TOKEN>" \
-  -d '{
-    "name": "João Cabeleireiro",
-    "bio": "10 anos de experiência em cortes femininos",
-    "specialties": ["Corte", "Coloração"]
-  }'
-# → { "id": "<PROF_ID>", ... }
-```
-
-Anote o `id` do profissional (`PROF_ID`).
-
----
-
-### Passo 5 — Afiliar profissional ao estabelecimento com agenda (Owner)
-
-Use `dayOfWeek` de 1 (segunda) a 7 (domingo). Ligue `providedServiceId` ao `SVC_ID` obtido no Passo 3.
-
-```bash
-curl -s -X POST "http://localhost:8080/api/catalog/establishments/<EST_ID>/affiliations?professionalId=<PROF_ID>" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <OWNER_TOKEN>" \
-  -d '{
-    "active": true,
-    "workSchedules": [
-      {"dayOfWeek": 1, "startTime": "09:00:00", "endTime": "18:00:00"},
-      {"dayOfWeek": 2, "startTime": "09:00:00", "endTime": "18:00:00"},
-      {"dayOfWeek": 3, "startTime": "09:00:00", "endTime": "18:00:00"},
-      {"dayOfWeek": 4, "startTime": "09:00:00", "endTime": "18:00:00"},
-      {"dayOfWeek": 5, "startTime": "09:00:00", "endTime": "18:00:00"}
-    ],
-    "serviceOfferings": [
-      {"providedServiceId": "<SVC_ID>", "price": 120.00, "durationMinutes": 60}
-    ]
-  }'
-```
-
----
-
-### Passo 6 — Consultar disponibilidade (público, sem token)
-
-Escolha uma data futura que caia em dia de semana (ex: próxima segunda-feira).
-
-```bash
-curl -s "http://localhost:8080/api/bookings/availability?\
-establishmentId=<EST_ID>&professionalId=<PROF_ID>&serviceId=<SVC_ID>&date=2026-04-07"
-# → {
-#     "durationMinutes": 60,
-#     "price": 120.00,
-#     "availableSlots": ["2026-04-07T09:00:00", "2026-04-07T10:00:00", ...]
-#   }
-```
-
----
-
-### Passo 7 — Criar agendamento (Client)
-
-Escolha um dos horários retornados no passo anterior como `startDatetime`.
-
-```bash
-curl -s -X POST http://localhost:8080/api/bookings \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <CLIENT_TOKEN>" \
-  -d '{
-    "professionalId": "<PROF_ID>",
-    "establishmentId": "<EST_ID>",
-    "providedServiceId": "<SVC_ID>",
-    "startDatetime": "2026-04-07T10:00:00",
-    "notes": "Prefiro corte mais curto nas laterais"
-  }'
-# → { "id": "<BOOKING_ID>", "status": "CONFIRMED", "price": 120.00, ... }
-```
-
----
-
-### Passo 8 — Consultar agendamento (Client)
-
-```bash
-curl -s http://localhost:8080/api/bookings/<BOOKING_ID> \
-  -H "Authorization: Bearer <CLIENT_TOKEN>"
-# → { "id": "<BOOKING_ID>", "status": "CONFIRMED", ... }
-```
-
----
-
-### Passo 9 — Finalizar atendimento (Professional)
-
-```bash
-curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/complete \
-  -H "Authorization: Bearer <PROF_TOKEN>"
-# → { "status": "COMPLETED", ... }
-```
-
-**Variante — Cancelar (Client ou Owner):**
-
-```bash
-curl -s -X PATCH http://localhost:8080/api/bookings/<BOOKING_ID>/cancel \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <CLIENT_TOKEN>" \
-  -d '{"reason": "Compromisso surgiu"}'
-# → { "status": "CANCELLED", "cancelReason": "Compromisso surgiu", ... }
-```
-
----
-
----
-
-### Passo 10 — Avaliar o atendimento (Client)
-
-Após o profissional completar o atendimento (Passo 9), o booking-service registra o booking como elegível para avaliação diretamente no próprio banco (sem RabbitMQ intermediário). O cliente pode então submeter uma avaliação:
-
-```bash
-curl -s -X POST http://localhost:8080/api/reviews \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <CLIENT_TOKEN>" \
-  -H "X-User-Id: <CLIENT_ID>" \
-  -d '{
-    "bookingId": "<BOOKING_ID>",
-    "professionalRating": 5,
-    "establishmentRating": 4,
-    "comment": "Atendimento excelente!"
-  }'
-# → { "id": "<REVIEW_ID>", "professionalRating": 5, "establishmentRating": 4, ... }
-```
-
----
-
-### Passo 11 — Buscar estabelecimentos (público, sem token)
-
-O search-service é alimentado automaticamente pelos eventos do catalog e do review. Para buscar:
-
-```bash
-# Busca por texto e cidade via GraphQL
-curl -s -X POST http://localhost:8080/api/search/graphql \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "{ searchEstablishments(filter: { query: \"Salão\", city: \"São Paulo\" }) { results { id name averageRating minPrice } totalHits } }"
-  }'
-
-# Busca por raio geográfico
-curl -s -X POST http://localhost:8080/api/search/graphql \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "{ searchEstablishments(filter: { geo: { lat: -23.56, lon: -46.63, radiusKm: 5.0 }, sortBy: DISTANCE }) { results { id name distanceKm } totalHits } }"
-  }'
-```
-
-> Use o GraphiQL interativo em http://localhost:8085/graphiql para explorar o schema com autocompletar.
-
----
-
-### Passo 12 — Sincronizar com calendário externo (Cliente ou Profissional)
-
-Após criar pelo menos um agendamento (Passo 7), o `notification-service` já recebeu o evento `booking.created` e armazenou o snapshot. Agora gere a URL do feed:
-
-```bash
-# 1. Obter a URL do feed ICS (requer token do cliente ou profissional)
-curl -s -X POST http://localhost:8080/api/calendar/feed/token \
-  -H "Authorization: Bearer <CLIENT_TOKEN>"
-# → { "feedUrl": "webcal://localhost:8080/api/calendar/feed/<userId>/<feedToken>/bookings.ics" }
-```
-
-Cole a `feedUrl` retornada em:
-- **Google Calendar** → Outros calendários → "De URL" → trocar `webcal://` por `http://` se necessário
-- **Outlook** → Adicionar calendário → "Assinar pela internet"
-- **Apple Calendar** → Arquivo → Nova assinatura de calendário
-
-Para verificar o conteúdo do feed diretamente:
-
-```bash
-# 2. Download do .ics (sem JWT — o token na URL é a autenticação)
-curl -s "http://localhost:8080/api/calendar/feed/<userId>/<feedToken>/bookings.ics"
-# → BEGIN:VCALENDAR
-#   VERSION:2.0
-#   PRODID:-//BookingHub//BookingHub Calendar//PT
-#   BEGIN:VEVENT
-#   UID:<bookingId>@bookinghub
-#   DTSTART:20260407T100000Z
-#   DTEND:20260407T110000Z
-#   SUMMARY:Agendamento - BookingHub
-#   STATUS:CONFIRMED
-#   END:VEVENT
-#   END:VCALENDAR
-```
-
-O feed é **idempotente** — cancelamentos alteram `STATUS:CANCELLED` no mesmo `UID` sem duplicar o evento.
-
----
-
-### Passo 13 — Reindexar (caso o índice esteja vazio)
-
-Se o search-service subiu antes dos outros ou o volume do ES foi perdido:
-
-```bash
-curl -s -X POST http://localhost:8080/api/search/admin/reindex \
-  -H "Authorization: Bearer <OWNER_TOKEN>"
-# → { "status": "accepted", "indexed": 3 }
-```
-
----
-
-### Resumo do Fluxo
+### Jobs (executados em sequência, paralelos por módulo)
 
 ```
-Owner registra → Owner cria estabelecimento (com lat/lon) + serviços
-  → eventos establishment.created + affiliation.created → search-service indexa
-Professional registra → Professional cria perfil
-Owner afilia Professional com agenda + preços → evento affiliation.created/updated
-Client consulta disponibilidade (sem token)
-Client cria booking → status: CONFIRMED → evento booking.created publicado
-  → notification-service consome booking.created → salva snapshot (status: CONFIRMED)
-Professional finaliza → status: COMPLETED → evento booking.completed publicado
-  → booking-service registra booking elegível (internamente, mesmo banco)
-  → notification-service consome booking.completed → atualiza snapshot (status: COMPLETED)
-Client avalia → review.created publicado → search-service atualiza averageRating
-Client busca via GraphQL → search-service retorna resultados ordenados por relevância/rating/distância
-Client/Professional gera URL do feed ICS → cola no Google Calendar / Outlook / Apple Calendar
-  → calendário externo faz polling do feed → exibe agendamentos como eventos
+detect-changes → build → static-analysis → unit-tests → bdd-integration → docker-build-check
+                                                                         ↘ performance-tests
 ```
+
+| # | Job | Condição de execução | O que valida e por quê |
+|---|---|---|---|
+| 0 | **Detect Changed Modules** | Sempre | Identifica quais módulos tiveram código alterado usando `dorny/paths-filter`. Produz a matriz dinâmica consumida por todos os jobs seguintes. Evita rodar a pipeline completa para mudanças irrelevantes. |
+| 1 | **Build** | Módulos alterados | Compila o módulo com `mvn compile -pl <module> -am` (inclui dependências locais). Falha rápida: problema de compilação não avança para análise ou testes. |
+| 2 | **Static Analysis** | Após build | Roda **Checkstyle** (estilo Google), **SpotBugs** (bugs em bytecode) e **PMD** (code smells) em sequência. Código fora do padrão ou com bugs detectáveis estaticamente não chega aos testes. Relatórios XML são publicados como artefatos em caso de falha. |
+| 3 | **Unit Tests + Coverage** | Após análise estática | Executa testes unitários (exclui `*IT` e `CucumberTest`), gera relatório JaCoCo e impõe **mínimo de 80% de cobertura de linhas**. Relatório HTML publicado como artefato por 7 dias. Exclui entidades JPA, DTOs e classes de configuração da métrica. |
+| 4 | **BDD & Integration** | Após testes unitários | Sobe PostgreSQL 16, RabbitMQ 3 e Elasticsearch 8.13 como *services* do GitHub Actions. Roda testes `*IT` (Testcontainers) e cenários Cucumber separadamente, com `SPRING_PROFILES_ACTIVE=test`. Relatórios Cucumber publicados como artefatos por 7 dias. |
+| 5 | **Docker Build Check** | PRs para `main` | Constrói a imagem Docker de cada módulo alterado com `docker build -f <module>/Dockerfile`. Garante que o `Dockerfile` (multi-stage) está funcional antes do merge. Não faz push — validação apenas. |
+| 6 | **Performance Tests (k6)** | Push/PR para `main` | Sobe a stack completa com `docker compose up --build`, aguarda 60 s e executa o script k6 em `performance-tests/k6/booking-load-test.js` contra `http://localhost:8080`. Roda apenas em `main` para não bloquear feature branches com testes longos. |

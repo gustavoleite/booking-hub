@@ -90,6 +90,46 @@ Os payloads de afiliação incluem `professionalName`, `professionalSpecialties`
 
 A partir da versão atual, os campos `latitude` e `longitude` são **obrigatórios** no `AddressDto` de criação e atualização de estabelecimentos (`@NotNull`). Isso garante que 100% dos documentos indexados no `search-service` tenham coordenadas geográficas válidas. Os campos `city` e `state` também fazem parte do payload de endereço.
 
+## ⚙️ Justificativa de Stack
+
+| Tecnologia | Justificativa |
+|---|---|
+| **Spring Data JPA + PostgreSQL** | Modelo relacional adequado para o domínio estrutural do catálogo (estabelecimentos, profissionais, serviços e afiliações têm relacionamentos complexos com integridade referencial) |
+| **Flyway** | Migrations versionadas garantem reprodutibilidade em múltiplos ambientes (local, docker, CI, produção) |
+| **RabbitMQ (Spring AMQP)** | Desacopla o catalog-service do search-service. Eventos publicados em topic exchange permitem que novos consumidores sejam adicionados sem alterar o produtor |
+| **Jackson2JsonMessageConverter** | Serialização JSON das mensagens RabbitMQ — mais legível e debugável do que Java serialization; compatível com consumidores em qualquer linguagem |
+
+## 🔧 Variáveis de Ambiente
+
+| Variável | Default (local) | Descrição |
+|---|---|---|
+| `DB_HOST` | `localhost` | Host do PostgreSQL |
+| `DB_PORT` | `5432` | Porta do PostgreSQL |
+| `DB_NAME` | `catalog_db` | Nome do banco |
+| `DB_USER` | `admin` | Usuário do banco |
+| `DB_PASS` | `admin123` | Senha do banco |
+| `RABBIT_HOST` | `localhost` | Host do RabbitMQ |
+| `RABBITMQ_PORT` | `5672` | Porta AMQP |
+| `RABBITMQ_USER` | `guest` | Usuário RabbitMQ |
+| `RABBITMQ_PASSWORD` | `guest` | Senha RabbitMQ |
+
+## 🧪 Testes
+
+```bash
+# Todos os testes
+mvn test -pl catalog-service
+
+# Apenas BDD (Cucumber + REST Assured)
+mvn test -pl catalog-service -Dtest="CucumberTest"
+
+# Com relatório de cobertura JaCoCo
+mvn verify -pl catalog-service
+```
+
+Cobertura mínima: **80% de linhas**. Relatório em `target/site/jacoco/index.html`.
+
+Excluídos da contagem: entidades JPA (`*Entity`), DTOs, classes de configuração.
+
 ## 📚 Documentação da API (Swagger)
 A documentação dos endpoints REST pode ser acessada em:
-👉 `http://localhost:8083/swagger-ui.html`
+`http://localhost:8083/swagger-ui.html` (ou agregada no API Gateway em `http://localhost:8080/swagger-ui.html`)

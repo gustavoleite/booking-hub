@@ -124,7 +124,7 @@ enum  SortBy     { RELEVANCE RATING DISTANCE }
 | `catalog.events` | `establishment.updated` | `search.establishment.updated` | catalog-service | Upsert documento base |
 | `catalog.events` | `affiliation.created` | `search.affiliation.created` | catalog-service | Upsert arrays `services[]` e `professionals[]` |
 | `catalog.events` | `affiliation.updated` | `search.affiliation.updated` | catalog-service | Atualiza preços e profissional |
-| `review.events` | `review.created` | `search.review.created` | review-service | Incrementa `ratingSum`, recalcula `averageRating` |
+| `review.events` | `review.created` | `search.review.created` | booking-service | Incrementa `ratingSum`, recalcula `averageRating` |
 
 Todos os listeners são **idempotentes**: reentregas do mesmo evento produzem o mesmo estado no ES (upsert por `id`).
 

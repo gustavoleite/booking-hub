@@ -13,7 +13,7 @@ Microsserviço responsável pelo ciclo de vida completo de **agendamentos e aval
 - Expor slots disponíveis publicamente (sem autenticação)
 - Publicar eventos `BookingCreated`, `BookingCancelled`, `BookingCompleted` no exchange `booking.events`
 
-### Avaliações (incorporado do antigo review-service)
+### Avaliações
 - Ao finalizar um booking, registrar o booking como **elegível para avaliação** diretamente no banco (tabela `tb_eligible_bookings`) — sem RabbitMQ intermediário
 - Receber avaliações de clientes (`POST /reviews`) e validar elegibilidade
 - Publicar evento `ReviewCreated` no exchange `review.events` (consumido pelo search-service para atualizar `averageRating`)
@@ -197,20 +197,26 @@ CREATE UNIQUE INDEX uk_booking_active_slot
 
 ### Exchange `booking.events` (topic, durable)
 
-| Routing Key         | Quando é publicado                 | Consumido por    |
-|---------------------|------------------------------------|------------------|
-| `booking.created`   | Agendamento criado com sucesso     | —                |
-| `booking.cancelled` | Agendamento cancelado              | —                |
-| `booking.completed` | Atendimento marcado como concluído | —                |
+| Routing Key         | Quando é publicado                 | Consumido por          |
+|---------------------|------------------------------------|------------------------|
+| `booking.created`   | Agendamento criado com sucesso     | notification-service   |
+| `booking.cancelled` | Agendamento cancelado              | notification-service   |
+| `booking.completed` | Atendimento marcado como concluído | notification-service   |
+
+O payload é **enriquecido**: o `clientEmail` vem do header `X-User-Email` (injetado pelo gateway a partir do claim JWT) e o `professionalEmail` é buscado via `GET /internal/users/{id}/email` no auth-service no momento da criação do booking.
 
 Payload `booking.events`:
 ```json
 {
   "bookingId": "uuid",
   "clientId": "uuid",
+  "clientEmail": "cliente@email.com",
   "professionalId": "uuid",
+  "professionalEmail": "prof@salon.com",
   "establishmentId": "uuid",
+  "establishmentName": "Salão da Maria",
   "providedServiceId": "uuid",
+  "serviceName": "Corte Feminino",
   "startDatetime": "2026-04-07T10:00:00",
   "endDatetime": "2026-04-07T11:00:00",
   "price": 120.00,

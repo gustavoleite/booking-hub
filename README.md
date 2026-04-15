@@ -24,28 +24,27 @@ O sistema segue o padrão de **microsserviços event-driven** com bounded contex
 
 ```mermaid
 flowchart TB
-    classDef user fill:#08427b,stroke:#052e56,color:#fff
-    classDef gateway fill:#1168bd,stroke:#0b4884,color:#fff
-    classDef service fill:#23a2d9,stroke:#18739b,color:#fff
-    classDef db fill:#438dd5,stroke:#2f6395,color:#fff
-    classDef broker fill:#f2a900,stroke:#b37d00,color:#fff
+    classDef user     fill:#08427b,stroke:#052e56,color:#fff
+    classDef gateway  fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef service  fill:#23a2d9,stroke:#18739b,color:#fff
+    classDef db       fill:#438dd5,stroke:#2f6395,color:#fff
+    classDef exchange fill:#f2a900,stroke:#b37d00,color:#000
+    classDef queue    fill:#27ae60,stroke:#1a7a43,color:#fff
+    classDef dlx      fill:#e67e22,stroke:#a85b10,color:#fff
+    classDef dlq      fill:#c0392b,stroke:#922b21,color:#fff
 
-    Client["API Client (REST)"]:::user
+    Client["API Client\n(REST / GraphQL)"]:::user
 
     subgraph Edge["Borda"]
-        GW["API Gateway\n(Spring Cloud Gateway)"]:::gateway
+        GW["API Gateway :8080\n(Spring Cloud Gateway)"]:::gateway
     end
 
-    subgraph Bus["Mensageria"]
-        RabbitMQ{{"RabbitMQ"}}:::broker
-    end
-
-    subgraph Services["Microsserviços"]
-        Auth["Auth Service"]:::service
-        Catalog["Catalog Service"]:::service
-        Booking["Booking Service"]:::service
-        Search["Search Service"]:::service
-        Notify["Notification Service"]:::service
+    subgraph Svcs["Microsserviços"]
+        Auth["Auth Service :8081"]:::service
+        Catalog["Catalog Service :8083"]:::service
+        Booking["Booking Service :8082"]:::service
+        Search["Search Service :8085\n(GraphQL)"]:::service
+        Notify["Notification Service :8086"]:::service
     end
 
     subgraph Data["Dados"]
@@ -56,26 +55,71 @@ flowchart TB
         DB_Notify[("PostgreSQL\nnotification_db")]:::db
     end
 
-    Client -->|HTTPS / REST| GW
-    GW -->|valida JWT RS256| Auth
+    subgraph Broker["Mensageria — RabbitMQ"]
+        direction TB
+
+        subgraph EXC["Exchanges (Topic)"]
+            direction LR
+            EX_CAT{{"catalog.events"}}:::exchange
+            EX_BOK{{"booking.events"}}:::exchange
+            EX_REV{{"review.events"}}:::exchange
+        end
+
+        subgraph QSrch["Queues → search-service"]
+            direction TB
+            QS1["search.establishment.created"]:::queue
+            QS2["search.establishment.updated"]:::queue
+            QS3["search.affiliation.created"]:::queue
+            QS4["search.affiliation.updated"]:::queue
+            QS5["search.review.created"]:::queue
+        end
+
+        subgraph QNotif["Queues → notification-service"]
+            direction LR
+            QN1["calendar.sync.queue"]:::queue
+            EX_DLX{{"calendar.dlx\n(Direct)"}}:::dlx
+            QN2["calendar.sync.dlq"]:::dlq
+            QN1 -->|"nack / expiração"| EX_DLX
+            EX_DLX -->|"calendar.sync.dlq"| QN2
+        end
+    end
+
+    %% ── Entrada ──────────────────────────────────────────────
+    Client -->|"HTTPS / REST"| GW
+    GW -->|"valida JWT RS256"| Auth
     GW --> Catalog
     GW --> Booking
     GW --> Search
     GW --> Notify
+    Booking -.->|"REST — valida agenda"| Catalog
 
-    Booking -.->|REST — valida agenda| Catalog
-
-    Catalog -.->|establishment.created/updated\naffiliation.created/updated| RabbitMQ
-    Booking -.->|booking.created/cancelled/completed\nreview.created| RabbitMQ
-
-    RabbitMQ ==>|atualiza índice CQRS| Search
-    RabbitMQ ==>|dispara emails + feed ICS| Notify
-
-    Auth --- DB_Auth
+    %% ── Bancos ───────────────────────────────────────────────
+    Auth    --- DB_Auth
     Catalog --- DB_Catalog
     Booking --- DB_Booking
-    Search --- DB_Search
-    Notify --- DB_Notify
+    Search  --- DB_Search
+    Notify  --- DB_Notify
+
+    %% ── Producers → Exchanges ────────────────────────────────
+    Catalog -->|"establishment.created\nestablishment.updated\naffiliation.created\naffiliation.updated"| EX_CAT
+    Booking -->|"booking.created\nbooking.cancelled\nbooking.completed"| EX_BOK
+    Booking -->|"review.created"| EX_REV
+
+    %% ── Exchanges → Queues (routing keys) ───────────────────
+    EX_CAT -->|"establishment.created"| QS1
+    EX_CAT -->|"establishment.updated"| QS2
+    EX_CAT -->|"affiliation.created"|  QS3
+    EX_CAT -->|"affiliation.updated"|  QS4
+    EX_BOK -->|"booking.*"| QN1
+    EX_REV -->|"review.created"| QS5
+
+    %% ── Queues → Consumers ───────────────────────────────────
+    QS1 --> Search
+    QS2 --> Search
+    QS3 --> Search
+    QS4 --> Search
+    QS5 --> Search
+    QN1 --> Notify
 ```
 
 ---
@@ -160,6 +204,78 @@ Antes de qualquer job de validação, o pipeline detecta quais módulos foram al
 ```
 detect-changes → build → static-analysis → unit-tests → bdd-integration → docker-build-check
                                                                          ↘ performance-tests
+```
+
+```mermaid
+flowchart TD
+    classDef trigger fill:#08427b,stroke:#052e56,color:#fff
+    classDef job fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef step fill:#23a2d9,stroke:#18739b,color:#fff
+    classDef cond fill:#f2a900,stroke:#b37d00,color:#000
+    classDef stop fill:#c0392b,stroke:#922b21,color:#fff
+
+    Push["Push / Pull Request\n(main · develop · feature/**)"]:::trigger
+
+    subgraph J0["Job 0 — Detect Changed Modules"]
+        D1["dorny/paths-filter\nidentifica módulos alterados"]:::step
+        D2{"Algum módulo\nalterado?"}:::cond
+        D3["any-changed = false\npipeline encerra"]:::stop
+        D4["Monta matriz dinâmica\nde módulos"]:::step
+    end
+
+    subgraph J1["Job 1 — Build (paralelo por módulo)"]
+        B1["mvn compile -pl module -am"]:::step
+    end
+
+    subgraph J2["Job 2 — Static Analysis (paralelo por módulo)"]
+        SA1["Checkstyle\n(Google Style)"]:::step
+        SA2["SpotBugs\n(bytecode bugs)"]:::step
+        SA3["PMD\n(code smells)"]:::step
+        SA1 --> SA2 --> SA3
+    end
+
+    subgraph J3["Job 3 — Unit Tests + Coverage (paralelo por módulo)"]
+        UT1["mvn test\n(exclui *IT e CucumberTest)"]:::step
+        UT2["JaCoCo report"]:::step
+        UT3["Enforce ≥ 80% line coverage"]:::step
+        UT1 --> UT2 --> UT3
+    end
+
+    subgraph J4["Job 4 — BDD & Integration (paralelo por módulo)"]
+        direction TB
+        SVC["Services: PostgreSQL 16\nRabbitMQ 3 · Elasticsearch 8.13"]:::step
+        IT["mvn test *IT\n(Testcontainers)"]:::step
+        BDD["mvn test CucumberTest\n(Cucumber + REST Assured)"]:::step
+        SVC --> IT --> BDD
+    end
+
+    subgraph J5["Job 5 — Docker Build Check"]
+        DC1{"PR para main?"}:::cond
+        DC2["docker build\n(multi-stage Dockerfile)"]:::step
+        DC3["Sem push — validação only"]:::step
+        DC1 -->|sim| DC2 --> DC3
+        DC1 -->|não| SKIP5["job ignorado"]:::stop
+    end
+
+    subgraph J6["Job 6 — Performance Tests (k6)"]
+        PF1{"Branch main\nou PR → main?"}:::cond
+        PF2["docker compose up --build\n(stack completa, 60s wait)"]:::step
+        PF3["k6 run booking-load-test.js\n→ localhost:8080"]:::step
+        PF4["docker compose down"]:::step
+        PF1 -->|sim| PF2 --> PF3 --> PF4
+        PF1 -->|não| SKIP6["job ignorado"]:::stop
+    end
+
+    Push --> D1
+    D1 --> D2
+    D2 -->|não| D3
+    D2 -->|sim| D4
+    D4 -->|"matriz: [módulos alterados]"| J1
+    J1 --> J2
+    J2 --> J3
+    J3 --> J4
+    J4 --> J5
+    J4 --> J6
 ```
 
 | # | Job | Condição de execução | O que valida e por quê |

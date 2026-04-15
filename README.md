@@ -33,26 +33,26 @@ flowchart TB
     classDef dlx      fill:#e67e22,stroke:#a85b10,color:#fff
     classDef dlq      fill:#c0392b,stroke:#922b21,color:#fff
 
-    Client["API Client\n(REST / GraphQL)"]:::user
+    Client["API Client (REST / GraphQL)"]:::user
 
     subgraph Edge["Borda"]
-        GW["API Gateway :8080\n(Spring Cloud Gateway)"]:::gateway
+        GW["API Gateway :8080 (Spring Cloud Gateway)"]:::gateway
     end
 
     subgraph Svcs["Microsserviços"]
         Auth["Auth Service :8081"]:::service
         Catalog["Catalog Service :8083"]:::service
         Booking["Booking Service :8082"]:::service
-        Search["Search Service :8085\n(GraphQL)"]:::service
+        Search["Search Service :8085 (GraphQL)"]:::service
         Notify["Notification Service :8086"]:::service
     end
 
     subgraph Data["Dados"]
-        DB_Auth[("PostgreSQL\nauth_db")]:::db
-        DB_Catalog[("PostgreSQL\ncatalog_db")]:::db
-        DB_Booking[("PostgreSQL\nbooking_db")]:::db
+        DB_Auth[("PostgreSQL auth_db")]:::db
+        DB_Catalog[("PostgreSQL catalog_db")]:::db
+        DB_Booking[("PostgreSQL booking_db")]:::db
         DB_Search[("Elasticsearch")]:::db
-        DB_Notify[("PostgreSQL\nnotification_db")]:::db
+        DB_Notify[("PostgreSQL notification_db")]:::db
     end
 
     subgraph Broker["Mensageria — RabbitMQ"]
@@ -65,8 +65,7 @@ flowchart TB
             EX_REV{{"review.events"}}:::exchange
         end
 
-        subgraph QSrch["Queues → search-service"]
-            direction TB
+        subgraph QSrch["Queues — search-service"]
             QS1["search.establishment.created"]:::queue
             QS2["search.establishment.updated"]:::queue
             QS3["search.affiliation.created"]:::queue
@@ -74,13 +73,13 @@ flowchart TB
             QS5["search.review.created"]:::queue
         end
 
-        subgraph QNotif["Queues → notification-service"]
+        subgraph QNotif["Queues — notification-service"]
             direction LR
             QN1["calendar.sync.queue"]:::queue
-            EX_DLX{{"calendar.dlx\n(Direct)"}}:::dlx
+            EX_DLX{{"calendar.dlx (Direct)"}}:::dlx
             QN2["calendar.sync.dlq"]:::dlq
-            QN1 -->|"nack / expiração"| EX_DLX
-            EX_DLX -->|"calendar.sync.dlq"| QN2
+            QN1 -->|nack| EX_DLX
+            EX_DLX --> QN2
         end
     end
 
@@ -94,22 +93,23 @@ flowchart TB
     Booking -.->|"REST — valida agenda"| Catalog
 
     %% ── Bancos ───────────────────────────────────────────────
-    Auth    --- DB_Auth
+    Auth --- DB_Auth
     Catalog --- DB_Catalog
     Booking --- DB_Booking
-    Search  --- DB_Search
-    Notify  --- DB_Notify
+    Search --- DB_Search
+    Notify --- DB_Notify
 
     %% ── Producers → Exchanges ────────────────────────────────
-    Catalog -->|"establishment.created\nestablishment.updated\naffiliation.created\naffiliation.updated"| EX_CAT
-    Booking -->|"booking.created\nbooking.cancelled\nbooking.completed"| EX_BOK
+    Catalog -->|"establishment.created / updated"| EX_CAT
+    Catalog -->|"affiliation.created / updated"| EX_CAT
+    Booking -->|"booking.created / cancelled / completed"| EX_BOK
     Booking -->|"review.created"| EX_REV
 
     %% ── Exchanges → Queues (routing keys) ───────────────────
     EX_CAT -->|"establishment.created"| QS1
     EX_CAT -->|"establishment.updated"| QS2
-    EX_CAT -->|"affiliation.created"|  QS3
-    EX_CAT -->|"affiliation.updated"|  QS4
+    EX_CAT -->|"affiliation.created"| QS3
+    EX_CAT -->|"affiliation.updated"| QS4
     EX_BOK -->|"booking.*"| QN1
     EX_REV -->|"review.created"| QS5
 

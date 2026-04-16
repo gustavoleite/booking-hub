@@ -2,7 +2,7 @@ spring:
   application:
     name: api-gateway
   profiles:
-    active: ${spring.profiles.active:local}
+    active: local
 server:
   port: ${GATEWAY_PORT:8080}
 management:

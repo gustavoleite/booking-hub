@@ -2,7 +2,7 @@ spring:
   application:
     name: catalog-service
   profiles:
-    active: ${spring.profiles.active:local}
+    active: local
 
 server:
   port: 8083

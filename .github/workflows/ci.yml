@@ -5,6 +5,12 @@ on:
     branches: ["main", "develop", "feature/**"]
   pull_request:
     branches: ["main", "develop"]
+  workflow_dispatch:
+    inputs:
+      force_all_modules:
+        description: "Forçar todos os módulos (ignora detecção de mudanças)"
+        type: boolean
+        default: true
 
 env:
   JAVA_VERSION: "21"
@@ -57,8 +63,8 @@ jobs:
         run: |
           MODULES=()
 
-          # Mudança global (pom raiz ou workflow) → todos os módulos
-          if [ "${{ steps.filter.outputs.root }}" == "true" ]; then
+          # Disparo manual ou mudança global (pom raiz ou workflow) → todos os módulos
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] || [ "${{ steps.filter.outputs.root }}" == "true" ]; then
             MODULES=("api-gateway" "auth-service" "catalog-service" "booking-service" "search-service" "notification-service")
           else
             [ "${{ steps.filter.outputs.api-gateway }}"     == "true" ] && MODULES+=("api-gateway")

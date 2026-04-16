@@ -34,9 +34,3 @@ logs/
 # Other
 .env
 .env.*
-
-.idea
-
-.claude
-
-CLAUDE.md
